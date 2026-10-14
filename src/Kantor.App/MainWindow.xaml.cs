@@ -8,9 +8,11 @@ using System.Windows.Threading;
 using Kantor.App.Audio;
 using Kantor.App.Stage;
 using Kantor.Core.Scoring;
+using Kantor.Core.Settings;
 using Kantor.Core.Songs;
 using Kantor.Core.Timing;
 using Microsoft.Win32;
+using NAudio.CoreAudioApi;
 
 namespace Kantor.App;
 
@@ -26,16 +28,39 @@ public partial class MainWindow : Window
     private WindowState _restoreState;
     private WindowStyle _restoreStyle;
 
+    private readonly string _settingsPath = UserSettingsStore.DefaultPath();
+    private readonly UserSettings _startupSettings;
+    private bool _restoringSettings;
+    private string? _lastInputId;
+    private int _lastInputChannel;
+    private Dictionary<string, int>? _profiles;
+
     public MainWindow()
     {
         InitializeComponent();
+        _startupSettings = UserSettingsStore.Load(_settingsPath);
+        _lastInputId = _startupSettings.InputDeviceId;
+        _lastInputChannel = _startupSettings.InputChannel;
+        _profiles = _startupSettings.DelayProfiles is { } stored ? new Dictionary<string, int>(stored) : null;
+        ApplySettings(_startupSettings);
+
         _input = new ActiveInput(_player);
-        _input.Changed += (_, _) => Dispatcher.BeginInvoke(UpdateInputStatus);
+        _input.Changed += (_, _) => Dispatcher.BeginInvoke(() =>
+        {
+            // Se recuerda la última entrada abierta; cerrarla a propósito la olvida, pero un arranque sin el
+            // dispositivo (desenchufado) no toca lo guardado.
+            _lastInputId = _input.Session?.Device.Id;
+            _lastInputChannel = _input.Channel;
+            UpdateInputStatus();
+            ApplyProfileDelay();
+            SaveSettings();
+        });
         _player.Ended += (_, _) => UpdateControls();
         _scoreTimer.Tick += (_, _) => AdvanceScore();
 
         Loaded += (_, _) =>
         {
+            RestoreInput();
             _scoreTimer.Start();
             var args = Environment.GetCommandLineArgs();
             if (args.Length > 1)
@@ -84,6 +109,7 @@ public partial class MainWindow : Window
         if (IsInitialized)
         {
             CreateScorer();
+            SaveSettings();
         }
     }
 
@@ -93,6 +119,135 @@ public partial class MainWindow : Window
         if (IsInitialized)
         {
             CreateScorer();
+            RememberDelayForCurrentDevice();
+            SaveSettings();
+        }
+    }
+
+    /// <summary>Clave del perfil de la combinación actual (salida predeterminada + entrada + canal), si hay entrada.</summary>
+    private string? CurrentProfileKey()
+    {
+        if (_lastInputId is null)
+        {
+            return null;
+        }
+
+        var output = string.Empty;
+        try
+        {
+            using var enumerator = new MMDeviceEnumerator();
+            using var device = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Console);
+            output = device.ID;
+        }
+        catch (System.Runtime.InteropServices.COMException)
+        {
+            // Sin salida predeterminada: el perfil queda atado solo a la entrada.
+        }
+
+        return UserSettings.ProfileKey(output, _lastInputId, _lastInputChannel);
+    }
+
+    private void RememberDelayForCurrentDevice()
+    {
+        if (_restoringSettings || CurrentProfileKey() is not { } key)
+        {
+            return;
+        }
+
+        _profiles ??= [];
+        _profiles[key] = Math.Max(DelayBox.SelectedIndex, 0) * UserSettings.VoiceDelayStepMs;
+    }
+
+    /// <summary>Si esta combinación de salida y entrada ya tiene un retardo guardado, lo pone en el selector.</summary>
+    private void ApplyProfileDelay()
+    {
+        if (CurrentProfileKey() is not { } key || _profiles is null || !_profiles.TryGetValue(key, out var ms))
+        {
+            return;
+        }
+
+        var index = Math.Clamp(ms / UserSettings.VoiceDelayStepMs, 0, DelayBox.Items.Count - 1);
+        if (DelayBox.SelectedIndex != index)
+        {
+            DelayBox.SelectedIndex = index;
+        }
+    }
+
+    private void OnCalibrateClick(object sender, RoutedEventArgs e)
+    {
+        if (_input.Session is not { } session)
+        {
+            StatusText.Text = "Elegí primero una entrada (Entradas… o Ctrl+I) para calibrar con ella.";
+            return;
+        }
+
+        if (_player.IsPlaying || _player.IsPaused)
+        {
+            StatusText.Text = "Detené la canción antes de calibrar.";
+            return;
+        }
+
+        var window = new CalibrationWindow(session.Device, _input.Channel, ms =>
+        {
+            DelayBox.SelectedIndex = Math.Clamp(ms / UserSettings.VoiceDelayStepMs, 0, DelayBox.Items.Count - 1);
+            StatusText.Text = $"Retardo de voz ajustado a {ms} ms por calibración.";
+        }) { Owner = this };
+        window.ShowDialog();
+    }
+
+    /// <summary>Pone los selectores según lo guardado, sin disparar guardados ni reinicios de más.</summary>
+    private void ApplySettings(UserSettings settings)
+    {
+        _restoringSettings = true;
+        try
+        {
+            DifficultyBox.SelectedIndex = (int)settings.Difficulty;
+            DelayBox.SelectedIndex = settings.VoiceDelayMs / UserSettings.VoiceDelayStepMs;
+            DisplayBox.SelectedIndex = settings.VoiceDisplay;
+        }
+        finally
+        {
+            _restoringSettings = false;
+        }
+    }
+
+    private void SaveSettings()
+    {
+        if (_restoringSettings || !IsInitialized)
+        {
+            return;
+        }
+
+        UserSettingsStore.Save(_settingsPath, new UserSettings
+        {
+            Difficulty = SelectedDifficulty,
+            VoiceDisplay = DisplayBox.SelectedIndex == 1 ? 1 : 0,
+            VoiceDelayMs = Math.Max(DelayBox.SelectedIndex, 0) * UserSettings.VoiceDelayStepMs,
+            InputDeviceId = _lastInputId,
+            InputChannel = _lastInputChannel,
+            DelayProfiles = _profiles,
+        });
+    }
+
+    /// <summary>Vuelve a abrir la última entrada si sigue disponible; si no, queda sin entrada y sin avisar.</summary>
+    private void RestoreInput()
+    {
+        if (_startupSettings.InputDeviceId is not { } id)
+        {
+            return;
+        }
+
+        try
+        {
+            if (AudioInputCatalog.List().FirstOrDefault(d => d.Id == id) is { } device)
+            {
+                _input.Open(device, Math.Min(_startupSettings.InputChannel, device.Channels - 1));
+            }
+        }
+        catch (Exception e) when (e is System.Runtime.InteropServices.COMException or InvalidOperationException
+                                      or UnauthorizedAccessException)
+        {
+            StatusText.Text = $"No se pudo reabrir la entrada anterior: {e.Message}";
         }
     }
 
@@ -105,6 +260,7 @@ public partial class MainWindow : Window
         if (IsInitialized)
         {
             Stage.VoiceMode = DisplayBox.SelectedIndex == 1 ? VoiceDisplay.Raw : VoiceDisplay.Beats;
+            SaveSettings();
         }
     }
 

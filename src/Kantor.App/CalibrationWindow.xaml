@@ -1,0 +1,43 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- Copyright (C) 2026 Pablo Pramparo -->
+<Window x:Class="Kantor.App.CalibrationWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Calibrar retardo de voz" Width="560" Height="420" MinWidth="460" MinHeight="360"
+        WindowStartupLocation="CenterOwner" Background="#14161A" Foreground="#F0F0F0">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" TextWrapping="Wrap" FontSize="14" LineHeight="21">
+            Kantor va a reproducir 5 barridos de sonido por la salida predeterminada de Windows y los va a
+            escuchar con la entrada elegida. Con eso mide cuánto tarda el audio en tu equipo y sugiere el
+            retardo de voz.
+        </TextBlock>
+
+        <TextBlock Grid.Row="1" Margin="0,12,0,0" TextWrapping="Wrap" Foreground="#8A919E" LineHeight="20">
+            • Los parlantes deben sonar con volumen normal (no auriculares) y el micrófono estar donde cantás.
+            • Durará unos 8 segundos. Silencio en la sala durante la prueba.
+            • También sirve con un cable de la salida de la placa a la entrada elegida.
+        </TextBlock>
+
+        <Border Grid.Row="2" Margin="0,16,0,0" Background="#1C1F25" CornerRadius="8" Padding="16">
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock x:Name="DeviceText" Foreground="#8A919E" TextWrapping="Wrap" />
+                <TextBlock x:Name="StatusText" Margin="0,10,0,0" FontSize="16" TextWrapping="Wrap" Text="Listo para empezar." />
+                <TextBlock x:Name="ResultText" Margin="0,10,0,0" FontSize="20" FontWeight="SemiBold" TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
+
+        <DockPanel Grid.Row="3" Margin="0,16,0,0" LastChildFill="False">
+            <Button x:Name="CloseButton" DockPanel.Dock="Right" Content="Cerrar" Padding="16,6" Margin="8,0,0,0" Click="OnCloseClick" />
+            <Button x:Name="ApplyButton" DockPanel.Dock="Right" Content="Aplicar retardo" Padding="16,6" Margin="8,0,0,0"
+                    IsEnabled="False" Click="OnApplyClick" />
+            <Button x:Name="StartButton" DockPanel.Dock="Right" Content="Iniciar prueba" Padding="16,6" Click="OnStartClick" />
+        </DockPanel>
+    </Grid>
+</Window>

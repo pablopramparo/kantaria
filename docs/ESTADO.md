@@ -192,9 +192,26 @@ Referencia de comportamiento: `docs/PUNTUACION_WORLDPARTY.md` (qué hace WorldPa
   en Fácil subía de 7660 (0 ms) a 8740 (150 ms) y 8810 (200 ms), y bajaba después; la latencia salida → entrada
   medida por cable fue 173 ms (§7), de ahí el valor inicial. WorldParty compensa ~90 ms + medio beat
   (~105 ms aquí). Depende del equipo y del dispositivo de salida, así que es un ajuste del usuario, no una
-  constante del sistema. El valor por omisión en Core sigue siendo 0. **No se persiste**
-  entre sesiones (pendiente). Efecto colateral: las barras "Por beat" aparecen ese retardo más tarde, porque el
-  beat se evalúa después de mirar la voz desplazada.
+  constante del sistema. El valor por omisión en Core sigue siendo 0. Efecto colateral: las barras "Por beat"
+  aparecen ese retardo más tarde, porque el beat se evalúa después de mirar la voz desplazada.
+- **Ajustes persistentes** (`Kantor.Core.Settings.UserSettings` + `UserSettingsStore`; archivo
+  `%APPDATA%\Kantor\settings.json`): dificultad, modo de voz, retardo (0–300 ms en pasos de 25, se corrige a un
+  valor válido), y la última entrada abierta con su canal. Se guarda al cambiar un selector o abrir/cerrar la
+  entrada. Al arrancar se reabre la entrada guardada si el dispositivo sigue disponible (si no, queda sin entrada
+  y lo guardado no se toca). Un archivo ausente o dañado da los valores por omisión, sin error.
+  **Perfil por dispositivo**: el retardo se guarda por combinación *salida predeterminada + entrada + canal*
+  (`UserSettings.DelayProfiles`); al abrir o cambiar la entrada se aplica el de esa combinación si existe, y
+  cualquier cambio manual o calibración lo actualiza. Sin perfil rige el retardo global.
+- **Calibración del retardo** (botón "Calibrar…", `Kantor.Core.Calibration` + `CalibrationRunner` +
+  `CalibrationWindow`): reproduce 5 barridos (200 Hz → 6 kHz, 0,5 s, 1 s de separación) por la salida
+  predeterminada de Windows, los busca en el canal de entrada elegido por correlación cruzada (FFT) y mide
+  la latencia con las marcas de tiempo de WASAPI. Pica por pico aplica las mismas reglas que el resto:
+  mínimo 3 picos con calidad ≥ 8, desvío mediano ≤ 8 ms, latencia entre 0 y 700 ms; sugiere el paso de 25 ms
+  más cercano (0–300). Si no, explica qué cambiar (volumen, auriculares, ruido). Requiere entrada abierta y la
+  canción detenida. En la Scarlett 4i4: **cable 177,9 ms (± 2,0), aire 180,9 ms (± 4,7), 5/5 barridos**; por la
+  ventana, 178 ms (± 3,4) → 175 ms aplicado. Los barridos dan ~4 ms más que el barrido de clics (umbral vs
+  correlación sobre el inicio del barrido). No mide la reacción del cantante. Pendiente: calibrar con el audio
+  de ASIO y la sugerencia al terminar cada canción.
 - **Puente de huecos** (`ScoringRules.GapBridge`, 150 ms, 0 lo apaga): decidido tras analizar un registro real
   (`KANTOR_PITCH_LOG`, "The Line", 222 s): ~13 % de los cuadros fuertes salían sin tono por consonantes,
   respiración y transiciones (min_cmnd medio 0,43). Si en el instante de un beat hay sonido pero no tono, y hay

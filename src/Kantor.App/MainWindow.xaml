@@ -47,6 +47,9 @@
                 <ComboBoxItem Content="275 ms" />
                 <ComboBoxItem Content="300 ms" />
             </ComboBox>
+            <Button x:Name="CalibrateButton" Content="Calibrar…" Padding="10,4" Margin="6,0,0,0"
+                    Click="OnCalibrateClick"
+                    ToolTip="Mide la latencia de audio de este equipo con una señal de prueba y sugiere el retardo de voz." />
             <TextBlock Text="Voz" VerticalAlignment="Center" Foreground="#8A919E" Margin="16,0,6,0" />
             <ComboBox x:Name="DisplayBox" Width="90" SelectedIndex="0" VerticalContentAlignment="Center"
                       SelectionChanged="OnDisplayChanged"
