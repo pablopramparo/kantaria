@@ -183,20 +183,10 @@ public sealed class StageControl : FrameworkElement
                 continue;
             }
 
-            var tone = MusicalPitch.FromFrequency(sample.Frequency).Midi - 60;
-
-            // Solo para dibujar: si el tono cae fuera del carril, se lleva a la octava que entra.
-            for (var i = 0; i < 4 && tone > highTone; i++)
-            {
-                tone -= 12;
-            }
-
-            for (var i = 0; i < 4 && tone < lowTone; i++)
-            {
-                tone += 12;
-            }
-
-            if (tone < lowTone || tone > highTone)
+            // Solo para dibujar: el tono se lleva a la octava que entra en el carril, cualquiera sea el
+            // origen de tonos del archivo (C4 = 0 o número MIDI directo).
+            if (MusicalPitch.FoldIntoRange(MusicalPitch.FromFrequency(sample.Frequency).Midi - 60, lowTone, highTone)
+                is not { } tone)
             {
                 continue;
             }
