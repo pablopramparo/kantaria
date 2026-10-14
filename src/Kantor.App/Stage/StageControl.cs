@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
+using Kantor.Core.Pitch;
 using Kantor.Core.Songs;
 using Kantor.Core.Timing;
 
@@ -31,8 +32,11 @@ public sealed class StageControl : FrameworkElement
 
     private static readonly Typeface Face = new("Segoe UI");
 
+    private readonly List<PitchSample> _pitchBuffer = [];
+
     private Song? _song;
     private ISongClock? _clock;
+    private PitchTimeline? _pitch;
     private SongTiming _timing;
 
     public StageControl()
@@ -42,10 +46,12 @@ public sealed class StageControl : FrameworkElement
         SnapsToDevicePixels = true;
     }
 
-    public void Show(Song? song, ISongClock? clock)
+    /// <param name="pitch">Tonos detectados en la entrada activa; se dibujan sobre la primera voz.</param>
+    public void Show(Song? song, ISongClock? clock, PitchTimeline? pitch = null)
     {
         _song = song;
         _clock = clock;
+        _pitch = pitch;
         if (song is not null)
         {
             _timing = new SongTiming(song.Bpm, song.GapMilliseconds);
@@ -77,11 +83,12 @@ public sealed class StageControl : FrameworkElement
         for (var i = 0; i < voices.Count; i++)
         {
             var top = margin + i * (panelHeight + margin);
-            DrawVoice(dc, voices[i], showName: voices.Count > 1, new Rect(margin, top, width - margin * 2, panelHeight), beat);
+            DrawVoice(dc, voices[i], showName: voices.Count > 1, drawPitch: i == 0,
+                new Rect(margin, top, width - margin * 2, panelHeight), position, beat);
         }
     }
 
-    private void DrawVoice(DrawingContext dc, Voice voice, bool showName, Rect panel, double beat)
+    private void DrawVoice(DrawingContext dc, Voice voice, bool showName, bool drawPitch, Rect panel, TimeSpan position, double beat)
     {
         dc.DrawRoundedRectangle(Lane, null, panel, 8, 8);
 
@@ -133,6 +140,11 @@ public sealed class StageControl : FrameworkElement
             }
         }
 
+        if (drawPitch)
+        {
+            DrawPitchTrail(dc, notes, nowX, pixelsPerBeat, lowTone, highTone, rowHeight, position, beat);
+        }
+
         dc.Pop();
         dc.DrawLine(NowPen, new Point(nowX, notes.Top), new Point(nowX, notes.Bottom));
 
@@ -144,6 +156,56 @@ public sealed class StageControl : FrameworkElement
             var name = new FormattedText(voice.Name, CultureInfo.CurrentUICulture, FlowDirection.LeftToRight,
                 Face, 16, Dim, Dpi());
             dc.DrawText(name, new Point(panel.Left + 10, panel.Top + 6));
+        }
+    }
+
+    /// <summary>
+    /// Cada tono detectado se dibuja como un segmento que cubre el intervalo de muestras analizadas,
+    /// ubicado por el instante de esas muestras en la canción. Solo visualización: no hay puntuación.
+    /// </summary>
+    private void DrawPitchTrail(DrawingContext dc, Rect notes, double nowX, double pixelsPerBeat,
+        int lowTone, int highTone, double rowHeight, TimeSpan position, double beat)
+    {
+        if (_pitch is null)
+        {
+            return;
+        }
+
+        _pitchBuffer.Clear();
+        _pitch.CopyRange(position - TimeSpan.FromSeconds(SecondsBehind + 0.5), position + TimeSpan.FromSeconds(0.5), _pitchBuffer);
+
+        foreach (var sample in _pitchBuffer)
+        {
+            if (!sample.IsVoiced)
+            {
+                continue;
+            }
+
+            var tone = MusicalPitch.FromFrequency(sample.Frequency).Midi - 60;
+
+            // Solo para dibujar: si el tono cae fuera del carril, se lleva a la octava que entra.
+            for (var i = 0; i < 4 && tone > highTone; i++)
+            {
+                tone -= 12;
+            }
+
+            for (var i = 0; i < 4 && tone < lowTone; i++)
+            {
+                tone += 12;
+            }
+
+            if (tone < lowTone || tone > highTone)
+            {
+                continue;
+            }
+
+            var startX = nowX + (_timing.BeatAt(sample.Start) - beat) * pixelsPerBeat;
+            var endX = nowX + (_timing.BeatAt(sample.End) - beat) * pixelsPerBeat;
+            var y = notes.Bottom - (tone - lowTone + 0.5) * rowHeight;
+            var alpha = (byte)(110 + 145 * Math.Clamp(sample.Confidence, 0, 1));
+            var brush = new SolidColorBrush(Color.FromArgb(alpha, 0xFF, 0x5E, 0xA8));
+            brush.Freeze();
+            dc.DrawRoundedRectangle(brush, null, new Rect(startX, y - 3, Math.Max(endX - startX, 3), 6), 3, 3);
         }
     }
 

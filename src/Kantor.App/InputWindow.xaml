@@ -13,6 +13,8 @@
         </Grid.RowDefinitions>
 
         <DockPanel Grid.Row="0">
+            <Button DockPanel.Dock="Right" Content="Detener entrada" Padding="12,4" Margin="8,0,0,0"
+                    Click="OnStopInputClick" />
             <Button DockPanel.Dock="Right" Content="Actualizar" Padding="12,4" Margin="8,0,0,0"
                     Click="OnRefreshClick" />
             <ComboBox x:Name="DeviceBox" DisplayMemberPath="Label" SelectionChanged="OnDeviceChanged" />

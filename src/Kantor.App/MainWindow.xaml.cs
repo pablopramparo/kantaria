@@ -10,6 +10,7 @@ namespace Kantor.App;
 public partial class MainWindow : Window
 {
     private readonly SongPlayer _player = new();
+    private readonly ActiveInput _input;
     private InputWindow? _inputWindow;
     private bool _fullscreen;
     private WindowState _restoreState;
@@ -18,6 +19,8 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        _input = new ActiveInput(_player);
+        _input.Changed += (_, _) => Dispatcher.BeginInvoke(UpdateInputStatus);
         _player.Ended += (_, _) => UpdateControls();
 
         Loaded += (_, _) =>
@@ -28,7 +31,11 @@ public partial class MainWindow : Window
                 LoadSong(args[1]);
             }
         };
-        Closed += (_, _) => _player.Dispose();
+        Closed += (_, _) =>
+        {
+            _input.Dispose();
+            _player.Dispose();
+        };
     }
 
     private void OnOpenClick(object sender, RoutedEventArgs e) => OpenSongDialog();
@@ -45,7 +52,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        _inputWindow = new InputWindow { Owner = this };
+        _inputWindow = new InputWindow(_input) { Owner = this };
         _inputWindow.Show();
     }
 
@@ -116,7 +123,7 @@ public partial class MainWindow : Window
             }
 
             _player.Load(audioPath);
-            Stage.Show(song, _player);
+            Stage.Show(song, _player, _input.Timeline);
             TitleText.Text = $"{song.Artist} — {song.Title}";
             Title = $"Kantor — {song.Artist} — {song.Title}";
 
@@ -134,6 +141,13 @@ public partial class MainWindow : Window
         }
 
         UpdateControls();
+    }
+
+    private void UpdateInputStatus()
+    {
+        InputText.Text = _input.Session is { } session
+            ? $"Entrada: {session.Device.Name} · canal {_input.Channel + 1}"
+            : string.Empty;
     }
 
     private void TogglePlayPause()

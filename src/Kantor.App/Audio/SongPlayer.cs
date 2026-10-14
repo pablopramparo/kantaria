@@ -1,3 +1,4 @@
+using System.Reflection;
 using Kantor.Core.Timing;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
@@ -5,114 +6,186 @@ using NAudio.Wave;
 namespace Kantor.App.Audio;
 
 /// <summary>
-/// Reproduce el audio de la canción por WASAPI y expone su posición como <see cref="ISongClock"/>.
-/// La posición sale del reloj del dispositivo, no de un cronómetro aparte, para que más adelante
-/// la captura de micrófonos se sincronice contra lo que realmente se está reproduciendo.
+/// Reproduce el audio de la canción por WASAPI y expone su posición como <see cref="ISongClock"/> y
+/// como <see cref="ISongTimeMap"/>. La posición sale del reloj del dispositivo (IAudioClock), que
+/// informa cada lectura junto con el QPC en que se tomó; así un instante de la captura puede ubicarse
+/// en la canción sin cronómetros intermedios. No incluye la latencia del hardware de salida.
 /// </summary>
-public sealed class SongPlayer : ISongClock, IDisposable
+public sealed class SongPlayer : ISongClock, ISongTimeMap, IDisposable
 {
     private const int OutputLatencyMilliseconds = 100;
 
+    // WasapiOut no expone su AudioClient; la versión de NAudio está fijada y el campo se verifica al usarlo.
+    private static readonly FieldInfo AudioClientField =
+        typeof(WasapiOut).GetField("audioClient", BindingFlags.Instance | BindingFlags.NonPublic)
+        ?? throw new MissingFieldException("NAudio.Wave.WasapiOut.audioClient no existe en esta versión de NAudio.");
+
+    private readonly object _sync = new();
+    private readonly PlaybackClockModel _model = new();
+
     private AudioFileReader? _reader;
     private WasapiOut? _output;
-
-    private bool _paused;
-    private double _pausedAt;
-    private double _skippedWhilePaused;
+    private AudioClockClient? _deviceClock;
 
     public event EventHandler? Ended;
 
     public bool IsLoaded => _reader is not null;
 
-    public bool IsPlaying => _output is { PlaybackState: PlaybackState.Playing };
+    public bool IsPlaying
+    {
+        get
+        {
+            lock (_sync)
+            {
+                return _output is { PlaybackState: PlaybackState.Playing };
+            }
+        }
+    }
 
-    public bool IsPaused => _paused;
+    public bool IsPaused
+    {
+        get
+        {
+            lock (_sync)
+            {
+                return _model.IsPaused;
+            }
+        }
+    }
 
     public TimeSpan Position
     {
         get
         {
-            if (_output is null)
+            lock (_sync)
             {
-                return TimeSpan.Zero;
+                return TryReadDeviceClock(out var raw, out _) ? _model.Position(raw) : TimeSpan.Zero;
             }
-
-            return TimeSpan.FromSeconds(_paused ? _pausedAt : RawSeconds() - _skippedWhilePaused);
         }
     }
 
     public TimeSpan Duration => _reader?.TotalTime ?? TimeSpan.Zero;
 
+    public TimeSpan? SongPositionAt(long hostTicks)
+    {
+        lock (_sync)
+        {
+            return TryReadDeviceClock(out var raw, out var observedHost)
+                ? _model.PositionAt(raw, observedHost, hostTicks)
+                : null;
+        }
+    }
+
     public void Load(string audioPath)
     {
-        Unload();
-        _reader = new AudioFileReader(audioPath);
+        lock (_sync)
+        {
+            Unload();
+            _reader = new AudioFileReader(audioPath);
+        }
     }
 
     public void Play()
     {
-        if (_reader is null)
+        lock (_sync)
         {
-            return;
-        }
+            if (_reader is null)
+            {
+                return;
+            }
 
-        if (_output is null)
-        {
-            _reader.Position = 0;
-            _skippedWhilePaused = 0;
-            _paused = false;
-            _output = new WasapiOut(AudioClientShareMode.Shared, OutputLatencyMilliseconds);
-            _output.PlaybackStopped += OnPlaybackStopped;
-            _output.Init(_reader);
-        }
-        else if (_paused)
-        {
-            // El reloj del dispositivo puede seguir avanzando durante la pausa; no contamos ese tiempo.
-            _skippedWhilePaused += Math.Max(0, RawSeconds() - _skippedWhilePaused - _pausedAt);
-            _paused = false;
-        }
+            if (_output is null)
+            {
+                _reader.Position = 0;
+                _output = new WasapiOut(AudioClientShareMode.Shared, OutputLatencyMilliseconds);
+                _output.PlaybackStopped += OnPlaybackStopped;
+                _output.Init(_reader);
+                _deviceClock = ((AudioClient)AudioClientField.GetValue(_output)!).AudioClockClient;
+                _model.Start();
+            }
+            else if (_model.IsPaused && TryReadDeviceClock(out var raw, out _))
+            {
+                _model.Resume(raw);
+            }
 
-        _output.Play();
+            _output.Play();
+        }
     }
 
     public void Pause()
     {
-        if (_output is null || _paused || _output.PlaybackState != PlaybackState.Playing)
+        lock (_sync)
         {
-            return;
-        }
+            if (_output is not { PlaybackState: PlaybackState.Playing } || _model.IsPaused)
+            {
+                return;
+            }
 
-        _pausedAt = RawSeconds() - _skippedWhilePaused;
-        _paused = true;
-        _output.Pause();
+            if (TryReadDeviceClock(out var raw, out _))
+            {
+                _model.Pause(raw);
+            }
+
+            _output.Pause();
+        }
     }
 
     public void Stop()
     {
-        ReleaseOutput();
-        if (_reader is not null)
+        lock (_sync)
         {
-            _reader.Position = 0;
+            ReleaseOutput();
+            if (_reader is not null)
+            {
+                _reader.Position = 0;
+            }
         }
     }
 
     public void Dispose()
     {
-        Unload();
+        lock (_sync)
+        {
+            Unload();
+        }
     }
 
-    private double RawSeconds()
+    /// <summary>Lee el reloj del dispositivo: segundos desde el inicio del flujo y el QPC (100 ns) de esa lectura.</summary>
+    private bool TryReadDeviceClock(out double rawSeconds, out long hostTicks)
     {
-        var output = _output!;
-        return output.GetPosition() / (double)output.OutputWaveFormat.AverageBytesPerSecond;
+        rawSeconds = 0;
+        hostTicks = 0;
+        if (_deviceClock is null || _output is null)
+        {
+            return false;
+        }
+
+        if (!_deviceClock.GetPosition(out var position, out var qpc))
+        {
+            return false;
+        }
+
+        rawSeconds = position / (double)_deviceClock.Frequency;
+        hostTicks = (long)qpc;
+        return true;
     }
 
     private void OnPlaybackStopped(object? sender, StoppedEventArgs e)
     {
-        // Solo avisamos del final natural; Stop() libera la salida antes de que llegue este evento.
-        if (ReferenceEquals(sender, _output))
+        bool natural;
+        lock (_sync)
         {
-            Stop();
+            natural = ReferenceEquals(sender, _output);
+            if (natural)
+            {
+                ReleaseOutput();
+                _reader!.Position = 0;
+            }
+        }
+
+        // Solo avisamos del final natural; Stop() libera la salida antes de que llegue este evento.
+        if (natural)
+        {
             Ended?.Invoke(this, EventArgs.Empty);
         }
     }
@@ -121,7 +194,8 @@ public sealed class SongPlayer : ISongClock, IDisposable
     {
         var output = _output;
         _output = null;
-        _paused = false;
+        _deviceClock = null;
+        _model.Stop();
         if (output is not null)
         {
             output.PlaybackStopped -= OnPlaybackStopped;

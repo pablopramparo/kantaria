@@ -9,36 +9,52 @@ using Kantor.Core.Pitch;
 
 namespace Kantor.App;
 
-/// <summary>Elegir una entrada, ver el nivel de cada canal y comprobar qué nota se detecta. No hay monitorización.</summary>
+/// <summary>
+/// Elegir la entrada de la aplicación, ver el nivel de cada canal y comprobar qué nota se detecta.
+/// La entrada la mantiene <see cref="ActiveInput"/>: cerrar esta ventana no la detiene.
+/// No hay monitorización.
+/// </summary>
 public partial class InputWindow : Window
 {
     private const double MinDb = -60;
     private const double ReleaseDbPerSecond = 40;
     private static readonly TimeSpan VoiceHold = TimeSpan.FromMilliseconds(250);
 
+    private readonly ActiveInput _manager;
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(33) };
     private readonly List<ChannelRow> _rows = [];
     private readonly Stopwatch _clock = Stopwatch.StartNew();
 
-    private CaptureSession? _session;
-    private int _pitchChannel;
     private TimeSpan _lastTick;
     private TimeSpan _lastVoiced = TimeSpan.MinValue;
     private PitchFrame _lastFrame = PitchFrame.Silent;
 
-    public InputWindow()
+    public InputWindow(ActiveInput manager)
     {
+        _manager = manager;
         InitializeComponent();
         _timer.Tick += OnTick;
+        _manager.Failed += OnFailed;
         Loaded += (_, _) => RefreshDevices();
-        Closed += (_, _) => StopSession();
+        Closed += (_, _) =>
+        {
+            _timer.Stop();
+            _manager.Failed -= OnFailed;
+        };
     }
 
     private void OnRefreshClick(object sender, RoutedEventArgs e) => RefreshDevices();
 
+    private void OnStopInputClick(object sender, RoutedEventArgs e)
+    {
+        _manager.Close();
+        _timer.Stop();
+        StatusText.Text = "Entrada detenida.";
+    }
+
     private void RefreshDevices()
     {
-        var previous = (DeviceBox.SelectedItem as AudioInputDevice)?.Id;
+        var previous = _manager.Session?.Device.Id ?? (DeviceBox.SelectedItem as AudioInputDevice)?.Id;
         IReadOnlyList<AudioInputDevice> devices;
         try
         {
@@ -54,7 +70,7 @@ public partial class InputWindow : Window
         DeviceBox.SelectedItem = devices.FirstOrDefault(d => d.Id == previous) ?? devices.FirstOrDefault();
         if (devices.Count == 0)
         {
-            StopSession();
+            _manager.Close();
             ChannelsPanel.Children.Clear();
             StatusText.Text = "No hay dispositivos de entrada activos.";
         }
@@ -62,31 +78,39 @@ public partial class InputWindow : Window
 
     private void OnDeviceChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (DeviceBox.SelectedItem is AudioInputDevice device)
+        if (DeviceBox.SelectedItem is not AudioInputDevice device)
         {
-            StartSession(device);
+            return;
         }
+
+        // Si la entrada ya está abierta sobre este dispositivo, solo se vuelve a mostrar su estado.
+        if (_manager.Session is { } current && current.Device.Id == device.Id)
+        {
+            BuildChannelRows(device);
+            _rows[Math.Min(_manager.Channel, _rows.Count - 1)].Radio.IsChecked = true;
+            _lastTick = _clock.Elapsed;
+            _timer.Start();
+            StatusText.Text = DescribeCapture(device);
+            return;
+        }
+
+        StartSession(device);
     }
 
     private void StartSession(AudioInputDevice device)
     {
-        StopSession();
+        _timer.Stop();
         BuildChannelRows(device);
-        _pitchChannel = 0;
-        _rows[0].Radio.IsChecked = true;
         _lastFrame = PitchFrame.Silent;
         _lastVoiced = TimeSpan.MinValue;
 
         try
         {
-            var session = new CaptureSession(device);
-            session.SetPitchChannels([_pitchChannel]);
-            session.Stopped += OnSessionStopped;
-            session.Start();
-            _session = session;
+            _manager.Open(device, 0);
+            _rows[0].Radio.IsChecked = true;
             _lastTick = _clock.Elapsed;
             _timer.Start();
-            StatusText.Text = $"Capturando: {device.Name} ({device.Channels} canal(es), {device.SampleRate} Hz).";
+            StatusText.Text = DescribeCapture(device);
         }
         catch (Exception e) when (e is System.Runtime.InteropServices.COMException or InvalidOperationException
                                       or UnauthorizedAccessException)
@@ -95,29 +119,15 @@ public partial class InputWindow : Window
         }
     }
 
-    private void StopSession()
-    {
-        _timer.Stop();
-        var session = _session;
-        _session = null;
-        if (session is not null)
-        {
-            session.Stopped -= OnSessionStopped;
-            session.Dispose();
-        }
-    }
+    private static string DescribeCapture(AudioInputDevice device) =>
+        $"Capturando: {device.Name} ({device.Channels} canal(es), {device.SampleRate} Hz).";
 
-    private void OnSessionStopped(object? sender, Exception? error)
+    private void OnFailed(object? sender, Exception? error)
     {
-        if (error is null)
-        {
-            return;
-        }
-
         Dispatcher.BeginInvoke(() =>
         {
             _timer.Stop();
-            StatusText.Text = $"La entrada se detuvo: {error.Message}. Elegí otra o pulsá Actualizar.";
+            StatusText.Text = $"La entrada se detuvo: {error?.Message ?? "dispositivo no disponible"}. Elegí otra o pulsá Actualizar.";
         });
     }
 
@@ -172,15 +182,14 @@ public partial class InputWindow : Window
 
     private void SelectPitchChannel(int channel)
     {
-        _pitchChannel = channel;
-        _session?.SetPitchChannels([channel]);
+        _manager.SelectChannel(channel);
         _lastFrame = PitchFrame.Silent;
         _lastVoiced = TimeSpan.MinValue;
     }
 
     private void OnTick(object? sender, EventArgs e)
     {
-        var session = _session;
+        var session = _manager.Session;
         if (session is null)
         {
             return;
@@ -204,7 +213,7 @@ public partial class InputWindow : Window
                 : new SolidColorBrush(Color.FromRgb(0x8A, 0x91, 0x9E));
         }
 
-        if (session.Read(_pitchChannel).Pitch is { } frame)
+        if (session.Read(_manager.Channel).Pitch is { } frame)
         {
             _lastFrame = frame;
             if (frame.IsVoiced)

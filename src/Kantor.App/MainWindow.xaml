@@ -25,7 +25,9 @@
 
         <stage:StageControl x:Name="Stage" Grid.Row="1" />
 
-        <TextBlock x:Name="StatusText" Grid.Row="2" Margin="12,6,12,8" Foreground="#8A919E"
-                   TextTrimming="CharacterEllipsis" />
+        <DockPanel Grid.Row="2" Margin="12,6,12,8">
+            <TextBlock x:Name="InputText" DockPanel.Dock="Right" Foreground="#8A919E" Margin="16,0,0,0" />
+            <TextBlock x:Name="StatusText" Foreground="#8A919E" TextTrimming="CharacterEllipsis" />
+        </DockPanel>
     </Grid>
 </Window>

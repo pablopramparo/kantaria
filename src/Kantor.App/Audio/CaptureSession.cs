@@ -1,7 +1,6 @@
 using Kantor.Core.Audio;
 using Kantor.Core.Pitch;
 using NAudio.CoreAudioApi;
-using NAudio.Wave;
 
 namespace Kantor.App.Audio;
 
@@ -9,9 +8,10 @@ namespace Kantor.App.Audio;
 public readonly record struct ChannelReading(LevelReading Level, PitchFrame? Pitch);
 
 /// <summary>
-/// Captura un dispositivo por WASAPI en modo compartido y mide el nivel de cada canal por separado.
-/// El tono solo se analiza en los canales elegidos con <see cref="SetPitchChannels"/>.
-/// El audio capturado no se reproduce ni se guarda: solo se miden niveles y tono.
+/// Captura un dispositivo por WASAPI y mide el nivel de cada canal por separado. El tono solo se
+/// analiza en los canales elegidos con <see cref="SetPitchChannels"/>, y cada análisis lleva el
+/// intervalo de las muestras analizadas en la base de tiempo común. El audio no se reproduce ni
+/// se guarda: solo se miden niveles y tono.
 /// </summary>
 public sealed class CaptureSession : IDisposable
 {
@@ -19,8 +19,9 @@ public sealed class CaptureSession : IDisposable
     private readonly AudioInputDevice _device;
     private readonly ChannelReading[] _readings;
     private readonly Dictionary<int, PitchTracker> _trackers = [];
+    private readonly List<(int Channel, PitchFrame Frame)> _emitted = []; // solo el hilo de captura
 
-    private WasapiCapture? _capture;
+    private WasapiInputCapture? _capture;
     private MMDevice? _mmDevice;
     private float[][] _channelBuffers;
 
@@ -34,8 +35,14 @@ public sealed class CaptureSession : IDisposable
 
     public AudioInputDevice Device => _device;
 
-    /// <summary>Se produce al detenerse la captura; la excepción es no nula si fue por un fallo (por ejemplo, desconexión).</summary>
+    /// <summary>Se produce al detenerse la captura por un fallo (por ejemplo, desconexión).</summary>
     public event EventHandler<Exception?>? Stopped;
+
+    /// <summary>
+    /// Un análisis de tono terminó. Se invoca en el hilo de captura, fuera de cualquier bloqueo
+    /// interno; el manejador debe ser breve.
+    /// </summary>
+    public event Action<int, PitchFrame>? PitchFrameReady;
 
     public bool IsRunning => _capture is not null;
 
@@ -48,16 +55,11 @@ public sealed class CaptureSession : IDisposable
 
         using var enumerator = new MMDeviceEnumerator();
         _mmDevice = enumerator.GetDevice(_device.Id);
-        var capture = new WasapiCapture(_mmDevice);
-        capture.DataAvailable += OnData;
-        capture.RecordingStopped += OnStopped;
+        var capture = new WasapiInputCapture(_mmDevice);
+        capture.Packet += OnPacket;
+        capture.Stopped += OnStopped;
         _capture = capture;
-        capture.StartRecording();
-    }
-
-    public void Stop()
-    {
-        _capture?.StopRecording();
+        capture.Start();
     }
 
     /// <summary>Define qué canales se analizan para tono; el resto solo mide nivel.</summary>
@@ -93,17 +95,8 @@ public sealed class CaptureSession : IDisposable
         _capture = null;
         if (capture is not null)
         {
-            capture.DataAvailable -= OnData;
-            capture.RecordingStopped -= OnStopped;
-            try
-            {
-                capture.StopRecording();
-            }
-            catch (InvalidOperationException)
-            {
-                // Ya estaba detenida.
-            }
-
+            capture.Packet -= OnPacket;
+            capture.Stopped -= OnStopped;
             capture.Dispose();
         }
 
@@ -114,10 +107,8 @@ public sealed class CaptureSession : IDisposable
     private float[][] NewBuffers(int frames) =>
         Enumerable.Range(0, _device.Channels).Select(_ => new float[frames]).ToArray();
 
-    private void OnData(object? sender, WaveInEventArgs e)
+    private void OnPacket(ReadOnlySpan<byte> data, int frames, long hostTicks, bool discontinuity)
     {
-        var bytesPerFrame = PcmDecoder.BytesPerSample(_device.Format) * _device.Channels;
-        var frames = e.BytesRecorded / bytesPerFrame;
         if (frames == 0)
         {
             return;
@@ -129,26 +120,43 @@ public sealed class CaptureSession : IDisposable
         }
 
         var buffers = _channelBuffers;
-        var decoded = PcmDecoder.Deinterleave(e.Buffer.AsSpan(0, e.BytesRecorded), _device.Format, _device.Channels, buffers);
+        var decoded = PcmDecoder.Deinterleave(data, _device.Format, _device.Channels, buffers);
+        var emitted = _emitted;
+        emitted.Clear();
 
         lock (_gate)
         {
             for (var c = 0; c < _device.Channels; c++)
             {
                 var block = buffers[c].AsSpan(0, decoded);
-                PitchFrame? pitch = _readings[c].Pitch;
-                if (_trackers.TryGetValue(c, out var tracker) && tracker.Push(block, out var frame))
+                var pitch = _readings[c].Pitch;
+                if (_trackers.TryGetValue(c, out var tracker))
                 {
-                    pitch = frame;
+                    if (discontinuity)
+                    {
+                        // Hubo un hueco en el flujo: lo acumulado ya no es contiguo con este paquete.
+                        tracker.Reset();
+                    }
+
+                    if (tracker.Push(block, hostTicks, out var frame))
+                    {
+                        pitch = frame;
+                        emitted.Add((c, frame));
+                    }
                 }
 
                 _readings[c] = new ChannelReading(LevelMeter.Measure(block), pitch);
             }
         }
+
+        foreach (var (channel, frame) in emitted)
+        {
+            PitchFrameReady?.Invoke(channel, frame);
+        }
     }
 
-    private void OnStopped(object? sender, StoppedEventArgs e)
+    private void OnStopped(object? sender, Exception? error)
     {
-        Stopped?.Invoke(this, e.Exception);
+        Stopped?.Invoke(this, error);
     }
 }

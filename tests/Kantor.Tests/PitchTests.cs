@@ -101,7 +101,7 @@ public class PitchTests
 
         for (var offset = 0; offset + 480 <= signal.Length; offset += 480)
         {
-            if (tracker.Push(signal.AsSpan(offset, 480), out var frame))
+            if (tracker.Push(signal.AsSpan(offset, 480), 0, out var frame))
             {
                 frames.Add(frame);
             }
@@ -120,7 +120,7 @@ public class PitchTests
     {
         var tracker = new PitchTracker(48000);
 
-        var emitted = tracker.Push(new float[tracker.WindowSize / 2], out _);
+        var emitted = tracker.Push(new float[tracker.WindowSize / 2], 0, out _);
 
         Assert.False(emitted);
     }
@@ -132,7 +132,7 @@ public class PitchTests
         // 0.001 de amplitud ≈ -63 dBFS RMS: por debajo del umbral aunque sea un tono perfecto.
         var quiet = Tone(220, 48000, 8192, amplitude: 0.001);
 
-        Assert.True(tracker.Push(quiet, out var frame));
+        Assert.True(tracker.Push(quiet, 0, out var frame));
 
         Assert.False(frame.IsVoiced);
         Assert.True(frame.LevelDb < -40);
