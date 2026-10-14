@@ -37,7 +37,6 @@ public sealed class StageControl : FrameworkElement
     private static readonly Brush Normal = Freeze(new SolidColorBrush(Color.FromRgb(0x4F, 0x8F, 0xF0)));
     private static readonly Brush Golden = Freeze(new SolidColorBrush(Color.FromRgb(0xF2, 0xC1, 0x2E)));
     private static readonly Brush Rap = Freeze(new SolidColorBrush(Color.FromRgb(0xE0, 0x7A, 0x3E)));
-    private static readonly Brush Free = Freeze(new SolidColorBrush(Color.FromArgb(0x70, 0x9A, 0xA3, 0xB2)));
     private static readonly Brush Active = Freeze(new SolidColorBrush(Color.FromRgb(0xFF, 0xFF, 0xFF)));
     private static readonly Brush Sung = Freeze(new SolidColorBrush(Color.FromRgb(0x6F, 0xE0, 0x8E)));
     private static readonly Brush Pending = Freeze(new SolidColorBrush(Color.FromRgb(0xF0, 0xF0, 0xF0)));
@@ -156,6 +155,12 @@ public sealed class StageControl : FrameworkElement
 
             foreach (var note in line.Notes)
             {
+                // Las freestyle no tienen tono que cantar ni puntúan: no se dibujan (su letra sí se muestra).
+                if (!note.IsScored)
+                {
+                    continue;
+                }
+
                 var x = nowX + (note.StartBeat - beat) * pixelsPerBeat;
                 var w = Math.Max(note.Length * pixelsPerBeat - 2, 4);
                 if (x + w < notes.Left || x > notes.Right)
@@ -163,7 +168,7 @@ public sealed class StageControl : FrameworkElement
                     continue;
                 }
 
-                var tone = note.Kind == NoteKind.Freestyle || note.Kind == NoteKind.Rap || note.Kind == NoteKind.RapGolden
+                var tone = note.Kind == NoteKind.Rap || note.Kind == NoteKind.RapGolden
                     ? (lowTone + highTone) / 2.0
                     : note.Tone;
                 var y = notes.Bottom - (tone - lowTone + 0.5) * rowHeight - noteHeight / 2;
@@ -350,7 +355,6 @@ public sealed class StageControl : FrameworkElement
     {
         NoteKind.Golden => Golden,
         NoteKind.Rap or NoteKind.RapGolden => Rap,
-        NoteKind.Freestyle => Free,
         _ => Normal,
     };
 

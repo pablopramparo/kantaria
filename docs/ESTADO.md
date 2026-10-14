@@ -220,6 +220,8 @@ Referencia de comportamiento: `docs/PUNTUACION_WORLDPARTY.md` (qué hace WorldPa
   no. Sobre ese registro: 7330 → 7660 puntos en Fácil. YIN no se tocó. El modo de voz "Cruda" no se puentea.
 - **Registro de diagnóstico** (`KANTOR_PITCH_LOG=ruta.csv`): una línea por análisis (tiempo, nivel, tono,
   confianza, mínimo de YIN, descartado, discontinuidades). Apagado por omisión; sirve para analizar sesiones.
+- **Notas no cantables**: las freestyle (`F`) no se dibujan en el escenario (no tienen tono ni puntúan); su
+  letra se sigue mostrando y resaltando. El rap sí se dibuja (se puntúa por sonido).
 - **Visualización de la voz** (selector "Voz", cambiable en cualquier momento; por omisión **Por beat**):
   *Por beat* dibuja como UltraStar a partir de `VoiceScorer.Results` (la misma evaluación del puntaje):
   barras de beats contiguos en el mismo tono (`VoiceBars`), sobre la nota y a altura completa si acierta, al
