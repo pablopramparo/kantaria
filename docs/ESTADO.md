@@ -28,9 +28,10 @@ detecta el tono y lo ubica en la línea temporal de la canción.
 |---|---|---|
 | 1 | Abrir TXT UltraStar, reproducir audio, notas y letra sincronizadas, pantalla completa | `f09a036` |
 | 2 | Entradas de audio por canal, nivel en vivo, detección de tono (YIN), ventana "Entradas" | `70d922c` |
-| 3 | Tono ubicado en el tiempo de la canción (marcas de tiempo reales), estela en el escenario | **sin commit** |
+| 3 | Tono ubicado en el tiempo de la canción (marcas de tiempo reales), estela en el escenario | `4f36bbf` |
 
-El incremento 3 está completo y verificado (compila, 76 tests pasan, 1 omitido) pero **falta hacer el commit**.
+El incremento 3 está completo y verificado por compilación y tests (76 pasan, 1 omitido). Falta la prueba
+manual del usuario con voz real (ver §7 y §9).
 
 ## 4. Estructura
 
