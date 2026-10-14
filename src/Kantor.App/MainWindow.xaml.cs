@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using Kantor.App.Audio;
 using Kantor.App.Stage;
+using Kantor.Core.Audio;
 using Kantor.Core.Scoring;
 using Kantor.Core.Settings;
 using Kantor.Core.Songs;
@@ -18,7 +19,9 @@ namespace Kantor.App;
 
 public partial class MainWindow : Window
 {
-    private readonly SongPlayer _player = new();
+    private readonly IAudioEngine _engine;
+    private string? _engineNote;
+    private readonly ISongPlayer _player;
     private readonly ActiveInput _input;
     private readonly DispatcherTimer _scoreTimer = new() { Interval = TimeSpan.FromMilliseconds(33) };
     private Song? _song;
@@ -44,7 +47,16 @@ public partial class MainWindow : Window
         _profiles = _startupSettings.DelayProfiles is { } stored ? new Dictionary<string, int>(stored) : null;
         ApplySettings(_startupSettings);
 
-        _input = new ActiveInput(_player);
+        // El motor de audio es una configuración global; Windows es el respaldo si el pedido no está disponible.
+        _engine = AudioEngineFactory.Create(_startupSettings.AudioEngine, out var engineNote);
+        _player = _engine.CreatePlayer();
+        _engineNote = engineNote;
+        if (engineNote is not null)
+        {
+            StatusText.Text = engineNote;
+        }
+
+        _input = new ActiveInput(_player, _engine.CreateCapture);
         _input.Changed += (_, _) => Dispatcher.BeginInvoke(() =>
         {
             // Se recuerda la última entrada abierta; cerrarla a propósito la olvida, pero un arranque sin el
@@ -73,6 +85,7 @@ public partial class MainWindow : Window
             _scoreTimer.Stop();
             _input.Dispose();
             _player.Dispose();
+            _engine.Dispose();
         };
     }
 
@@ -90,7 +103,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        _inputWindow = new InputWindow(_input) { Owner = this };
+        _inputWindow = new InputWindow(_input, _engine) { Owner = this };
         _inputWindow.Show();
     }
 
@@ -187,6 +200,12 @@ public partial class MainWindow : Window
             return;
         }
 
+        if (_engine.Kind != AudioEngineKind.Windows)
+        {
+            StatusText.Text = "La calibración por ahora solo mide el motor de Windows.";
+            return;
+        }
+
         var window = new CalibrationWindow(session.Device, _input.Channel, ms =>
         {
             DelayBox.SelectedIndex = Math.Clamp(ms / UserSettings.VoiceDelayStepMs, 0, DelayBox.Items.Count - 1);
@@ -226,6 +245,7 @@ public partial class MainWindow : Window
             InputDeviceId = _lastInputId,
             InputChannel = _lastInputChannel,
             DelayProfiles = _profiles,
+            AudioEngine = _startupSettings.AudioEngine,
         });
     }
 
@@ -239,7 +259,7 @@ public partial class MainWindow : Window
 
         try
         {
-            if (AudioInputCatalog.List().FirstOrDefault(d => d.Id == id) is { } device)
+            if (_engine.ListInputs().FirstOrDefault(d => d.Id == id) is { } device)
             {
                 _input.Open(device, Math.Min(_startupSettings.InputChannel, device.Channels - 1));
             }
@@ -401,8 +421,9 @@ public partial class MainWindow : Window
     private void UpdateInputStatus()
     {
         InputText.Text = _input.Session is { } session
-            ? $"Entrada: {session.Device.Name} · canal {_input.Channel + 1}"
+            ? $"Entrada: {session.Device.Name} · canal {_input.Channel + 1} · {_engine.Name}"
             : string.Empty;
+        InputText.ToolTip = _engineNote;
     }
 
     private void TogglePlayPause()

@@ -42,12 +42,16 @@ Kantor.sln
 src/Kantor.Core   (sin UI ni hardware)
   Songs/    Song, Voice, Line, Note, UltraStarParser, SongMedia
   Timing/   SongTiming (beat <-> tiempo), ISongClock, HostClock + ISongTimeMap, PlaybackClockModel
-  Audio/    InputChannelId, PcmDecoder, LevelMeter
+  Audio/    InputChannelId, PcmDecoder, LevelMeter; AudioEngine.cs: IAudioEngine (motor), ISongPlayer,
+            ICaptureSession, AudioInputDevice, AudioEngineChoice (motor pedido -> disponible, con respaldo)
   Pitch/    PitchDetector (YIN), PitchTracker, MusicalPitch, PitchTimeline
+  Calibration/  señal de barridos, filtro por correlación (FFT), reglas de aceptación del retardo
+  Settings/ UserSettings (+ perfil de retardo por dispositivo), UserSettingsStore
   Scoring/  Difficulty, ScoringRules, NoteScoring (regla de acierto), BeatSampler (política temporal),
             VoiceScorer (puntaje por beat y bono de línea); no conoce YIN, NAudio ni WPF
 src/Kantor.App    (WPF)
-  Audio/    SongPlayer, WasapiInputCapture, CaptureSession, ActiveInput, AudioInputCatalog
+  Audio/    WasapiEngine + AudioEngineFactory (motor Windows compartido), SongPlayer, WasapiInputCapture,
+            CaptureSession, ActiveInput, AudioInputCatalog, CalibrationRunner, PitchLog
   Stage/    StageControl (notas, letra, estela de tono)
   MainWindow, InputWindow
 tests/Kantor.Tests   xUnit; RealLibraryTests es opt-in con KANTOR_SONGS_DIR
@@ -202,6 +206,14 @@ Referencia de comportamiento: `docs/PUNTUACION_WORLDPARTY.md` (qué hace WorldPa
   **Perfil por dispositivo**: el retardo se guarda por combinación *salida predeterminada + entrada + canal*
   (`UserSettings.DelayProfiles`); al abrir o cambiar la entrada se aplica el de esa combinación si existe, y
   cualquier cambio manual o calibración lo actualiza. Sin perfil rige el retardo global.
+- **Motor de audio** (`Kantor.Core.Audio.IAudioEngine`; etapa 1 del plan ASIO): la aplicación ya no usa
+  `SongPlayer`/`CaptureSession` directamente sino `ISongPlayer`/`ICaptureSession` que entrega un motor
+  (`WasapiEngine` = Windows compartido, el actual y el **respaldo**). Preferencia **global**
+  (`UserSettings.AudioEngine`, por omisión Windows; sin ajuste por canción). Si se pide ASIO y no está
+  disponible, se usa Windows y se avisa (tooltip junto a la entrada). Hoy ASIO no está implementado: el
+  ajuste existe, pero siempre resuelve a Windows. Etapas siguientes: 2) motor ASIO (reproducción y captura en
+  el mismo callback, entrada y salida elegibles), 3) calibración con el reloj de ASIO. La calibración y el
+  selector de motor en la interfaz esperan a la etapa 2.
 - **Calibración del retardo** (botón "Calibrar…", `Kantor.Core.Calibration` + `CalibrationRunner` +
   `CalibrationWindow`): reproduce 5 barridos (200 Hz → 6 kHz, 0,5 s, 1 s de separación) por la salida
   predeterminada de Windows, los busca en el canal de entrada elegido por correlación cruzada (FFT) y mide

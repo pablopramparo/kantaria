@@ -17,6 +17,12 @@ public sealed record UserSettings
     /// <summary>0 = por beat (UltraStar), 1 = cruda.</summary>
     public int VoiceDisplay { get; init; }
 
+    /// <summary>
+    /// Motor de audio preferido (configuración global). Windows es el predeterminado y el respaldo: si el
+    /// pedido no está disponible, la aplicación usa Windows y lo avisa.
+    /// </summary>
+    public Audio.AudioEngineKind AudioEngine { get; init; } = Audio.AudioEngineKind.Windows;
+
     /// <summary>Retardo de voz en milisegundos, de 0 a 300 en pasos de 25.</summary>
     public int VoiceDelayMs { get; init; } = DefaultVoiceDelayMs;
 
@@ -63,6 +69,7 @@ public sealed record UserSettings
         return this with
         {
             Difficulty = Enum.IsDefined(Difficulty) ? Difficulty : Difficulty.Easy,
+            AudioEngine = Enum.IsDefined(AudioEngine) ? AudioEngine : Audio.AudioEngineKind.Windows,
             VoiceDisplay = VoiceDisplay == 1 ? 1 : 0,
             VoiceDelayMs = SnapDelay(VoiceDelayMs),
             InputDeviceId = string.IsNullOrWhiteSpace(InputDeviceId) ? null : InputDeviceId,

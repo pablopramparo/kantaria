@@ -6,20 +6,7 @@ using NAudio.Wave;
 
 namespace Kantor.App.Audio;
 
-/// <summary>Un endpoint de captura de Windows y los canales que expone en modo compartido.</summary>
-public sealed record AudioInputDevice(
-    string Id,
-    string Name,
-    int Channels,
-    int SampleRate,
-    SampleFormat Format,
-    bool IsDefault)
-{
-    public string Label => Channels == 1
-        ? $"{Name} — 1 canal, {SampleRate / 1000.0:0.#} kHz"
-        : $"{Name} — {Channels} canales, {SampleRate / 1000.0:0.#} kHz";
-}
-
+/// <summary>Los endpoints de captura de Windows y los canales que exponen en modo compartido.</summary>
 public static class AudioInputCatalog
 {
     /// <summary>

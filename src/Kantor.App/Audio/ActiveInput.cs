@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Pablo Pramparo
+using Kantor.Core.Audio;
 using Kantor.Core.Pitch;
 using Kantor.Core.Timing;
 
@@ -13,18 +14,22 @@ namespace Kantor.App.Audio;
 public sealed class ActiveInput : IDisposable
 {
     private readonly ISongTimeMap _songTime;
+    private readonly Func<AudioInputDevice, ICaptureSession> _createCapture;
     private readonly PitchLog? _log = PitchLog.FromEnvironment();
-    private CaptureSession? _session;
+    private ICaptureSession? _session;
     private volatile int _channel;
 
-    public ActiveInput(ISongTimeMap songTime)
+    /// <param name="songTime">Cómo se ubica un instante de la captura en la canción (la reproducción activa).</param>
+    /// <param name="createCapture">Abre la captura de un dispositivo con el motor de audio vigente.</param>
+    public ActiveInput(ISongTimeMap songTime, Func<AudioInputDevice, ICaptureSession> createCapture)
     {
         _songTime = songTime;
+        _createCapture = createCapture;
     }
 
     public PitchTimeline Timeline { get; } = new();
 
-    public CaptureSession? Session => _session;
+    public ICaptureSession? Session => _session;
 
     public int Channel => _channel;
 
@@ -37,7 +42,7 @@ public sealed class ActiveInput : IDisposable
     public void Open(AudioInputDevice device, int channel = 0)
     {
         Close();
-        var session = new CaptureSession(device);
+        var session = _createCapture(device);
         session.SetPitchChannels([channel]);
         session.PitchFrameReady += OnPitchFrame;
         session.Stopped += OnStopped;

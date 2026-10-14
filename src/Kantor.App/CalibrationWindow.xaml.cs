@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Pablo Pramparo
 using System.Windows;
 using Kantor.App.Audio;
+using Kantor.Core.Audio;
 using Kantor.Core.Calibration;
 
 namespace Kantor.App;

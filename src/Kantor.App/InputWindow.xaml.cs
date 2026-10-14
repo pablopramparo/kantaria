@@ -23,6 +23,7 @@ public partial class InputWindow : Window
     private static readonly TimeSpan VoiceHold = TimeSpan.FromMilliseconds(250);
 
     private readonly ActiveInput _manager;
+    private readonly IAudioEngine _engine;
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(33) };
     private readonly List<ChannelRow> _rows = [];
     private readonly Stopwatch _clock = Stopwatch.StartNew();
@@ -31,9 +32,10 @@ public partial class InputWindow : Window
     private TimeSpan _lastVoiced = TimeSpan.MinValue;
     private PitchFrame _lastFrame = PitchFrame.Silent;
 
-    public InputWindow(ActiveInput manager)
+    public InputWindow(ActiveInput manager, IAudioEngine engine)
     {
         _manager = manager;
+        _engine = engine;
         InitializeComponent();
         _timer.Tick += OnTick;
         _manager.Failed += OnFailed;
@@ -60,7 +62,7 @@ public partial class InputWindow : Window
         IReadOnlyList<AudioInputDevice> devices;
         try
         {
-            devices = AudioInputCatalog.List();
+            devices = _engine.ListInputs();
         }
         catch (System.Runtime.InteropServices.COMException e)
         {

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Pablo Pramparo
 using System.Reflection;
+using Kantor.Core.Audio;
 using Kantor.Core.Timing;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
@@ -13,7 +14,7 @@ namespace Kantor.App.Audio;
 /// informa cada lectura junto con el QPC en que se tomó; así un instante de la captura puede ubicarse
 /// en la canción sin cronómetros intermedios. No incluye la latencia del hardware de salida.
 /// </summary>
-public sealed class SongPlayer : ISongClock, ISongTimeMap, IDisposable
+public sealed class SongPlayer : ISongPlayer
 {
     private const int OutputLatencyMilliseconds = 100;
 

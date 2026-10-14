@@ -6,16 +6,13 @@ using NAudio.CoreAudioApi;
 
 namespace Kantor.App.Audio;
 
-/// <summary>Última lectura de un canal: nivel del último bloque y último análisis de tono, si el canal se analiza.</summary>
-public readonly record struct ChannelReading(LevelReading Level, PitchFrame? Pitch);
-
 /// <summary>
 /// Captura un dispositivo por WASAPI y mide el nivel de cada canal por separado. El tono solo se
 /// analiza en los canales elegidos con <see cref="SetPitchChannels"/>, y cada análisis lleva el
 /// intervalo de las muestras analizadas en la base de tiempo común. El audio no se reproduce ni
 /// se guarda: solo se miden niveles y tono.
 /// </summary>
-public sealed class CaptureSession : IDisposable
+public sealed class CaptureSession : ICaptureSession
 {
     private readonly object _gate = new();
     private readonly AudioInputDevice _device;
