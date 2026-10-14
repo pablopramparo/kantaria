@@ -13,6 +13,7 @@ namespace Kantor.App.Audio;
 public sealed class ActiveInput : IDisposable
 {
     private readonly ISongTimeMap _songTime;
+    private readonly PitchLog? _log = PitchLog.FromEnvironment();
     private CaptureSession? _session;
     private volatile int _channel;
 
@@ -73,7 +74,11 @@ public sealed class ActiveInput : IDisposable
         }
     }
 
-    public void Dispose() => Close();
+    public void Dispose()
+    {
+        Close();
+        _log?.Dispose();
+    }
 
     private void OnPitchFrame(int channel, PitchFrame frame)
     {
@@ -83,7 +88,9 @@ public sealed class ActiveInput : IDisposable
         }
 
         // Se ubica en la canción el centro de las muestras analizadas, no el momento de este cálculo.
-        if (_songTime.SongPositionAt(frame.CenterHost) is not { } time)
+        var located = _songTime.SongPositionAt(frame.CenterHost);
+        _log?.Frame(channel, frame, located, _session?.Discontinuities ?? 0);
+        if (located is not { } time)
         {
             return;
         }

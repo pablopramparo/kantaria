@@ -37,6 +37,11 @@ public sealed class CaptureSession : IDisposable
 
     public AudioInputDevice Device => _device;
 
+    private int _discontinuities;
+
+    /// <summary>Paquetes que llegaron marcados con un hueco en el flujo desde que arrancó (diagnóstico).</summary>
+    public int Discontinuities => Volatile.Read(ref _discontinuities);
+
     /// <summary>Se produce al detenerse la captura por un fallo (por ejemplo, desconexión).</summary>
     public event EventHandler<Exception?>? Stopped;
 
@@ -119,6 +124,11 @@ public sealed class CaptureSession : IDisposable
         if (_channelBuffers[0].Length < frames)
         {
             _channelBuffers = NewBuffers(frames);
+        }
+
+        if (discontinuity)
+        {
+            Interlocked.Increment(ref _discontinuities);
         }
 
         var buffers = _channelBuffers;

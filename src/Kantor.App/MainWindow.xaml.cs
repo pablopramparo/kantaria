@@ -2,9 +2,14 @@
 // Copyright (C) 2026 Pablo Pramparo
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 using Kantor.App.Audio;
+using Kantor.App.Stage;
+using Kantor.Core.Scoring;
 using Kantor.Core.Songs;
+using Kantor.Core.Timing;
 using Microsoft.Win32;
 
 namespace Kantor.App;
@@ -13,6 +18,9 @@ public partial class MainWindow : Window
 {
     private readonly SongPlayer _player = new();
     private readonly ActiveInput _input;
+    private readonly DispatcherTimer _scoreTimer = new() { Interval = TimeSpan.FromMilliseconds(33) };
+    private Song? _song;
+    private VoiceScorer? _scorer;
     private InputWindow? _inputWindow;
     private bool _fullscreen;
     private WindowState _restoreState;
@@ -24,9 +32,11 @@ public partial class MainWindow : Window
         _input = new ActiveInput(_player);
         _input.Changed += (_, _) => Dispatcher.BeginInvoke(UpdateInputStatus);
         _player.Ended += (_, _) => UpdateControls();
+        _scoreTimer.Tick += (_, _) => AdvanceScore();
 
         Loaded += (_, _) =>
         {
+            _scoreTimer.Start();
             var args = Environment.GetCommandLineArgs();
             if (args.Length > 1)
             {
@@ -35,6 +45,7 @@ public partial class MainWindow : Window
         };
         Closed += (_, _) =>
         {
+            _scoreTimer.Stop();
             _input.Dispose();
             _player.Dispose();
         };
@@ -60,8 +71,90 @@ public partial class MainWindow : Window
 
     private void OnStopClick(object sender, RoutedEventArgs e)
     {
+        // Detener devuelve la canción al principio: el puntaje empieza de nuevo. Pausar, en cambio, lo conserva.
         _player.Stop();
+        _scorer?.Reset();
+        UpdateScore();
         UpdateControls();
+    }
+
+    private void OnDifficultyChanged(object sender, SelectionChangedEventArgs e)
+    {
+        // Cambiar la dificultad puntúa de nuevo desde cero; el selector solo está activo con la canción detenida.
+        if (IsInitialized)
+        {
+            CreateScorer();
+        }
+    }
+
+    private void OnDelayChanged(object sender, SelectionChangedEventArgs e)
+    {
+        // Como la dificultad: cambia cómo se puntúa, así que se vuelve a empezar; solo con la canción detenida.
+        if (IsInitialized)
+        {
+            CreateScorer();
+        }
+    }
+
+    /// <summary>Retardo de voz elegido: 25 ms por posición de la lista (0 a 300 ms).</summary>
+    private TimeSpan SelectedVoiceDelay =>
+        TimeSpan.FromMilliseconds(25 * Math.Max(DelayBox.SelectedIndex, 0));
+
+    private void OnDisplayChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (IsInitialized)
+        {
+            Stage.VoiceMode = DisplayBox.SelectedIndex == 1 ? VoiceDisplay.Raw : VoiceDisplay.Beats;
+        }
+    }
+
+    private Difficulty SelectedDifficulty => DifficultyBox.SelectedIndex switch
+    {
+        1 => Difficulty.Medium,
+        2 => Difficulty.Hard,
+        _ => Difficulty.Easy,
+    };
+
+    private void CreateScorer()
+    {
+        _scorer = _song is { Voices.Count: > 0 } song
+            ? new VoiceScorer(song.Voices[0], new SongTiming(song.Bpm, song.GapMilliseconds),
+                new ScoringRules { Difficulty = SelectedDifficulty, AcousticLatency = SelectedVoiceDelay })
+            : null;
+        Stage.Scorer = _scorer;
+        Stage.VoiceDelay = SelectedVoiceDelay;
+        UpdateScore();
+    }
+
+    /// <summary>
+    /// Solo avanza con la canción sonando: en pausa la posición no se mueve y el puntaje se conserva; al terminar
+    /// o detenerse no se toca (el final queda visible hasta volver a empezar).
+    /// </summary>
+    private void AdvanceScore()
+    {
+        if (_scorer is null || !_player.IsPlaying)
+        {
+            return;
+        }
+
+        var position = _player.Position;
+        if (position <= TimeSpan.Zero)
+        {
+            return; // lectura de reloj no disponible: no se interpreta como un retroceso
+        }
+
+        _scorer.Advance(position, _input.Timeline);
+        UpdateScore();
+    }
+
+    private void UpdateScore()
+    {
+        var s = _scorer?.Snapshot;
+        ScoreText.Text = (s?.Total ?? 0).ToString("N0");
+        ScoreText.ToolTip = s is { } snap
+            ? $"Notas {snap.NotesRounded:N0} · Doradas {snap.GoldenRounded:N0} · Líneas {snap.LinesRounded:N0}\n" +
+              $"Beats acertados {snap.BeatsHit:N0} de {snap.BeatsEvaluated:N0} evaluados ({snap.BeatsTotal:N0} en total)"
+            : null;
     }
 
     private void OnPreviewKeyDown(object sender, KeyEventArgs e)
@@ -125,6 +218,8 @@ public partial class MainWindow : Window
             }
 
             _player.Load(audioPath);
+            _song = song;
+            CreateScorer();
             Stage.Show(song, _player, _input.Timeline);
             TitleText.Text = $"{song.Artist} — {song.Title}";
             Title = $"Kantor — {song.Artist} — {song.Title}";
@@ -137,6 +232,8 @@ public partial class MainWindow : Window
         catch (Exception e) when (e is SongFormatException or IOException or UnauthorizedAccessException
                                       or InvalidOperationException or System.Runtime.InteropServices.COMException)
         {
+            _song = null;
+            CreateScorer();
             Stage.Show(null, null);
             TitleText.Text = string.Empty;
             StatusText.Text = $"No se pudo abrir: {e.Message}";
@@ -176,6 +273,7 @@ public partial class MainWindow : Window
         PlayButton.IsEnabled = _player.IsLoaded;
         StopButton.IsEnabled = _player.IsLoaded;
         PlayButton.Content = _player.IsPlaying ? "Pausa (Espacio)" : "Reproducir (Espacio)";
+        DifficultyBox.IsEnabled = DelayBox.IsEnabled = !_player.IsPlaying && !_player.IsPaused;
     }
 
     private void SetFullscreen(bool on)

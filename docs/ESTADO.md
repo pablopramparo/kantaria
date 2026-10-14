@@ -29,9 +29,11 @@ detecta el tono y lo ubica en la línea temporal de la canción.
 | 1 | Abrir TXT UltraStar, reproducir audio, notas y letra sincronizadas, pantalla completa | `f09a036` |
 | 2 | Entradas de audio por canal, nivel en vivo, detección de tono (YIN), ventana "Entradas" | `70d922c` |
 | 3 | Tono ubicado en el tiempo de la canción (marcas de tiempo reales), estela en el escenario | `4f36bbf` |
+| — | Correcciones de las pruebas manuales: desfase acumulativo en pausa; plegado de octava de la estela | `8a34657`, `d6d390f` |
+| 4 | Puntuación por beat (una voz, una entrada), selector de dificultad, puntaje visible | sin commit (a probar) |
 
-El incremento 3 está completo y verificado por compilación y tests (76 pasan, 1 omitido). Falta la prueba
-manual del usuario con voz real (ver §7 y §9).
+Las pruebas funcionales de los incrementos 1–3 fueron aprobadas por el usuario. El incremento 4 está
+implementado y verificado por compilación y tests; falta su prueba manual (ver §6 ter y §9).
 
 ## 4. Estructura
 
@@ -42,6 +44,8 @@ src/Kantor.Core   (sin UI ni hardware)
   Timing/   SongTiming (beat <-> tiempo), ISongClock, HostClock + ISongTimeMap, PlaybackClockModel
   Audio/    InputChannelId, PcmDecoder, LevelMeter
   Pitch/    PitchDetector (YIN), PitchTracker, MusicalPitch, PitchTimeline
+  Scoring/  Difficulty, ScoringRules, NoteScoring (regla de acierto), BeatSampler (política temporal),
+            VoiceScorer (puntaje por beat y bono de línea); no conoce YIN, NAudio ni WPF
 src/Kantor.App    (WPF)
   Audio/    SongPlayer, WasapiInputCapture, CaptureSession, ActiveInput, AudioInputCatalog
   Stage/    StageControl (notas, letra, estela de tono)
@@ -123,10 +127,26 @@ La única que falla es "Ace of Base – Beautiful Life" (sin `#BPM`).
 
 ## 7. Pendiente de medir o probar
 
-- **Latencia acústica total** (salida + aire + entrada): **no medida**. Los intentos con ráfagas por altavoz
-  no fueron concluyentes (la Focusrite con micrófono no distinguía las ráfagas del ruido; la webcam tampoco).
-  Hace falta cable de loopback (salida → entrada de la interfaz) o micrófono junto al altavoz. Hasta
-  entonces la sincronía absoluta con lo que se oye no está demostrada.
+- **Latencia salida → entrada por cable (medida, 2026-10-14)**: Scarlett 4i4, WASAPI compartido, salida
+  "Altavoces (Focusrite)" → entrada 2 (Analogue 2), clics de 4 ms: **mediana 173 ms** (172–179, dispersión
+  ~7 ms en 11 clics; el primero arrastra un arranque). Mide el tramo "el reloj de reproducción dice que suena"
+  → "marca de tiempo de la captura"; no incluye aire ni reacción. **Camino acústico** (mismos clics, parlantes de la
+  PC → aire → micrófono en la entrada 1, clics a 0,8): mediana **176 ms** (175–177 en 9 clics; un evento espurio
+  a 583 ms descartado), es decir ~2–3 ms más que por cable (el aire a ~1 m). Coincide con el máximo del barrido de puntaje
+  sobre la grabación de "The Line" (150–200 ms), así que el retardo de voz es casi todo del equipo. La
+  correlación global voz/notas en esa grabación pone la voz **~200 ms después** de las notas (173–176 de
+  sistema + ~25 de detección y arranque de voz); los inicios de frase llegan ~178 ms tarde (n = 29). La
+  latencia **no depende del búfer de salida de Kantor** (100/50/30 ms → 177/174/174 ms; 20 ms empeora a 185):
+  está en el driver/USB de la interfaz en modo compartido; bajarla exigiría modo exclusivo o ASIO. Windows
+  informa 0 ms de `StreamLatency` en ambos lados (el driver no la declara). **Por ASIO** ("Focusrite USB ASIO",
+  6 entradas / 4 salidas, búfer 508 muestras ≈ 10,6 ms), mismos clics y mismo cable: **19,5 ms** de ida y vuelta
+  (6 de 6 clics, dispersión 0; por el aire al micrófono 22,1 ms), contra 173 ms en compartido. WASAPI exclusivo:
+  los endpoints WDM solo aceptan 16 bits / 48 kHz estéreo, período de 3–10 ms; su latencia **no se midió**.
+  NAudio exige hilo STA para ASIO. Con ASIO las salidas 1/2 de la API son los jacks traseros 1/2 (el cable
+  quedó en esas). No se probó la convivencia ASIO + audio de Windows de otras aplicaciones. Lo que **no**
+  se sabe es cómo se reparte entre salida y entrada: la parte de salida afecta a la sincronía entre notas
+  dibujadas y audio oído, la de entrada al desfase de la voz. Herramienta: scratchpad, no está en el repo; para
+  repetirla hay que cablear una salida de línea a la entrada 2 con INST apagado y ganancia mínima.
 - **Detección de voz real**: probar cantando en la Focusrite. El micrófono del usuario es modesto y
   tiene graves flojos: puede quedar bajo la puerta de −50 dBFS o fallar por debajo de ~80 Hz.
 - Independencia de los dos canales de la Focusrite con dos micrófonos.
@@ -144,21 +164,72 @@ La única que falla es "Ace of Base – Beautiful Life" (sin `#BPM`).
 - "Sum41 - War": el TXT dice `Sum41 - War.mp3` pero el archivo es `Sum 41 - War.mp3` (no abre; dato roto).
 - Carpetas con `[ ]` en el nombre: cuidado con comodines en PowerShell (`-LiteralPath`).
 
+## 6 ter. Puntuación (incremento 4)
+
+Referencia de comportamiento: `docs/PUNTUACION_WORLDPARTY.md` (qué hace WorldParty y en qué difiere Kantor).
+
+- **Máximo 10.000**: 9.000 de notas + 1.000 de bono de línea (activado); sin bono, 10.000 de notas.
+  Cada beat acertado vale `MaxNotas / valorTotal × factor` (normal y rap 1, dorada y rap dorada 2, freestyle 0).
+- **Acierto**: normal y dorada, voz detectada y clase de altura a ≤ tolerancia (Fácil 2, Medio 1, Difícil 0)
+  con equivalencia de octava; rap, solo sonido sobre la compuerta; ambos requieren `LevelDb ≥ −50`
+  (provisional, sin equivalencia con el umbral de WorldParty).
+- **Política temporal** (`BeatSampler`): cada beat se evalúa una vez, en orden, en el instante de su punto medio
+  (+ `AcousticLatency`, 0 por defecto) y cuando la posición lo pasó por `Settling` (100 ms; medido ~47 ms de
+  retardo de llegada). Muestra elegida: la ventana de análisis que cubre el instante (extremos incluidos) con
+  centro más cercano; empate, la anterior; sin ventana que lo cubra, el beat no suma. No usa la última muestra
+  ni depende de los FPS. Una muestra que llega después de evaluado el beat se ignora.
+- **Octavas (decidido por el usuario tras la prueba manual)**: equivalencia por clase de nota, como WorldParty;
+  cantar una octava distinta puntúa igual. No hay modo estricto. La estela sigue plegada al carril (no indica
+  la octava real). Si algún día se quiere distinguir, es un cambio de regla a decidir aparte.
+- **Ciclo de vida**: pausa conserva el puntaje (la posición queda quieta y no se llama a `Advance`);
+  Detener lo reinicia (`Reset`); canción nueva o dificultad nueva crean otro `VoiceScorer`; un retroceso de
+  posición > 250 ms se toma como reinicio; un salto hacia adelante evalúa los beats saltados con el historial
+  que haya; al terminar la canción el puntaje queda visible hasta volver a empezar.
+- **Interfaz**: selector Fácil/Medio/Difícil (solo con la canción detenida) y puntaje en la barra superior
+  (tooltip con notas, doradas, líneas y beats). `DispatcherTimer` de 33 ms en `MainWindow`, independiente del dibujo.
+- **Retardo de voz** (`ScoringRules.AcousticLatency`; en la interfaz, selector "Retardo" de 0 a 300 ms en pasos
+  de 25, **175 ms por omisión**, solo con la canción detenida): con la grabación real de "The Line" el puntaje
+  en Fácil subía de 7660 (0 ms) a 8740 (150 ms) y 8810 (200 ms), y bajaba después; la latencia salida → entrada
+  medida por cable fue 173 ms (§7), de ahí el valor inicial. WorldParty compensa ~90 ms + medio beat
+  (~105 ms aquí). Depende del equipo y del dispositivo de salida, así que es un ajuste del usuario, no una
+  constante del sistema. El valor por omisión en Core sigue siendo 0. **No se persiste**
+  entre sesiones (pendiente). Efecto colateral: las barras "Por beat" aparecen ese retardo más tarde, porque el
+  beat se evalúa después de mirar la voz desplazada.
+- **Puente de huecos** (`ScoringRules.GapBridge`, 150 ms, 0 lo apaga): decidido tras analizar un registro real
+  (`KANTOR_PITCH_LOG`, "The Line", 222 s): ~13 % de los cuadros fuertes salían sin tono por consonantes,
+  respiración y transiciones (min_cmnd medio 0,43). Si en el instante de un beat hay sonido pero no tono, y hay
+  tono a ambos lados a ≤ 150 ms entre sí, se evalúa con el vecino con voz más cercano. No extiende finales de
+  nota. Los beats dentro de un hueco esperan hasta `GapBridge + Settling` para ver el tono posterior; los demás
+  no. Sobre ese registro: 7330 → 7660 puntos en Fácil. YIN no se tocó. El modo de voz "Cruda" no se puentea.
+- **Registro de diagnóstico** (`KANTOR_PITCH_LOG=ruta.csv`): una línea por análisis (tiempo, nivel, tono,
+  confianza, mínimo de YIN, descartado, discontinuidades). Apagado por omisión; sirve para analizar sesiones.
+- **Visualización de la voz** (selector "Voz", cambiable en cualquier momento; por omisión **Por beat**):
+  *Por beat* dibuja como UltraStar a partir de `VoiceScorer.Results` (la misma evaluación del puntaje):
+  barras de beats contiguos en el mismo tono (`VoiceBars`), sobre la nota y a altura completa si acierta, al
+  tono real (a ±6 de la nota) y al 65 % si falla, solo sobre las notas y recortadas en la línea del "ahora";
+  llega con el retraso de asentamiento. *Cruda* es la estela de cada análisis de YIN, útil para depurar el
+  micrófono. Ver `docs/PUNTUACION_WORLDPARTY.md` §10.
+  Compensación visual: la estela *Cruda* se dibuja el retardo de voz antes (alineada con la nota cantada) y el
+  modo *Por beat* suma el resultado provisional (`VoiceScorer.Preview`) de los beats cuya voz ya llegó pero que
+  todavía no se evalúan, sin tocar el puntaje. Ganancia real de la vista previa: solo el tramo
+  asentamiento − (llegada ~45 ms + margen 20 ms) ≈ 35 ms; los ~175 ms de retardo son físicos y la barra de la
+  nota que se canta *ahora* no puede existir antes de que llegue su voz.
+- **Limitaciones conocidas**: (1) los cuadros que llegan en los ~100–140 ms posteriores a pausar (el búfer
+  que sigue sonando) no se guardan en el historial, así que los beats de ese tramo pueden perderse;
+  (2) solo la voz 0 y una entrada (sin duetos ni asignación micrófono→voz); (3) con notas solapadas de distinto
+  tono el máximo no es alcanzable (WorldParty puntúa cada nota por separado, igual); (4) la compuerta
+  de nivel y la latencia acústica no están calibradas con el micrófono del usuario.
+
 ## 9. Siguientes pasos propuestos (no aprobados)
 
-1. ~~Commit del incremento 3~~ (hecho).
-2. **El usuario prueba manualmente** (voz real, canales de la Focusrite, estela de tono sobre las notas)
-   antes de seguir. No avanzar con puntuación hasta su devolución.
-3. La medición de latencia acústica por loopback sigue pendiente; **no debe convertirse en un proyecto
-   independiente**: se resuelve con una prueba breve cuando haya cable, junto con el desfase de arranque (§6 bis).
-4. Siguiente incremento acordado, tras esas pruebas: **puntuación por beat sobre Kantor**, usando WorldParty
-   como referencia y manteniendo el cálculo de puntuación **separado del detector de pitch** (la puntuación
-   consume `PitchTimeline`/`PitchSample`; no conoce YIN ni WASAPI). Detalle de la referencia: Referencia verificada en WorldParty (`UNote.pas`): tolerancia 0–2 semitonos según
-   dificultad, plegado de octava a ±6, notas rap sin comparar tono, freestyle sin puntuar, 10000 puntos
-   (9000 + 1000 de bonus de línea si está activo). Falta ver el cálculo del bonus y el offset de detección.
-   Decisión pendiente: asignación micrófono→voz por actuación (hoy la estela se dibuja solo en la voz 0).
-4. Biblioteca con carpetas elegidas expresamente (SQLite) y búsqueda.
-5. Video (probablemente FFmpeg; hay que hacer el censo de códecs), y más adelante perfiles, sesiones, cola y Avyn.
+1. ~~Commit del incremento 3~~ y de las dos correcciones (hecho).
+2. **El usuario prueba manualmente la puntuación** (cantar con voz real, los tres niveles, pausa, detener,
+   fin de canción) antes del commit del incremento 4.
+3. ~~Medición de latencia por loopback~~ (hecha: 173 ms, §7). Siguen pendientes: separar la parte de salida de
+   la de entrada, el desfase de arranque (§6 bis) y calibrar la compuerta de nivel con el micrófono.
+4. Decisión pendiente: asignación micrófono→voz por actuación y duetos (hoy solo la voz 0).
+5. Biblioteca con carpetas elegidas expresamente (SQLite) y búsqueda.
+6. Video (probablemente FFmpeg; hay que hacer el censo de códecs), y más adelante perfiles, sesiones, cola y Avyn.
 
 Decisiones abiertas del documento base: definición de "puntos de competición" y "efectividad", umbral de
 paridad con WorldParty, hardware objetivo.

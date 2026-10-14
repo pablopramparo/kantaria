@@ -4,10 +4,21 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
 using Kantor.Core.Pitch;
+using Kantor.Core.Scoring;
 using Kantor.Core.Songs;
 using Kantor.Core.Timing;
 
 namespace Kantor.App.Stage;
+
+/// <summary>Cómo se muestra la voz del jugador sobre las notas.</summary>
+public enum VoiceDisplay
+{
+    /// <summary>Por beat, como UltraStar: barras sobre la nota si acierta y al tono real si no.</summary>
+    Beats,
+
+    /// <summary>Cada análisis del detector tal como llega: útil para ver qué detecta el micrófono.</summary>
+    Raw,
+}
 
 /// <summary>
 /// Dibuja notas y letra de una canción según la posición de un <see cref="ISongClock"/>.
@@ -32,6 +43,12 @@ public sealed class StageControl : FrameworkElement
     private static readonly Brush Pending = Freeze(new SolidColorBrush(Color.FromRgb(0xF0, 0xF0, 0xF0)));
     private static readonly Brush Dim = Freeze(new SolidColorBrush(Color.FromRgb(0x8A, 0x91, 0x9E)));
 
+    private static readonly Brush VoiceHit = Freeze(new SolidColorBrush(Color.FromRgb(0xFF, 0x5E, 0xA8)));
+    private static readonly Brush VoiceMiss = Freeze(new SolidColorBrush(Color.FromArgb(0xC8, 0xFF, 0x5E, 0xA8)));
+
+    // UltraStar dibuja un fallo al 65 % de la altura de un acierto.
+    private const double MissHeightFraction = 0.65;
+
     private static readonly Typeface Face = new("Segoe UI");
 
     private readonly List<PitchSample> _pitchBuffer = [];
@@ -40,6 +57,20 @@ public sealed class StageControl : FrameworkElement
     private ISongClock? _clock;
     private PitchTimeline? _pitch;
     private SongTiming _timing;
+
+    /// <summary>Cómo se dibuja la voz del jugador; se puede cambiar en cualquier momento.</summary>
+    public VoiceDisplay VoiceMode { get; set; } = VoiceDisplay.Beats;
+
+    /// <summary>Evaluación por beat de la voz 0; sin ella, el modo por beat no dibuja nada.</summary>
+    public VoiceScorer? Scorer { get; set; }
+
+    /// <summary>
+    /// Retardo con el que llega la voz respecto de la canción (el mismo que usa el puntaje). La estela cruda se
+    /// dibuja ese tiempo antes para que quede alineada con la nota que se estaba cantando.
+    /// </summary>
+    public TimeSpan VoiceDelay { get; set; }
+
+    private readonly List<BeatResult> _barSource = [];
 
     public StageControl()
     {
@@ -144,7 +175,14 @@ public sealed class StageControl : FrameworkElement
 
         if (drawPitch)
         {
-            DrawPitchTrail(dc, notes, nowX, pixelsPerBeat, lowTone, highTone, rowHeight, position, beat);
+            if (VoiceMode == VoiceDisplay.Beats)
+            {
+                DrawBeatBars(dc, notes, nowX, pixelsPerBeat, lowTone, highTone, rowHeight, noteHeight, beat, beatsPerSecond, position);
+            }
+            else
+            {
+                DrawPitchTrail(dc, notes, nowX, pixelsPerBeat, lowTone, highTone, rowHeight, position, beat);
+            }
         }
 
         dc.Pop();
@@ -162,6 +200,48 @@ public sealed class StageControl : FrameworkElement
     }
 
     /// <summary>
+    /// Voz por beat, como UltraStar: beats contiguos en el mismo tono forman una barra. Si el beat acertó, la
+    /// barra queda sobre la nota a altura completa; si no, va al tono real (a ±6 semitonos de la nota) con
+    /// el 65 % de la altura. Solo hay barras sobre las notas; entre notas no se dibuja nada. Sale de la misma
+    /// evaluación que el puntaje, así que llega con el retraso de asentamiento.
+    /// </summary>
+    private void DrawBeatBars(DrawingContext dc, Rect notes, double nowX, double pixelsPerBeat,
+        int lowTone, int highTone, double rowHeight, double noteHeight, double beat, double beatsPerSecond,
+        TimeSpan position)
+    {
+        if (Scorer is not { } scorer)
+        {
+            return;
+        }
+
+        // Lo ya evaluado más lo provisional de los beats cuya voz ya llegó (la barra aparece sin esperar el asentamiento).
+        _barSource.Clear();
+        _barSource.AddRange(scorer.Results);
+        if (_pitch is not null)
+        {
+            _barSource.AddRange(scorer.Preview(_pitch, position));
+        }
+
+        var from = (int)Math.Floor(beat - SecondsBehind * beatsPerSecond) - 1;
+        foreach (var bar in VoiceBars.Build(_barSource, from))
+        {
+            var left = nowX + (bar.StartBeat - beat) * pixelsPerBeat;
+            var right = Math.Min(nowX + (bar.EndBeat - beat) * pixelsPerBeat - 2, nowX);
+            if (right <= left)
+            {
+                continue;
+            }
+
+            // El rap se dibuja a media altura del carril, igual que sus notas.
+            var tone = bar.Rap ? (lowTone + highTone) / 2.0 : bar.Tone;
+            var height = bar.Hit ? noteHeight : noteHeight * MissHeightFraction;
+            var y = notes.Bottom - (tone - lowTone + 0.5) * rowHeight;
+            dc.DrawRoundedRectangle(bar.Hit ? VoiceHit : VoiceMiss, null,
+                new Rect(left, y - height / 2, Math.Max(right - left, 4), height), height / 3, height / 3);
+        }
+    }
+
+    /// <summary>
     /// Cada tono detectado se dibuja como un segmento que cubre el intervalo de muestras analizadas,
     /// ubicado por el instante de esas muestras en la canción. Solo visualización: no hay puntuación.
     /// </summary>
@@ -173,8 +253,11 @@ public sealed class StageControl : FrameworkElement
             return;
         }
 
+        // La voz llega con retraso: se pide lo que corresponde a la ventana visible desplazada ese retraso y se
+        // dibuja ese tiempo antes, de modo que quede sobre la nota que se estaba cantando.
+        var shift = VoiceDelay;
         _pitchBuffer.Clear();
-        _pitch.CopyRange(position - TimeSpan.FromSeconds(SecondsBehind + 0.5), position + TimeSpan.FromSeconds(0.5), _pitchBuffer);
+        _pitch.CopyRange(position - TimeSpan.FromSeconds(SecondsBehind + 0.5) + shift, position + TimeSpan.FromSeconds(0.5) + shift, _pitchBuffer);
 
         foreach (var sample in _pitchBuffer)
         {
@@ -191,8 +274,8 @@ public sealed class StageControl : FrameworkElement
                 continue;
             }
 
-            var startX = nowX + (_timing.BeatAt(sample.Start) - beat) * pixelsPerBeat;
-            var endX = nowX + (_timing.BeatAt(sample.End) - beat) * pixelsPerBeat;
+            var startX = nowX + (_timing.BeatAt(sample.Start - shift) - beat) * pixelsPerBeat;
+            var endX = nowX + (_timing.BeatAt(sample.End - shift) - beat) * pixelsPerBeat;
             var y = notes.Bottom - (tone - lowTone + 0.5) * rowHeight;
             var alpha = (byte)(110 + 145 * Math.Clamp(sample.Confidence, 0, 1));
             var brush = new SolidColorBrush(Color.FromArgb(alpha, 0xFF, 0x5E, 0xA8));

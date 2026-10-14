@@ -2,7 +2,12 @@
 // Copyright (C) 2026 Pablo Pramparo
 namespace Kantor.Core.Pitch;
 
-public readonly record struct PitchEstimate(double Frequency, double Confidence)
+/// <param name="MinCmnd">
+/// Valor mínimo de la función de YIN en el rango de períodos: cuánto se parece la señal a periódica
+/// (0 = periódica perfecta). Con voz por debajo del umbral (0,15 por omisión); si no hay voz, dice qué
+/// tan cerca estuvo. Es solo diagnóstico: no interviene en la decisión.
+/// </param>
+public readonly record struct PitchEstimate(double Frequency, double Confidence, double MinCmnd = 1)
 {
     public bool IsVoiced => Frequency > 0;
 
@@ -85,6 +90,12 @@ public sealed class PitchDetector
             _cmnd[tau] = running <= 0 ? 1f : (float)(d * tau / running);
         }
 
+        var minCmnd = 1.0;
+        for (var tau = _tauMin; tau < _tauMax; tau++)
+        {
+            minCmnd = Math.Min(minCmnd, _cmnd[tau]);
+        }
+
         for (var tau = _tauMin; tau < _tauMax; tau++)
         {
             if (_cmnd[tau] >= _threshold)
@@ -99,10 +110,10 @@ public sealed class PitchDetector
             }
 
             var refined = Refine(tau);
-            return new PitchEstimate(_sampleRate / refined, Math.Clamp(1 - _cmnd[tau], 0, 1));
+            return new PitchEstimate(_sampleRate / refined, Math.Clamp(1 - _cmnd[tau], 0, 1), minCmnd);
         }
 
-        return PitchEstimate.Unvoiced;
+        return new PitchEstimate(0, 0, minCmnd);
     }
 
     private double Refine(int tau)

@@ -14,7 +14,8 @@ public readonly record struct PitchFrame(
     double Confidence,
     double LevelDb,
     long WindowStartHost,
-    long WindowEndHost)
+    long WindowEndHost,
+    double MinCmnd = 1)
 {
     public bool IsVoiced => Frequency > 0;
 
@@ -101,7 +102,7 @@ public sealed class PitchTracker
         }
 
         var estimate = _detector.Detect(_window);
-        frame = new PitchFrame(estimate.Frequency, estimate.Confidence, level, start, end);
+        frame = new PitchFrame(estimate.Frequency, estimate.Confidence, level, start, end, estimate.MinCmnd);
         return true;
     }
 

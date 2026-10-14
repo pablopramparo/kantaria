@@ -69,4 +69,69 @@ public class RealLibraryTests(ITestOutputHelper output)
         Assert.True(songs > 0, "La carpeta no contiene canciones.");
         Assert.True(failures.Count == 0, $"{failures.Count} de {songs} fallaron:\n" + string.Join('\n', failures.Take(50)));
     }
+
+    [RealLibraryFact]
+    public void Singing_every_real_song_perfectly_scores_exactly_10000()
+    {
+        var root = Environment.GetEnvironmentVariable(RealLibraryFactAttribute.Variable)!;
+        var wrong = new List<string>();
+        var scored = 0;
+        var overlapping = 0;
+
+        // Se recorre un subconjunto determinista (ordenado por ruta) para que la prueba dure segundos.
+        var files = Directory.EnumerateFiles(root, "*.txt", SearchOption.AllDirectories).Order().Take(150);
+        foreach (var txt in files)
+        {
+            Song song;
+            try
+            {
+                song = UltraStarParser.ParseFile(txt);
+            }
+            catch (SongFormatException)
+            {
+                continue;
+            }
+
+            if (song.Voices.Count == 0 || !song.Voices[0].HasNotes || song.Voices[0].Lines.All(l => l.Notes.All(n => !n.IsScored)))
+            {
+                continue;
+            }
+
+            // Con notas solapadas de distinto tono, un solo cantante no puede acertar los dos beats a la vez
+            // (WorldParty puntúa cada nota por separado, igual que Kantor): el máximo no es alcanzable.
+            if (HasOverlappingNotes(song.Voices[0]))
+            {
+                overlapping++;
+                continue;
+            }
+
+            scored++;
+            var total = SingerSim.Run(song, new Kantor.Core.Scoring.ScoringRules(), SingerSim.Perfect(song), step: 0.05).Snapshot.Total;
+            if (total != 10000)
+            {
+                wrong.Add($"{total}: {txt}");
+            }
+        }
+
+        output.WriteLine($"Canciones puntuadas: {scored}; omitidas por notas solapadas: {overlapping}");
+        Assert.True(scored > 0);
+        Assert.True(wrong.Count == 0, $"{wrong.Count} de {scored} no dieron 10000:\n" + string.Join('\n', wrong.Take(30)));
+    }
+
+    private static bool HasOverlappingNotes(Voice voice)
+    {
+        var notes = voice.Lines.SelectMany(l => l.Notes).Where(n => n.IsScored && n.Length > 0).OrderBy(n => n.StartBeat).ToList();
+        var end = int.MinValue;
+        foreach (var note in notes)
+        {
+            if (note.StartBeat < end)
+            {
+                return true;
+            }
+
+            end = Math.Max(end, note.EndBeat);
+        }
+
+        return false;
+    }
 }

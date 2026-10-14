@@ -21,6 +21,43 @@
             <Button x:Name="StopButton" Content="Detener" Padding="14,6" Margin="8,0,0,0"
                     IsEnabled="False" Click="OnStopClick" />
             <Button Content="Entradas… (Ctrl+I)" Padding="14,6" Margin="8,0,0,0" Click="OnInputsClick" />
+            <TextBlock Text="Dificultad" VerticalAlignment="Center" Foreground="#8A919E" Margin="16,0,6,0" />
+            <ComboBox x:Name="DifficultyBox" Width="90" SelectedIndex="0" VerticalContentAlignment="Center"
+                      SelectionChanged="OnDifficultyChanged"
+                      ToolTip="Fácil: 2 semitonos de tolerancia · Medio: 1 · Difícil: tono exacto. Solo se cambia con la canción detenida.">
+                <ComboBoxItem Content="Fácil" />
+                <ComboBoxItem Content="Medio" />
+                <ComboBoxItem Content="Difícil" />
+            </ComboBox>
+            <TextBlock Text="Retardo" VerticalAlignment="Center" Foreground="#8A919E" Margin="16,0,6,0" />
+            <ComboBox x:Name="DelayBox" Width="80" SelectedIndex="7" VerticalContentAlignment="Center"
+                      SelectionChanged="OnDelayChanged"
+                      ToolTip="Retardo de voz: cuánto después de lo que suena llega tu voz (aire, reacción y latencia de audio). Se compara tu voz con ese desfase. Solo se cambia con la canción detenida.">
+                <ComboBoxItem Content="0 ms" />
+                <ComboBoxItem Content="25 ms" />
+                <ComboBoxItem Content="50 ms" />
+                <ComboBoxItem Content="75 ms" />
+                <ComboBoxItem Content="100 ms" />
+                <ComboBoxItem Content="125 ms" />
+                <ComboBoxItem Content="150 ms" />
+                <ComboBoxItem Content="175 ms" />
+                <ComboBoxItem Content="200 ms" />
+                <ComboBoxItem Content="225 ms" />
+                <ComboBoxItem Content="250 ms" />
+                <ComboBoxItem Content="275 ms" />
+                <ComboBoxItem Content="300 ms" />
+            </ComboBox>
+            <TextBlock Text="Voz" VerticalAlignment="Center" Foreground="#8A919E" Margin="16,0,6,0" />
+            <ComboBox x:Name="DisplayBox" Width="90" SelectedIndex="0" VerticalContentAlignment="Center"
+                      SelectionChanged="OnDisplayChanged"
+                      ToolTip="Por beat: como UltraStar (barras sobre la nota si acertás). Cruda: cada análisis del detector.">
+                <ComboBoxItem Content="Por beat" />
+                <ComboBoxItem Content="Cruda" />
+            </ComboBox>
+            <TextBlock x:Name="ScoreText" DockPanel.Dock="Right" FontSize="24" FontWeight="SemiBold"
+                       VerticalAlignment="Center" Margin="16,0,0,0" Text="0" />
+            <TextBlock Text="Puntos" DockPanel.Dock="Right" VerticalAlignment="Center" Foreground="#8A919E"
+                       Margin="16,0,0,0" />
             <TextBlock x:Name="TitleText" VerticalAlignment="Center" Margin="16,0,0,0" FontSize="16"
                        TextTrimming="CharacterEllipsis" />
         </DockPanel>
