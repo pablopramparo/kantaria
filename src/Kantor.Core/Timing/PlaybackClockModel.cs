@@ -3,16 +3,20 @@
 namespace Kantor.Core.Timing;
 
 /// <summary>
-/// Convierte lecturas del reloj del dispositivo de salida en posición de la canción, descontando
-/// el tiempo que el reloj siga avanzando durante una pausa, y extrapola una lectura (posición, QPC)
-/// a otro instante de la base de tiempo común. No toca hardware: el reproductor le pasa las lecturas.
+/// Convierte lecturas del reloj del dispositivo de salida en posición de la canción y extrapola una
+/// lectura (posición, QPC) a otro instante de la base de tiempo común. No toca hardware: el reproductor
+/// le pasa las lecturas.
 /// </summary>
+/// <remarks>
+/// El reloj de WASAPI (IAudioClock) cuenta solo audio efectivamente reproducido. Al pausar, el búfer que
+/// ya estaba cargado sigue sonando hasta vaciarse y recién entonces el reloj se detiene; al reanudar
+/// continúa desde ahí. Por eso la posición de la canción es siempre la lectura cruda del reloj: descontar
+/// el avance posterior a la pausa atrasaba la imagen respecto del audio una vez por ciclo.
+/// </remarks>
 public sealed class PlaybackClockModel
 {
     private bool _running;
     private bool _paused;
-    private double _pausedAt;
-    private double _skipped;
 
     public bool IsRunning => _running && !_paused;
 
@@ -23,30 +27,18 @@ public sealed class PlaybackClockModel
     {
         _running = true;
         _paused = false;
-        _skipped = 0;
-        _pausedAt = 0;
     }
 
-    public void Pause(double rawSeconds)
+    public void Pause()
     {
-        if (!_running || _paused)
+        if (_running)
         {
-            return;
+            _paused = true;
         }
-
-        _pausedAt = rawSeconds - _skipped;
-        _paused = true;
     }
 
-    public void Resume(double rawSeconds)
+    public void Resume()
     {
-        if (!_paused)
-        {
-            return;
-        }
-
-        // El reloj del dispositivo puede haber seguido avanzando durante la pausa; ese tiempo no cuenta.
-        _skipped = Math.Max(0, rawSeconds - _pausedAt);
         _paused = false;
     }
 
@@ -54,20 +46,11 @@ public sealed class PlaybackClockModel
     {
         _running = false;
         _paused = false;
-        _skipped = 0;
-        _pausedAt = 0;
     }
 
     /// <summary>Posición de la canción para una lectura cruda del reloj del dispositivo.</summary>
-    public TimeSpan Position(double rawSeconds)
-    {
-        if (!_running)
-        {
-            return TimeSpan.Zero;
-        }
-
-        return TimeSpan.FromSeconds(_paused ? _pausedAt : rawSeconds - _skipped);
-    }
+    public TimeSpan Position(double rawSeconds) =>
+        _running ? TimeSpan.FromSeconds(rawSeconds) : TimeSpan.Zero;
 
     /// <summary>
     /// Posición de la canción en <paramref name="targetHostTicks"/>, a partir de una lectura del reloj
@@ -81,6 +64,6 @@ public sealed class PlaybackClockModel
         }
 
         var offset = HostClock.ToSeconds(targetHostTicks - observedHostTicks);
-        return TimeSpan.FromSeconds(rawSeconds - _skipped + offset);
+        return TimeSpan.FromSeconds(rawSeconds + offset);
     }
 }

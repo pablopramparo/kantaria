@@ -56,7 +56,10 @@ tests/Kantor.Tests   xUnit; RealLibraryTests es opt-in con KANTOR_SONGS_DIR
 - **`SongPlayer`**: reproduce con `WasapiOut` y lee el par (posición, QPC) del reloj IAudioClock.
   Accede por reflexión al campo privado `audioClient` de `WasapiOut` (NAudio **fijado en 2.2.1**).
   Implementa `ISongClock` e `ISongTimeMap` (`SongPositionAt(hostTicks)`).
-- **`PlaybackClockModel`** (Core, testeado): descuenta pausa y extrapola una lectura a otro instante.
+- **`PlaybackClockModel`** (Core, testeado): la posición es la lectura cruda de IAudioClock y extrapola una
+  lectura a otro instante. **No descuenta tiempo de pausa**: el reloj de WASAPI cuenta solo audio reproducido;
+  tras `Pause()` el búfer cargado (~100–140 ms) sigue sonando y recién ahí el reloj se detiene (medido con
+  WasapiOut compartido, 100 ms). Descontar ese avance atrasaba la imagen ~100 ms por cada pausa/reanudación.
 - **`WasapiInputCapture`**: captura propia (no `WasapiCapture`) porque necesita el QPC de cada paquete.
 - **`PitchTracker.Push(muestras, hostInicioPaquete)`**: cada `PitchFrame` lleva `WindowStartHost`/`WindowEndHost`
   (intervalo real de las muestras analizadas); la ventana termina en la última muestra del paquete.

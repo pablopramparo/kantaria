@@ -105,9 +105,9 @@ public sealed class SongPlayer : ISongClock, ISongTimeMap, IDisposable
                 _deviceClock = ((AudioClient)AudioClientField.GetValue(_output)!).AudioClockClient;
                 _model.Start();
             }
-            else if (_model.IsPaused && TryReadDeviceClock(out var raw, out _))
+            else if (_model.IsPaused)
             {
-                _model.Resume(raw);
+                _model.Resume();
             }
 
             _output.Play();
@@ -123,11 +123,7 @@ public sealed class SongPlayer : ISongClock, ISongTimeMap, IDisposable
                 return;
             }
 
-            if (TryReadDeviceClock(out var raw, out _))
-            {
-                _model.Pause(raw);
-            }
-
+            _model.Pause();
             _output.Pause();
         }
     }

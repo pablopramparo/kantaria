@@ -25,36 +25,25 @@ public class PlaybackClockModelTests
     }
 
     [Fact]
-    public void Paused_position_is_frozen_even_if_the_device_clock_keeps_running()
+    public void Paused_position_is_the_raw_device_clock_which_stops_by_itself()
     {
         var clock = new PlaybackClockModel();
         clock.Start();
-        clock.Pause(3.0);
+        clock.Pause();
 
+        Assert.True(clock.IsPaused);
         Assert.Equal(3.0, clock.Position(3.0).TotalSeconds, 6);
-        Assert.Equal(3.0, clock.Position(4.5).TotalSeconds, 6);
     }
 
     [Fact]
-    public void Resume_discounts_the_time_spent_paused_when_device_clock_kept_running()
+    public void Resume_continues_from_the_device_clock_without_discounting_anything()
     {
         var clock = new PlaybackClockModel();
         clock.Start();
-        clock.Pause(3.0);
-        clock.Resume(5.0); // el reloj del dispositivo avanzó 2 s en la pausa
+        clock.Pause();
+        clock.Resume();
 
-        Assert.Equal(3.0, clock.Position(5.0).TotalSeconds, 6);
-        Assert.Equal(3.5, clock.Position(5.5).TotalSeconds, 6);
-    }
-
-    [Fact]
-    public void Resume_when_device_clock_froze_during_pause_adds_nothing()
-    {
-        var clock = new PlaybackClockModel();
-        clock.Start();
-        clock.Pause(3.0);
-        clock.Resume(3.0);
-
+        Assert.False(clock.IsPaused);
         Assert.Equal(3.25, clock.Position(3.25).TotalSeconds, 6);
     }
 
@@ -79,26 +68,129 @@ public class PlaybackClockModelTests
         Assert.Null(clock.PositionAt(1, Host(1), Host(1)));
 
         clock.Start();
-        clock.Pause(2);
+        clock.Pause();
         Assert.Null(clock.PositionAt(2, Host(2), Host(2)));
 
-        clock.Resume(2);
+        clock.Resume();
         clock.Stop();
         Assert.Null(clock.PositionAt(2, Host(2), Host(2)));
     }
+}
 
-    [Fact]
-    public void PositionAt_accounts_for_paused_time_discounted_earlier()
+/// <summary>
+/// Dispositivo de salida simulado con el comportamiento medido en WASAPI compartido (NAudio 2.2.1,
+/// búfer de 100 ms): su reloj cuenta solo audio efectivamente reproducido. Tras pausar, el búfer que ya
+/// estaba cargado sigue sonando hasta vaciarse y recién entonces el reloj se detiene.
+/// </summary>
+internal sealed class SimulatedOutput
+{
+    private readonly double _bufferSeconds;
+    private bool _refilling = true;
+    private double _buffered;
+
+    public SimulatedOutput(double bufferSeconds)
     {
+        _bufferSeconds = bufferSeconds;
+        _buffered = bufferSeconds;
+    }
+
+    /// <summary>Lo que informa IAudioClock: segundos de audio reproducidos desde el inicio del flujo.</summary>
+    public double ClockSeconds { get; private set; }
+
+    public void SoftPause() => _refilling = false;
+
+    public void SoftResume() => _refilling = true;
+
+    public void Advance(double seconds)
+    {
+        var played = _refilling ? seconds : Math.Min(_buffered, seconds);
+        ClockSeconds += played;
+        if (!_refilling)
+        {
+            _buffered -= played;
+        }
+        else
+        {
+            _buffered = _bufferSeconds;
+        }
+    }
+}
+
+public class PauseResumeCycleTests
+{
+    // Lo que se escucha equivale al tiempo de reproducción acumulado: el reloj del dispositivo solo
+    // avanza mientras suena audio de la canción, así que la posición mostrada debe seguirlo siempre.
+    [Fact]
+    public void Position_keeps_matching_the_audio_over_many_pause_resume_cycles()
+    {
+        var device = new SimulatedOutput(bufferSeconds: 0.1);
         var clock = new PlaybackClockModel();
         clock.Start();
-        clock.Pause(3.0);
-        clock.Resume(5.0);
+        device.Advance(1.0);
 
-        var position = clock.PositionAt(6.0, Host(200.0), Host(200.0));
+        for (var cycle = 1; cycle <= 20; cycle++)
+        {
+            clock.Pause();
+            device.SoftPause();
+            device.Advance(0.5); // pausado: el búfer se vacía y el reloj se detiene
 
-        Assert.Equal(4.0, position!.Value.TotalSeconds, 6);
+            clock.Resume();
+            device.SoftResume();
+            device.Advance(0.75);
+
+            Assert.Equal(device.ClockSeconds, clock.Position(device.ClockSeconds).TotalSeconds, 6);
+        }
     }
+
+    [Fact]
+    public void Song_position_does_not_accumulate_error_with_each_cycle()
+    {
+        var device = new SimulatedOutput(bufferSeconds: 0.1);
+        var clock = new PlaybackClockModel();
+        clock.Start();
+        device.Advance(1.0);
+
+        double? firstError = null;
+        for (var cycle = 1; cycle <= 10; cycle++)
+        {
+            clock.Pause();
+            device.SoftPause();
+            device.Advance(0.3);
+            clock.Resume();
+            device.SoftResume();
+            device.Advance(0.2);
+
+            var error = clock.Position(device.ClockSeconds).TotalSeconds - device.ClockSeconds;
+            firstError ??= error;
+            Assert.Equal(firstError.Value, error, 6);
+        }
+    }
+
+    [Fact]
+    public void PositionAt_matches_the_audio_after_many_cycles()
+    {
+        var device = new SimulatedOutput(bufferSeconds: 0.1);
+        var clock = new PlaybackClockModel();
+        clock.Start();
+        device.Advance(1.0);
+
+        for (var cycle = 1; cycle <= 10; cycle++)
+        {
+            clock.Pause();
+            device.SoftPause();
+            device.Advance(0.4);
+            clock.Resume();
+            device.SoftResume();
+            device.Advance(0.6);
+        }
+
+        // Una lectura tomada ahora (QPC 500 s), proyectada 50 ms hacia atrás.
+        var position = clock.PositionAt(device.ClockSeconds, Host(500.0), Host(499.95));
+
+        Assert.Equal(device.ClockSeconds - 0.05, position!.Value.TotalSeconds, 6);
+    }
+
+    private static long Host(double seconds) => HostClock.FromSeconds(seconds);
 }
 
 public class PitchFrameTimingTests
