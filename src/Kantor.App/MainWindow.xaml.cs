@@ -10,6 +10,7 @@ namespace Kantor.App;
 public partial class MainWindow : Window
 {
     private readonly SongPlayer _player = new();
+    private InputWindow? _inputWindow;
     private bool _fullscreen;
     private WindowState _restoreState;
     private WindowStyle _restoreStyle;
@@ -34,6 +35,20 @@ public partial class MainWindow : Window
 
     private void OnPlayPauseClick(object sender, RoutedEventArgs e) => TogglePlayPause();
 
+    private void OnInputsClick(object sender, RoutedEventArgs e) => ShowInputs();
+
+    private void ShowInputs()
+    {
+        if (_inputWindow is { IsLoaded: true })
+        {
+            _inputWindow.Activate();
+            return;
+        }
+
+        _inputWindow = new InputWindow { Owner = this };
+        _inputWindow.Show();
+    }
+
     private void OnStopClick(object sender, RoutedEventArgs e)
     {
         _player.Stop();
@@ -46,6 +61,9 @@ public partial class MainWindow : Window
         {
             case Key.O when Keyboard.Modifiers == ModifierKeys.Control:
                 OpenSongDialog();
+                break;
+            case Key.I when Keyboard.Modifiers == ModifierKeys.Control:
+                ShowInputs();
                 break;
             case Key.Space:
                 TogglePlayPause();

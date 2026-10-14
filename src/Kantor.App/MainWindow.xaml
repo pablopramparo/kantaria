@@ -18,6 +18,7 @@
                     IsEnabled="False" Click="OnPlayPauseClick" />
             <Button x:Name="StopButton" Content="Detener" Padding="14,6" Margin="8,0,0,0"
                     IsEnabled="False" Click="OnStopClick" />
+            <Button Content="Entradas… (Ctrl+I)" Padding="14,6" Margin="8,0,0,0" Click="OnInputsClick" />
             <TextBlock x:Name="TitleText" VerticalAlignment="Center" Margin="16,0,0,0" FontSize="16"
                        TextTrimming="CharacterEllipsis" />
         </DockPanel>

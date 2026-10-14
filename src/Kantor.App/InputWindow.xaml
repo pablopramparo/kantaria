@@ -1,0 +1,40 @@
+<Window x:Class="Kantor.App.InputWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Entradas de audio" Width="720" Height="560" MinWidth="560" MinHeight="420"
+        Background="#14161A" Foreground="#F0F0F0">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <DockPanel Grid.Row="0">
+            <Button DockPanel.Dock="Right" Content="Actualizar" Padding="12,4" Margin="8,0,0,0"
+                    Click="OnRefreshClick" />
+            <ComboBox x:Name="DeviceBox" DisplayMemberPath="Label" SelectionChanged="OnDeviceChanged" />
+        </DockPanel>
+
+        <TextBlock Grid.Row="1" Margin="0,10,0,6" Foreground="#8A919E" TextWrapping="Wrap"
+                   Text="Cada canal es una entrada independiente. Elegí el canal cuyo tono querés analizar; el audio no se reproduce ni se guarda." />
+
+        <StackPanel x:Name="ChannelsPanel" Grid.Row="2" />
+
+        <Border Grid.Row="3" Margin="0,16,0,0" Background="#1C1F25" CornerRadius="8" Padding="16">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock x:Name="NoteText" Text="—" FontSize="72" FontWeight="SemiBold"
+                           HorizontalAlignment="Center" />
+                <TextBlock x:Name="FrequencyText" Text="Sin voz detectada" FontSize="22"
+                           Foreground="#8A919E" HorizontalAlignment="Center" />
+                <TextBlock x:Name="DetailText" FontSize="16" Foreground="#8A919E"
+                           HorizontalAlignment="Center" Margin="0,6,0,0" />
+            </StackPanel>
+        </Border>
+
+        <TextBlock x:Name="StatusText" Grid.Row="4" Margin="0,10,0,0" Foreground="#8A919E"
+                   TextWrapping="Wrap" />
+    </Grid>
+</Window>
