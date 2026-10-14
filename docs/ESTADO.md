@@ -157,8 +157,20 @@ La única que falla es "Ace of Base – Beautiful Life" (sin `#BPM`).
 4. Biblioteca con carpetas elegidas expresamente (SQLite) y búsqueda.
 5. Video (probablemente FFmpeg; hay que hacer el censo de códecs), y más adelante perfiles, sesiones, cola y Avyn.
 
-Decisiones abiertas del documento base: licencia de distribución (WorldParty es GPL-3.0; no se copió código),
-definición de "puntos de competición" y "efectividad", umbral de paridad con WorldParty, hardware objetivo.
+Decisiones abiertas del documento base: definición de "puntos de competición" y "efectividad", umbral de
+paridad con WorldParty, hardware objetivo.
+
+**Licencia (decidida): GPL-3.0-or-later.** Archivo `LICENSE` en la raíz y aviso en `README.md`.
+- WorldParty: GPL-3.0-or-later (verificado en `LICENSE` y en la cabecera de `src/base/UMain.pas`).
+- USDX: GPL-2.0-or-later (el `LICENSE` es el texto v2, pero las cabeceras de fuente dicen "or any later
+  version", p. ej. `src/base/UMain.pas`). Compatible con GPL-3.0-or-later. Verificado en una muestra, no
+  archivo por archivo: si algún día se reutiliza un archivo concreto, mirar su cabecera.
+- **Hasta hoy no se copió código de WorldParty ni de USDX.** El scoring es implementación propia, tomando
+  WorldParty solo como referencia de comportamiento. Reutilizar código concreto exige proponerlo antes y
+  verificar la cabecera del archivo (más atribución y conservar sus avisos de copyright).
+- Dependencias futuras (FFmpeg, ASIO, códecs): evaluar la licencia cuando se necesiten. Hoy: NAudio (MIT),
+  .NET/WPF (MIT); xunit/coverlet solo en tests.
+- Sin infraestructura de contribuciones (CLA/DCO) por ahora.
 
 ## 10. Trampas conocidas
 

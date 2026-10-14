@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Pablo Pramparo
 namespace Kantor.Core.Pitch;
 
 /// <summary>Una altura musical expresada en semitonos MIDI (A4 = 69 = 440 Hz), con conversiones a nota y a tono UltraStar.</summary>

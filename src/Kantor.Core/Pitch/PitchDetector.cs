@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Pablo Pramparo
 namespace Kantor.Core.Pitch;
 
 public readonly record struct PitchEstimate(double Frequency, double Confidence)

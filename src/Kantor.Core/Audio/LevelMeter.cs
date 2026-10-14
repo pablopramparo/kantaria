@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Pablo Pramparo
 namespace Kantor.Core.Audio;
 
 /// <summary>Nivel de un bloque de audio en dBFS (0 dB = fondo de escala).</summary>

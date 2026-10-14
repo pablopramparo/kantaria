@@ -1,4 +1,6 @@
-﻿using System.Configuration;
+﻿// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Pablo Pramparo
+using System.Configuration;
 using System.Data;
 using System.Windows;
 

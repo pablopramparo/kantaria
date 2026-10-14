@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Pablo Pramparo
 using System.Reflection;
 using Kantor.Core.Timing;
 using NAudio.CoreAudioApi;
