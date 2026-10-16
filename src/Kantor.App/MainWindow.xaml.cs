@@ -422,6 +422,7 @@ public partial class MainWindow : Window
         _loadVersion++; // si había una canción cargándose, se descarta
         LoadingLayer.Visibility = Visibility.Collapsed;
         QueueScreen.Visibility = Visibility.Collapsed;
+        FinishPrompt.Visibility = Visibility.Collapsed;
         SessionPrompt.Visibility = Visibility.Collapsed;
         PlayersScreen.Visibility = Visibility.Collapsed;
         _pendingPlay = false;
@@ -2141,7 +2142,8 @@ public partial class MainWindow : Window
         _song is not null
         && Menu.Visibility != Visibility.Visible && SongList.Visibility != Visibility.Visible
         && Results.Visibility != Visibility.Visible && Options.Visibility != Visibility.Visible
-        && PlayersScreen.Visibility != Visibility.Visible && SessionPrompt.Visibility != Visibility.Visible;
+        && PlayersScreen.Visibility != Visibility.Visible && SessionPrompt.Visibility != Visibility.Visible
+        && FinishPrompt.Visibility != Visibility.Visible;
 
     private void OnWindowMouseMove(object sender, MouseEventArgs e)
     {
@@ -2167,14 +2169,18 @@ public partial class MainWindow : Window
                 : _player.IsPaused ? MenuTexts.Resume(language) : MenuTexts.Sing(language);
             StageMenuButton.Content = MenuTexts.BackToMenu(language);
             StageFinishButton.Content = MenuTexts.Finish(language);
-            StageFinishButton.Visibility = lyricsDone ? Visibility.Visible : Visibility.Collapsed;
+            // TERMINAR está siempre que haya una canción en curso (sonando o en pausa): es la salida hacia los resultados
+            StageFinishButton.Visibility = _player.IsPlaying || _player.IsPaused ? Visibility.Visible : Visibility.Collapsed;
         }
     }
 
     /// <summary>La canción está sonando y ya no queda letra por cantar (la música sigue).</summary>
-    private bool LyricsFinished()
+    private bool LyricsFinished() => _player.IsPlaying && LyricsOver();
+
+    /// <summary>La posición ya pasó la última nota de todas las voces (sin importar si suena o está en pausa).</summary>
+    private bool LyricsOver()
     {
-        if (_song is null || !_player.IsPlaying)
+        if (_song is null)
         {
             return false;
         }
@@ -2183,14 +2189,69 @@ public partial class MainWindow : Window
         return _player.Position > new SongTiming(_song.Bpm, _song.GapMilliseconds).TimeOf(lastBeat);
     }
 
-    private void OnStageFinishClick(object sender, RoutedEventArgs e)
+    private void OnStageFinishClick(object sender, RoutedEventArgs e) => FinishSong();
+
+    /// <summary>
+    /// Termina la canción en curso (sonando o en pausa) y va a los resultados con el puntaje que lleva. Terminar antes de
+    /// que acabe la música cuenta como canción cantada: se guarda como cualquier final. Botón TERMINAR o la tecla Fin.
+    /// </summary>
+    private void FinishSong()
     {
-        // Terminar antes de que acabe la música cuenta como canción cantada: se guarda y va a resultados.
+        if (!StageIsShowing || !(_player.IsPlaying || _player.IsPaused))
+        {
+            return;
+        }
+
+        if (LyricsOver())
+        {
+            FinishNow(save: true); // ya no quedaba letra: es un final como cualquier otro
+            return;
+        }
+
+        // Salir antes de que se acabe la letra: se pregunta si guardar. Mientras tanto la canción espera en pausa.
+        _finishWasPlaying = _player.IsPlaying;
+        if (_finishWasPlaying)
+        {
+            TogglePlayPause();
+        }
+
+        FinishPrompt.Show(_prefs.CommentLanguage, canSave: _store is not null && UseSession);
+        FinishPrompt.Visibility = Visibility.Visible;
+        UpdateStageControls();
+    }
+
+    private bool _finishWasPlaying;
+
+    private void FinishNow(bool save)
+    {
+        FinishPrompt.Visibility = Visibility.Collapsed;
         var duration = _player.Duration;
         _player.Stop();
         _lastPosition = duration;
+        if (!save)
+        {
+            _runSaved = true; // esta ejecución no se guarda (ver SavePerformance)
+            StatusText.Text = MenuTexts.NotSaved(_prefs.CommentLanguage);
+        }
+
         UpdateControls();
         ShowResult();
+        UpdateStageControls();
+    }
+
+    private void OnFinishSave(object? sender, EventArgs e) => FinishNow(save: true);
+
+    private void OnFinishDiscard(object? sender, EventArgs e) => FinishNow(save: false);
+
+    private void OnFinishContinue(object? sender, EventArgs e)
+    {
+        FinishPrompt.Visibility = Visibility.Collapsed;
+        if (_finishWasPlaying && _player.IsPaused)
+        {
+            TogglePlayPause(); // seguía sonando antes de preguntar: vuelve a sonar
+        }
+
+        _finishWasPlaying = false;
         UpdateStageControls();
     }
 
@@ -2235,7 +2296,7 @@ public partial class MainWindow : Window
         if ((Results.Visibility == Visibility.Visible || Menu.Visibility == Visibility.Visible
                 || SongList.Visibility == Visibility.Visible || Options.Visibility == Visibility.Visible
                 || PlayersScreen.Visibility == Visibility.Visible || SessionPrompt.Visibility == Visibility.Visible
-                || GuestScreen.Visibility == Visibility.Visible)
+                || GuestScreen.Visibility == Visibility.Visible || FinishPrompt.Visibility == Visibility.Visible)
             && e.Key is Key.Space or Key.Enter or Key.Escape or Key.Up or Key.Down)
         {
             return; // el menú, las listas y la pantalla de resultados interpretan estas teclas
@@ -2255,6 +2316,9 @@ public partial class MainWindow : Window
             case Key.F11:
                 SetFullscreen(!_fullscreen);
                 break;
+            case Key.End when Keyboard.Modifiers == ModifierKeys.None && StageIsShowing && (_player.IsPlaying || _player.IsPaused):
+                FinishSong(); // terminar la canción y ver los resultados (con resultados abiertos, Fin sigue siendo de la ceremonia)
+                break;
             case Key.F9:
                 StatusBar.Visibility = StatusBar.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
                 break;
@@ -2264,8 +2328,11 @@ public partial class MainWindow : Window
             case Key.Escape when _player.IsPlaying:
                 TogglePlayPause(); // primera vez: pausa
                 break;
+            case Key.Escape when _player.IsPaused:
+                FinishSong(); // segunda (en pausa): termina y va a los resultados, desde donde se vuelve al menú o se repite
+                break;
             case Key.Escape:
-                ShowMenu(); // segunda: vuelve al menú (detiene la canción)
+                ShowMenu(); // sin canción en curso (cargada y sin empezar): vuelve al menú
                 break;
             case Key.J when Keyboard.Modifiers == ModifierKeys.Control:
                 ShowPlayers(PlayersView.Section.Session);
@@ -2301,6 +2368,7 @@ public partial class MainWindow : Window
     private void LoadSong(string txtPath)
     {
         Diag.Mark($"cargar canción: {Path.GetFileName(txtPath)}");
+        FinishPrompt.Visibility = Visibility.Collapsed;
         StopPreview();
         using (Diag.Time("reproductor: detener"))
         {

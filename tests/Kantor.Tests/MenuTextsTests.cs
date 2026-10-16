@@ -44,4 +44,24 @@ public class MenuTextsTests
 
     [Fact]
     public void UnknownLanguageFallsBackToSpanish() => Assert.Equal("CANTAR", MenuTexts.Sing("fr"));
+
+    [Fact]
+    public void FinishPromptTextsExistInBothLanguages()
+    {
+        foreach (var language in new[] { "es", "en" })
+        {
+            foreach (var text in new[]
+                     {
+                         MenuTexts.FinishTitle(language), MenuTexts.FinishInfo(language, true), MenuTexts.FinishInfo(language, false),
+                         MenuTexts.FinishSave(language), MenuTexts.FinishDiscard(language), MenuTexts.FinishView(language),
+                         MenuTexts.FinishContinue(language), MenuTexts.NotSaved(language),
+                     })
+            {
+                Assert.False(string.IsNullOrWhiteSpace(text));
+            }
+        }
+
+        Assert.NotEqual(MenuTexts.FinishSave("es"), MenuTexts.FinishSave("en"));
+        Assert.NotEqual(MenuTexts.FinishInfo("es", true), MenuTexts.FinishInfo("es", false));
+    }
 }

@@ -1,0 +1,33 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- Copyright (C) 2026 Pablo Pramparo -->
+<UserControl x:Class="Kantor.App.Stage.FinishPromptView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:pixel="clr-namespace:Kantor.App.Pixel"
+             Focusable="False">
+    <Grid Background="#B0070A24">
+        <pixel:PixelViewbox>
+            <Grid Width="1280" Height="720">
+                <pixel:PixelFrame Fill="#F010142E" BorderBrush="{StaticResource GoldBrush}"
+                                  Shadow="{StaticResource InkBrush}" BorderUnits="1" NotchUnits="2" ShadowUnits="1"
+                                  Width="860" Height="470" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                  Padding="36,28">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <pixel:PixelText x:Name="TitleText" FontFamily="{StaticResource PixelFont}" FontSize="52"
+                                         Foreground="{StaticResource GoldBrush}" Shadow="{StaticResource InkBrush}"
+                                         HorizontalAlignment="Center" />
+                        <TextBlock x:Name="InfoText" FontFamily="{StaticResource BodyFont}" FontSize="22"
+                                   Foreground="{StaticResource TextBrush}" TextAlignment="Center"
+                                   TextWrapping="Wrap" Margin="0,18,0,22" />
+                        <Button x:Name="SaveButton" Style="{StaticResource PixelButton}" FontSize="32" Width="600"
+                                Click="OnSave" />
+                        <Button x:Name="DiscardButton" Style="{StaticResource PixelButton}" FontSize="32" Width="600"
+                                Margin="0,14,0,0" Click="OnDiscard" />
+                        <Button x:Name="ContinueButton" Style="{StaticResource PixelButton}" FontSize="26" Width="600"
+                                Margin="0,14,0,0" Click="OnContinue" />
+                    </StackPanel>
+                </pixel:PixelFrame>
+            </Grid>
+        </pixel:PixelViewbox>
+    </Grid>
+</UserControl>

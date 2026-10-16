@@ -170,6 +170,11 @@
         <!-- Jugadores, sesión e historial -->
         <players:PlayersView x:Name="PlayersScreen" Grid.Row="0" Grid.RowSpan="3" Visibility="Collapsed" />
 
+        <!-- ¿Terminar la canción antes de que se acabe la letra? -->
+        <stage:FinishPromptView x:Name="FinishPrompt" Grid.Row="0" Grid.RowSpan="3" Visibility="Collapsed"
+                                SaveRequested="OnFinishSave" DiscardRequested="OnFinishDiscard"
+                                ContinueRequested="OnFinishContinue" />
+
         <!-- Aviso de sesión abierta al arrancar -->
         <players:SessionPromptView x:Name="SessionPrompt" Grid.Row="0" Grid.RowSpan="3" Visibility="Collapsed"
                                    ContinueRequested="OnSessionContinue" NewRequested="OnSessionNew"
