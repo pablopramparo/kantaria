@@ -6,3 +6,7 @@ obj/
 TestResults/
 pitch*.csv
 design-assets/
+dist/
+
+# Avatares: por ahora no se suben al repositorio (la app usa el placeholder si faltan los PNG)
+src/Kantor.App/Assets/Characters/avatar_*/
