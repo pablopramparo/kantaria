@@ -347,7 +347,7 @@ durante la canción **no se toca** hasta el video de fondo. Video y dos jugadore
   Sin selección de personajes ni cambios en la pantalla de reproducción todavía.
 - **Distribución**: `scripts/publish.ps1` arma `dist\Kantor-<versión>-win-x64\` (autocontenida, solo x64, sin .pdb,
   sin `libvlc\win-x86`) y su `.zip`; ver `docs/DISTRIBUCION.md` (incluye lo que falta para la Store). Versión en
-  `Kantor.App.csproj` (0.1.0). Comprobado: publica y arranca desde `dist`; sin probar en una PC limpia ni firmada.
+  `Kantor.App.csproj` (hoy 0.2.0). Comprobado: publica y arranca desde `dist`; sin probar en una PC limpia ni firmada.
 - **Señal de onda del micrófono** (`StageControl.DrawWave`): a la derecha de la tarjeta de cada jugador con
   micrófono, la envolvente de los últimos ~1,3 s (22 columnas simétricas, vieja → ahora) en el color del jugador,
   sin marco ni fondo (cada columna con contorno oscuro). Sale de `PitchSample.LevelDb` de su `PitchTimeline` (sin otra captura): -55 dB → mínimo,
@@ -1063,3 +1063,17 @@ Guía de uso y seguridad: **`docs/INVITADOS.md`**. Aquí, lo que hay que saber p
 ### TERMINAR siempre disponible
 - El botón **TERMINAR** del escenario (junto a PAUSA y MENÚ) ahora aparece **con cualquier canción en curso, sonando o en pausa**, no solo al acabarse la letra; sigue saliendo con el mouse en movimiento y queda fijo en pausa. La tecla **Fin** hace lo mismo (solo con una canción en curso; con los resultados abiertos conserva su función de saltear la ceremonia). Va a resultados con el puntaje que lleva y se guarda como cualquier final (`MainWindow.FinishSong`). **Escape**: sonando → pausa; **en pausa → termina y va a resultados** (antes volvía al menú descartando la canción); sin canción en curso, vuelve al menú. Desde resultados, Esc o CERRAR vuelven al menú y OTRA VEZ la repite. Sin comprobar a mano (hace falta un micrófono para empezar una canción).
 - **Salir antes de que se acabe la letra pregunta** (`Stage/FinishPromptView`): TERMINAR, Fin o Esc en pausa abren «¿TERMINAR LA CANCIÓN?» con GUARDAR Y VER RESULTADOS / VER SIN GUARDAR / SEGUIR CANTANDO (Esc = seguir). Mientras se decide, la canción queda en pausa; «seguir» la reanuda si sonaba. «Sin guardar» marca la ejecución como ya guardada (`_runSaved`), así que `SavePerformance` no escribe nada, y se avisa en la barra técnica; Avyn recibe el resultado con `saved=false`. Sin partida abierta solo se ofrece ver o seguir (de todos modos no se guarda). Si la letra ya terminó (`LyricsOver`), termina directo y guarda, como antes. Sin comprobar a mano ni a la vista (hace falta un micrófono para empezar una canción).
+
+## 8 quaterdecies. Publicación en Microsoft Store (estado)
+
+- **Producto**: Id. de Store `9P8ZKZBJ4RHB` (<https://apps.microsoft.com/detail/9P8ZKZBJ4RHB>), identidad `PabloPramparo.Kantor`.
+- **0.1.0** (16/10/2026): primera versión, ya publicada. Traía el acceso de invitados con creación de jugadores, los créditos y 30
+  avatares (sin exclusiones), y no tenía música de interfaz.
+- **0.2.0** (16/10/2026): **ya enviada a certificación**. Suma la música de interfaz, la galería renovada (41 avatares: se retiran
+  `avatar_025`, `029`, `030` y no se incluye `031`, y se agregan los 032–045), el botón TERMINAR siempre disponible, Esc en pausa →
+  resultados con la pregunta de guardar y la tecla Fin. Un jugador creado en la 0.1.0 con uno de los avatares retirados se ve con el
+  genérico (no pierde datos).
+- **La próxima versión (> 0.2.0.0, por ejemplo 0.2.1 o 0.3.0) NO debe volver a informar esos cambios** en «Novedades de esta versión»:
+  solo lo que cambie después de la 0.2.0. Hay que subir `<Version>` en `Kantor.App.csproj` antes de armar el paquete
+  (`scripts/publish.ps1 -Edition Store -Msix`) y volver a enviar desde «Crear nuevo envío».
+- La edición Store sigue sin README en el paquete (enlaza a donaciones) y excluye los avatares de `store-excluded.txt`.

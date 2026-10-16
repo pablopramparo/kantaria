@@ -28,7 +28,7 @@ Genera además `dist\Kantor-Setup-<versión>.exe` (~84 MB), a partir de `install
 - Instalación silenciosa: `Kantor-Setup-<versión>.exe /SILENT`.
 - Sin firmar: SmartScreen puede avisar la primera vez.
 
-La versión sale de `<Version>` en `src/Kantor.App/Kantor.App.csproj` (hoy 0.1.0). Subirla antes de cada entrega.
+La versión sale de `<Version>` en `src/Kantor.App/Kantor.App.csproj` (hoy 0.2.0). Subirla antes de cada entrega.
 
 Qué incluye / qué se saca a propósito:
 
@@ -90,5 +90,5 @@ completo, ancho 310×150, a escala 100/200/400 y tamaños fijos). Versión del p
 - Comprobado: `makeappx` valida el manifiesto y arma el paquete (132 MB). **Sin comprobar**: instalarlo (hace falta firmarlo
   con un certificado de prueba cuyo asunto sea el Publisher), la certificación de la Store (WACK) y el comportamiento de la
   app empaquetada (virtualización de `%APPDATA%`, micrófono, el servidor de invitados y el Firewall).
-- Pendiente para publicar: política de privacidad (URL), clasificación de edad, descripciones, capturas y definir la versión (la lista de avatares ya está: 25, 29, 30 y 31 excluidos).
+- Publicación: la 0.1.0 ya está en la Store y la 0.2.0 está enviada a certificación; ver `docs/ESTADO.md` (Publicación en Microsoft Store).
 
