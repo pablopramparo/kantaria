@@ -749,16 +749,15 @@ public sealed class StageControl : FrameworkElement
         // Jersey 15 es angosta y baja: se usa más grande que una tipografía común para el mismo peso visual.
         var size = Math.Clamp(area.Height * 0.55, 26, 76);
         var text = Display(current);
+        size = FittedSize(text, PixelFace, size, area.Width - 40);
         var white = Format(text, PixelFace, size, White);
         var gold = Format(text, PixelFace, size, Gold);
-        FitWidth(white, size, area.Width - 40);
-        FitWidth(gold, size, area.Width - 40);
         var x = area.Left + (area.Width - white.WidthIncludingTrailingWhitespace) / 2;
 
         // Sin recuadro: directo sobre el video, con contorno oscuro (copias desplazadas del texto: mucho más
         // barato que trazar la geometría de las letras en cada cuadro).
         var ring = Math.Max(2, Math.Round(size / 14));
-        DrawTextRing(dc, text, size, white, new Point(x, area.Top), ring);
+        DrawTextRing(dc, text, size, new Point(x, area.Top), ring);
         dc.DrawText(white, new Point(x, area.Top));
 
         // Relleno: sigue el tiempo real de cada sílaba (su inicio y fin) sobre el tramo que ocupa en el texto.
@@ -793,12 +792,11 @@ public sealed class StageControl : FrameworkElement
         if (index + 1 < voice.Lines.Count)
         {
             var nextText = Display(voice.Lines[index + 1]);
-            var nextSize = size * 0.7;
+            var nextSize = FittedSize(nextText, PixelFace, size * 0.7, area.Width - 40);
             var next = Format(nextText, PixelFace, nextSize, Dim);
-            FitWidth(next, nextSize, area.Width - 40);
             var nx = area.Left + (area.Width - next.WidthIncludingTrailingWhitespace) / 2;
             var ny = area.Top + size * 1.2;
-            DrawTextRing(dc, nextText, nextSize, next, new Point(nx, ny), Math.Max(2, Math.Round(nextSize / 16)));
+            DrawTextRing(dc, nextText, nextSize, new Point(nx, ny), Math.Max(2, Math.Round(nextSize / 16)));
             dc.DrawText(next, new Point(nx, ny));
         }
     }
@@ -863,13 +861,9 @@ public sealed class StageControl : FrameworkElement
     }
 
     /// <summary>Contorno duro: el mismo texto en tinta oscura desplazado en las ocho direcciones.</summary>
-    private void DrawTextRing(DrawingContext dc, string text, double size, FormattedText fitted, Point at, double radius)
+    private void DrawTextRing(DrawingContext dc, string text, double size, Point at, double radius)
     {
         var ink = Format(text, PixelFace, size, Ink);
-        if (ink.WidthIncludingTrailingWhitespace > fitted.WidthIncludingTrailingWhitespace + 0.5)
-        {
-            ink.SetFontSize(size * fitted.WidthIncludingTrailingWhitespace / ink.WidthIncludingTrailingWhitespace);
-        }
 
         // Cuatro copias en diagonal: contorno suficiente para leerse sobre el video y la mitad de trabajo que ocho
         // (con ocho el escenario perdía cuadros en canciones de letra larga).
@@ -979,12 +973,11 @@ public sealed class StageControl : FrameworkElement
         dc.DrawText(Format(text, face, size, brush), at);
     }
 
-    private static void FitWidth(FormattedText text, double fontSize, double maxWidth)
+    /// <summary>Tamaño que hace entrar el texto en <paramref name="maxWidth"/>. No muta los textos del caché.</summary>
+    private double FittedSize(string text, Typeface face, double size, double maxWidth)
     {
-        if (text.WidthIncludingTrailingWhitespace > maxWidth && maxWidth > 0)
-        {
-            text.SetFontSize(fontSize * maxWidth / text.WidthIncludingTrailingWhitespace);
-        }
+        var natural = Format(text, face, size, White).WidthIncludingTrailingWhitespace;
+        return natural > maxWidth && maxWidth > 0 ? size * maxWidth / natural : size;
     }
 
     private void DrawCentered(DrawingContext dc, string message, double width, double y, double size, Brush brush)
