@@ -1,7 +1,8 @@
-# Contrato Kantor ↔ Avyn — v3 (cerrada; sin implementar)
+# Contrato Kantor ↔ Avyn — v3 (cerrada e implementada)
 
 Pipe `Kantor.ControlPlane.v1`, mismo patrón que Auren. Sustituye a la v2 y a los borradores anteriores.
-**Nada de esto está implementado.** Los esquemas JSON los mantiene cada repo a mano (sin código compartido).
+Implementado en `Kantor.Core/Remote` (servidor, controlador y protocolo) y `Kantor.App` (ventana y pantallas). Los
+esquemas JSON los mantiene cada repo a mano (sin código compartido).
 Convención: el concepto es `session`; en pantalla, en español, es **"Partida"** (y "cantar suelto" = `solo`).
 
 ## 0. Decisiones cerradas
@@ -150,7 +151,7 @@ Convención: el concepto es `session`; en pantalla, en español, es **"Partida"*
 - `monitor.deviceName` = nombre GDI (`\\.\DISPLAYn`, `MONITORINFOEX.szDevice`). El Agent lo relaciona con el `id`
   estable (EDID) de su `monitors.list`; **Kantor no genera ni conoce ese ID**.
 - `bounds` en **píxeles físicos** del escritorio virtual. Para que lo sean, Kantor se declara **PerMonitorV2**
-  (manifiesto de la aplicación; hoy no declara nada y corre como "System DPI aware"). `dpiScale` = DPI del monitor / 96.
+  (`app.manifest`). `dpiScale` = DPI del monitor / 96.
 - `windowHandle`: HWND en hexadecimal con `0x`; `processId`: PID de Kantor. El Agent los valida entre sí.
 - **Título de ventana**: `Kantor`, siempre no vacío (también en pantalla completa y maximizada).
 - **Se republica `display`** (con un retardo de calma de 250 ms, para no emitir una publicación por cada píxel
@@ -266,7 +267,12 @@ entrada ya no exista. `available:false` = la entrada no está en el índice vige
 - Sin invitados anónimos: `playerId` existente, activo y, con partida abierta, miembro de ella. Un jugador, un
   puesto; `slot` ∈ 1..`maxSlots`. No cambia micrófonos ni calibración.
 - `selection.set` reemplaza la selección completa. `expectedSelectionRev` vencido ⇒ `CONFLICT` con la vigente.
-- El catálogo hoy tiene un solo personaje (`provisional`). Los colores P1–P4 son por puesto, no por jugador.
+- **Personajes**: el catálogo trae 30 avatares de fábrica (`avatar_001` … `avatar_030`) y suma los que el usuario
+  carga en la PC (`usuario-<id>`; no se crean ni se editan desde Avyn). **Los avatares no tienen nombre propio**:
+  `name` repite el `characterId` y no debe mostrarse. `hasPortrait` / `hasFullBody` indican si el personaje tiene
+  esa imagen. Un `characterId` desconocido (por ejemplo, un personaje borrado) se muestra con el primero del
+  catálogo; el ID guardado en el jugador no se pierde. Avyn **no recibe las imágenes** en v1.
+- Los colores P1–P4 son por puesto, no por jugador.
 
 ### 3.4 Partida (`session`)
 
@@ -437,7 +443,7 @@ Todo argumento se valida **antes** de tocar el estado: un comando inválido no c
   historial. `KantorStore` usa **una** conexión con un candado global (seguro entre hilos); las lecturas pesadas se
   paginan para no demorar el guardado de una interpretación.
 
-## 8. Qué cambia en Kantor
+## 8. Qué incluye la implementación en Kantor
 
 - Esquema SQLite **v3**: `library_entry`; `queue_item` con `item_id`, `library_entry_id`, instantánea
   (`song_identity`, artista, título, edición), `state`, `added_by`, `added_at`, `finished_at`, `performance_id` y
@@ -447,8 +453,8 @@ Todo argumento se valida **antes** de tocar el estado: un comando inválido no c
 - `KantorController` en Core (sin WPF): una sola ruta de operaciones para interfaz local e IPC.
 - `KantorIpcServer` (App); `NativeMonitor` con `deviceName` y píxeles físicos; manifiesto PerMonitorV2;
   republicación de `display`; miniaturas; ajustes `RemoteControl` y `AutoAdvance`; cuenta regresiva en resultados.
-- Pruebas: cliente de pipe real contra el controlador real; dos clientes; reconexión; reinicio; límite de marco;
-  ping, suspensión y expulsión; migración; ids de entrada (mover, borrar, duplicar).
+- Pruebas automáticas: cliente de pipe real contra el controlador real; dos clientes; reconexión; reinicio; límite
+  de marco; ping, suspensión y expulsión; migración; ids de entrada (mover, borrar, duplicar).
 
 ## 9. Cambios desde la v2 (pedidos de Avyn y cierre)
 

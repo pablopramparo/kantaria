@@ -604,8 +604,9 @@ public sealed partial class KantorController
         {
             ["characterId"] = ch.Id,
             ["name"] = ch.Name,
-            ["hasPortrait"] = ch.PortraitPath is not null,
-            ["hasFullBody"] = ch.FullBodyPath is not null,
+            // los de fábrica traen las dos imágenes por convención; los del usuario, las que se cargaron
+            ["hasPortrait"] = !ch.IsUser || ch.PortraitPath is not null,
+            ["hasFullBody"] = !ch.IsUser || ch.FullBodyPath is not null,
         })]),
     };
 

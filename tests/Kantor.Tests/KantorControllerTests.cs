@@ -458,6 +458,11 @@ public sealed class KantorControllerTests : IDisposable
 
         Assert.Equal(CharacterCatalog.FactoryCount, items.Count);
         Assert.Equal("avatar_001", items[0]!["characterId"]!.GetValue<string>());
+        Assert.All(items, i =>
+        {
+            Assert.True(i!["hasPortrait"]!.GetValue<bool>());
+            Assert.True(i["hasFullBody"]!.GetValue<bool>());
+        });
         var ana = _h.LongPlayerId("Ana");
         Assert.Equal(ErrorCodes.NotFound,
             _h.Send("kantor.players.setCharacter", $$"""{"playerId":{{ana}},"characterId":"inexistente"}""").Code);

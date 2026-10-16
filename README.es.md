@@ -72,12 +72,31 @@ No hubo ninguna reunión en la que se aprobara semejante crecimiento. Simplement
 
 ## Capturas de pantalla
 
-*Próximamente: pantalla de canto, resultados con personajes y biblioteca de canciones.*
+<table>
+  <tr>
+    <td width="50%" align="center"><a href="docs/screenshots/es/menu.png"><img src="docs/screenshots/es/menu.png" alt="Menú principal" width="100%"></a><br><sub>Menú principal</sub></td>
+    <td width="50%" align="center"><a href="docs/screenshots/es/library.png"><img src="docs/screenshots/es/library.png" alt="Biblioteca de canciones" width="100%"></a><br><sub>Biblioteca de canciones</sub></td>
+  </tr>
+  <tr>
+    <td width="50%" align="center"><a href="docs/screenshots/es/who-sings.png"><img src="docs/screenshots/es/who-sings.png" alt="Quién canta en cada micrófono" width="100%"></a><br><sub>Quién canta en cada micrófono</sub></td>
+    <td width="50%" align="center"><a href="docs/screenshots/es/stage.png"><img src="docs/screenshots/es/stage.png" alt="Pantalla de canto con mensajes por frase" width="100%"></a><br><sub>Pantalla de canto con mensajes por frase</sub></td>
+  </tr>
+  <tr>
+    <td width="50%" align="center"><a href="docs/screenshots/es/results.png"><img src="docs/screenshots/es/results.png" alt="Resultados con personajes y veredictos" width="100%"></a><br><sub>Resultados con personajes y veredictos</sub></td>
+    <td width="50%" align="center"><a href="docs/screenshots/es/avatars.png"><img src="docs/screenshots/es/avatars.png" alt="Selector de avatares" width="100%"></a><br><sub>Selector de avatares</sub></td>
+  </tr>
+</table>
+
+<sub>Hacé clic en una imagen para verla en tamaño completo. Las capturas usan canciones y jugadores de demostración propios, con cantantes simulados.</sub>
 
 ## Descargar
 
-Los paquetes se publican en [Releases](../../releases) como un `.zip` autocontenido: no hace falta instalar .NET.
-Descomprimí y ejecutá `Kantor.App.exe`.
+Los paquetes se publican en [Releases](../../releases). No hace falta instalar .NET:
+
+- **Instalador** (`Kantor-Setup-<versión>.exe`): instala para el usuario actual, sin permisos de administrador,
+  crea el acceso en el menú Inicio y se desinstala desde *Aplicaciones instaladas*. Ejecutar un instalador más
+  nuevo encima actualiza Kantor y conserva tus datos.
+- **Portable** (`Kantor-<versión>-win-x64.zip`): descomprimí en cualquier carpeta y ejecutá `Kantor.App.exe`.
 
 > Todavía no hay una versión publicada; la página de Releases la va a listar cuando exista.
 >
@@ -94,10 +113,11 @@ dotnet test  Kantor.sln
 dotnet run --project src/Kantor.App
 ```
 
-Para armar el paquete distribuible (carpeta + zip en `dist\`):
+Para armar los paquetes distribuibles (carpeta + zip en `dist\`, y el instalador con `-Installer`, que necesita
+[Inno Setup 6](https://jrsoftware.org/isinfo.php)):
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts\publish.ps1
+powershell -ExecutionPolicy Bypass -File scripts\publish.ps1 -Installer
 ```
 
 Los PNG de los avatares de fábrica no están en el repositorio: sin ellos la aplicación funciona y muestra un

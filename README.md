@@ -68,12 +68,31 @@ There was no meeting where anyone approved this expansion. It just happened.
 
 ## Screenshots
 
-*Coming soon: singing screen, results with characters and the song library.*
+<table>
+  <tr>
+    <td width="50%" align="center"><a href="docs/screenshots/en/menu.png"><img src="docs/screenshots/en/menu.png" alt="Main menu" width="100%"></a><br><sub>Main menu</sub></td>
+    <td width="50%" align="center"><a href="docs/screenshots/en/library.png"><img src="docs/screenshots/en/library.png" alt="Song library" width="100%"></a><br><sub>Song library</sub></td>
+  </tr>
+  <tr>
+    <td width="50%" align="center"><a href="docs/screenshots/en/who-sings.png"><img src="docs/screenshots/en/who-sings.png" alt="Who sings on each microphone" width="100%"></a><br><sub>Who sings on each microphone</sub></td>
+    <td width="50%" align="center"><a href="docs/screenshots/en/stage.png"><img src="docs/screenshots/en/stage.png" alt="Singing screen with per-phrase messages" width="100%"></a><br><sub>Singing screen with per-phrase messages</sub></td>
+  </tr>
+  <tr>
+    <td width="50%" align="center"><a href="docs/screenshots/en/results.png"><img src="docs/screenshots/en/results.png" alt="Results with characters and verdicts" width="100%"></a><br><sub>Results with characters and verdicts</sub></td>
+    <td width="50%" align="center"><a href="docs/screenshots/en/avatars.png"><img src="docs/screenshots/en/avatars.png" alt="Avatar picker" width="100%"></a><br><sub>Avatar picker</sub></td>
+  </tr>
+</table>
+
+<sub>Click an image to see it full size. Screenshots use original demo songs, demo players and simulated singers.</sub>
 
 ## Download
 
-Packages are published on [Releases](../../releases) as a self-contained `.zip`: you don't need to install .NET.
-Extract it and run `Kantor.App.exe`.
+Packages are published on [Releases](../../releases). You don't need to install .NET:
+
+- **Installer** (`Kantor-Setup-<version>.exe`): installs for the current user, no administrator rights, adds a
+  Start menu entry and uninstalls from *Installed apps*. Running a newer installer over it updates Kantor and keeps
+  your data.
+- **Portable** (`Kantor-<version>-win-x64.zip`): extract it anywhere and run `Kantor.App.exe`.
 
 > There is no published release yet; the Releases page will list it once there is one.
 >
@@ -90,10 +109,11 @@ dotnet test  Kantor.sln
 dotnet run --project src/Kantor.App
 ```
 
-To build the distributable package (folder + zip in `dist\`):
+To build the distributable packages (folder + zip in `dist\`, plus the installer with `-Installer`, which needs
+[Inno Setup 6](https://jrsoftware.org/isinfo.php)):
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts\publish.ps1
+powershell -ExecutionPolicy Bypass -File scripts\publish.ps1 -Installer
 ```
 
 The factory avatar PNGs are not in the repository: without them the app works and shows a generic avatar.
