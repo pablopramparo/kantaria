@@ -1,0 +1,36 @@
+#TITLE:Arpegio Arcade
+#ARTIST:Kantor Demo
+#MP3:Kantor Demo - Arpegio Arcade.wav
+#COVER:Kantor Demo - Arpegio Arcade.jpg
+#BPM:120
+#GAP:2000
+#GENRE:Chiptune
+#YEAR:2026
+#LANGUAGE:Spanish
+#EDITION:Kantor demo
+: 0 2 0 la 
+: 2 2 4 la 
+: 4 2 7 la 
+* 6 2 12 la
+- 8
+: 12 2 5 ra 
+: 14 2 9 ra 
+: 16 2 12 ra 
+* 18 2 17 ra
+- 20
+: 24 2 7 pa 
+: 26 2 11 pa 
+: 28 2 14 pa 
+* 30 2 19 pa
+- 32
+: 36 2 12 ta 
+: 38 2 7 ta 
+: 40 2 4 ta 
+* 42 6 0 ta
+- 48
+: 54 4 0 ar 
+: 58 4 4 ca 
+: 62 4 7 de 
+* 66 8 12 ar
+- 74
+E

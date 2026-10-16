@@ -1,0 +1,37 @@
+#TITLE:Duo de Prueba
+#ARTIST:Kantor Demo
+#MP3:Kantor Demo - Duo de Prueba.wav
+#COVER:Kantor Demo - Duo de Prueba.jpg
+#BPM:120
+#GAP:2000
+#GENRE:Demo
+#YEAR:2026
+#LANGUAGE:Spanish
+#EDITION:Kantor demo
+P1
+: 0 4 0 Uh 
+: 4 4 2 uh 
+: 8 4 4 uh 
+* 12 4 5 uh
+- 16
+: 32 4 7 Ah 
+: 36 4 5 ah 
+: 40 4 4 ah 
+: 44 4 2 ah
+- 48
+* 64 16 0 Uuuh
+- 80
+P2
+: 16 4 7 Ah 
+: 20 4 9 ah 
+: 24 4 11 ah 
+* 28 4 12 ah
+- 32
+: 48 4 12 Uh 
+: 52 4 11 uh 
+: 56 4 9 uh 
+: 60 4 7 uh
+- 64
+* 64 16 7 Aaah
+- 80
+E

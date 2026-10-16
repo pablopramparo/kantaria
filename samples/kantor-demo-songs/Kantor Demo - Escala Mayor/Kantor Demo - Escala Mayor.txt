@@ -1,0 +1,49 @@
+#TITLE:Escala Mayor
+#ARTIST:Kantor Demo
+#MP3:Kantor Demo - Escala Mayor.wav
+#COVER:Kantor Demo - Escala Mayor.jpg
+#BPM:120
+#GAP:2000
+#GENRE:Demo
+#YEAR:2026
+#LANGUAGE:Spanish
+#EDITION:Kantor demo
+: 0 4 0 do 
+: 4 4 2 re 
+: 8 4 4 mi 
+* 12 4 5 fa
+- 16
+: 20 4 7 sol 
+: 24 4 9 la 
+: 28 4 11 si 
+* 32 4 12 do
+- 36
+: 40 4 12 do 
+: 44 4 11 si 
+: 48 4 9 la 
+: 52 4 7 sol
+- 56
+: 60 4 5 fa 
+: 64 4 4 mi 
+: 68 4 2 re 
+* 72 4 0 do
+- 76
+: 84 2 0 do 
+: 86 2 2 re 
+: 88 2 4 mi 
+: 90 2 5 fa 
+: 92 2 7 sol 
+: 94 2 9 la 
+: 96 2 11 si 
+* 98 2 12 do
+- 100
+: 104 2 12 do 
+: 106 2 11 si 
+: 108 2 9 la 
+: 110 2 7 sol 
+: 112 2 5 fa 
+: 114 2 4 mi 
+: 116 2 2 re 
+* 118 8 0 do
+- 126
+E
