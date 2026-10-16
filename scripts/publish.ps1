@@ -6,12 +6,15 @@
 
 .DESCRIPTION
   Salida: dist\Kantor-<versión>-win-x64\ y dist\Kantor-<versión>-win-x64.zip.
+  Con -Installer también arma dist\Kantor-Setup-<versión>.exe (requiere Inno Setup 6:
+  winget install JRSoftware.InnoSetup).
   El SDK de .NET 10 no está en el PATH global: se toma de $env:DOTNET_ROOT, de $env:USERPROFILE\.dotnet o del PATH.
 #>
 param(
     [string]$Configuration = 'Release',
     [switch]$SkipTests,
-    [switch]$NoZip
+    [switch]$NoZip,
+    [switch]$Installer
 )
 
 $ErrorActionPreference = 'Stop'
@@ -71,4 +74,20 @@ $size = (Get-ChildItem $out -Recurse -File | Measure-Object Length -Sum).Sum / 1
 Write-Host ("Carpeta: {0}  ({1:N0} MB)" -f $out, $size) -ForegroundColor Green
 if (-not $NoZip) {
     Write-Host ("Zip:     {0}  ({1:N0} MB)" -f $zip, ((Get-Item $zip).Length / 1MB)) -ForegroundColor Green
+}
+
+if ($Installer) {
+    $candidates = @(
+        (Get-Command ISCC.exe -ErrorAction SilentlyContinue).Source,
+        (Join-Path $env:LOCALAPPDATA 'Programs\Inno Setup 6\ISCC.exe'),
+        (Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe'),
+        (Join-Path $env:ProgramFiles 'Inno Setup 6\ISCC.exe')
+    ) | Where-Object { $_ -and (Test-Path $_) }
+    if (-not $candidates) { throw 'No se encontró Inno Setup 6 (winget install JRSoftware.InnoSetup).' }
+
+    Write-Host '== Instalador ==' -ForegroundColor Cyan
+    & ($candidates | Select-Object -First 1) "/DAppVersion=$version" "/DSourceDir=$out" "/DOutputDir=$(Join-Path $root 'dist')" "/DRepoDir=$root" (Join-Path $root 'installer\kantor.iss')
+    if ($LASTEXITCODE -ne 0) { throw 'Inno Setup falló.' }
+    $setup = Join-Path $root "dist\Kantor-Setup-$version.exe"
+    Write-Host ("Instalador: {0}  ({1:N0} MB)" -f $setup, ((Get-Item $setup).Length / 1MB)) -ForegroundColor Green
 }

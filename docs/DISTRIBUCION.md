@@ -12,6 +12,22 @@ Salida en `dist\` (ignorado por git):
 - `Kantor-<versión>-win-x64\` — `Kantor.App.exe` + runtime .NET 10 incluido (no hace falta instalar .NET).
 - `Kantor-<versión>-win-x64.zip` — lo mismo comprimido (~113 MB; la carpeta pesa ~262 MB).
 
+### Instalador (Inno Setup)
+
+```powershell
+winget install JRSoftware.InnoSetup                                   # una sola vez
+powershell -ExecutionPolicy Bypass -File scripts\publish.ps1 -Installer
+```
+
+Genera además `dist\Kantor-Setup-<versión>.exe` (~84 MB), a partir de `installer\kantor.iss`:
+
+- Instala por usuario, **sin administrador**, en `%LOCALAPPDATA%\Programs\Kantor`; crea el acceso del menú Inicio
+  (y el del escritorio, opcional) y se desinstala desde "Aplicaciones instaladas".
+- Para actualizar se ejecuta el instalador nuevo encima: reemplaza los archivos (borra antes `libvlc` y las `.dll`
+  viejas) y conserva los datos de `%APPDATA%\Kantor`. Si Kantor está abierto, lo cierra.
+- Instalación silenciosa: `Kantor-Setup-<versión>.exe /SILENT`.
+- Sin firmar: SmartScreen puede avisar la primera vez.
+
 La versión sale de `<Version>` en `src/Kantor.App/Kantor.App.csproj` (hoy 0.1.0). Subirla antes de cada entrega.
 
 Qué incluye / qué se saca a propósito:
