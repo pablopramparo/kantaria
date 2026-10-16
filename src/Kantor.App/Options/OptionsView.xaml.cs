@@ -91,6 +91,9 @@ public partial class OptionsView : UserControl
 
     public event Action<bool>? RemoteControlChanged;
 
+    /// <summary>Volumen de la música de interfaz elegido (0–100 %); se aplica al instante.</summary>
+    public event Action<int>? MusicVolumeChanged;
+
     /// <summary>Red elegida para el acceso de invitados (<c>null</c> = automática).</summary>
     public event Action<string?>? GuestInterfaceChanged;
 
@@ -473,6 +476,12 @@ public partial class OptionsView : UserControl
         }
 
         ContentPanel.Children.Add(Note(DescribeEngine(m)));
+
+        ContentPanel.Children.Add(Row(T("audio.music"),
+            Choice("music", Kantor.Core.Music.MusicVolume.Steps.Select(p => $"{p} %").ToList(),
+                Kantor.Core.Music.MusicVolume.IndexOf(m.MusicVolume),
+                i => MusicVolumeChanged?.Invoke(Kantor.Core.Music.MusicVolume.Steps[i]))));
+        ContentPanel.Children.Add(Note(T("audio.music.help"), 18));
 
         try
         {

@@ -1013,7 +1013,7 @@ Guía de uso y seguridad: **`docs/INVITADOS.md`**. Aquí, lo que hay que saber p
     Jugadores de la PC mientras está abierta (cubierto por tests solo hasta `PlayersAdded`).
 
 ### Ediciones: local y Microsoft Store (avatares)
-- `Edition=Local` (por omisión) trae los 30 avatares; `Edition=Store` define `STORE_EDITION` y quita los de
+- `Edition=Local` (por omisión) trae los 45 avatares; `Edition=Store` define `STORE_EDITION` y quita los de
   `Kantor.Core/Characters/store-excluded.txt` (ids separados por `;` o saltos de línea, un subconjunto de los locales).
   `CharacterEdition` lee la lista (recurso embebido), `CharacterCatalog.Factory` se arma sin ellos y la App ni siquiera
   embebe sus PNG (`Resource Remove` en `Kantor.App.csproj`). Todo lo que usa la galería (PC, web de invitados, validación
@@ -1022,7 +1022,7 @@ Guía de uso y seguridad: **`docs/INVITADOS.md`**. Aquí, lo que hay que saber p
   recursos de WPF al cambiar solo la lista de recursos: el script borra `obj` antes y después.
 - Un jugador con un avatar que la Store no trae se muestra con el genérico (`GetOrDefault`); el id guardado no se toca.
 - Tests (`CharacterEditionTests`): análisis de la lista, subconjunto y orden, caída del genérico, y que el archivo real solo
-  nombre avatares de fábrica. Se corrieron en las dos ediciones. **La lista está vacía hasta decidir cuáles se excluyen.**
+  nombre avatares de fábrica. Se corrieron en las dos ediciones. **Excluidos de la Store (decididos el 16/10/2026, por parecido con personajes ajenos): `avatar_025`, `avatar_029`, `avatar_030` y `avatar_031`; la Store trae 41 de los 45.**
 
 ### Paquete MSIX y créditos
 - `publish.ps1 -Edition Store -Msix` → `dist\Kantor-<v>-store.msix` (ver `docs/DISTRIBUCION.md`); manifiesto e identidad en
@@ -1031,3 +1031,31 @@ Guía de uso y seguridad: **`docs/INVITADOS.md`**. Aquí, lo que hay que saber p
 - Opciones › **CRÉDITOS** (`OptionsView.Section.Credits`, textos `credits.*` en `OptionsTexts`): versión y edición, autoría,
   inspiración (UltraStar Deluxe / WorldParty, sin código copiado), arte y marca, tecnología de terceros y canciones. Las seis
   pestañas entran con `MinWidth=160`. Sin controles enfocables: ↑↓ desplazan, como la guía.
+
+## 8 terdecies. Música de la interfaz
+
+- **Qué suena**: «8Bit Title Screen» (Joth, CC0) en el menú y la navegación, y «Heroic Loop» (Zane Little Music, CC0) en resultados;
+  detalles de origen, licencias y conversiones en `Assets/Music/README.md` y `THIRD-PARTY-NOTICES.md`. Volumen en Opciones › Audio
+  › **Música de interfaz** (0–100 % en pasos de 10; 0 = apagada; por omisión 20 %; `UserSettings.MusicVolumePercent`, se aplica en
+  vivo y se guarda).
+- **Arquitectura**: `Kantor.Core/Music/MusicCoordinator` es la única fuente de verdad. Recibe la escena (`MusicScene`: None,
+  Navigation, Library, Song, Results), el volumen y el tiempo, y mueve un nivel de fundido por pista (salida 500 ms, entrada 400 ms;
+  volumen final = fundido × volumen). Habla con `IMusicOutput`/`IMusicChannel` (una salida por pista): la implementación de la App
+  (`Audio/UiMusic.cs`) es `WaveOutEvent` sobre el dispositivo predeterminado, como la vista previa de canciones, con el audio
+  decodificado en memoria (16 bits) y loop sin costura. **No toca** el motor de la canción (WASAPI/ASIO), la captura, el puntaje ni
+  los relojes.
+- **Escena** (`MainWindow.Music.cs`, `DesiredMusicScene`, un temporizador de 33 ms): resultados visibles → Results; canción sonando o
+  en pausa → Song (nada suena, tampoco en pausa); lista de canciones → Library (**callada**, para que se oigan las vistas previas;
+  decisión posterior a la especificación inicial); el resto → Navigation. La música del menú **sigue donde quedó** al volver
+  (la salida se cierra al silenciarse y se conserva la posición del loop). Volver a Navigation desde una canción espera 150 ms
+  para no parpadear entre el fin de la canción y los resultados. Cada entrada a resultados parte del principio, salvo que la
+  melodía siga sonando (entrada y salida muy rápidas: continúa sin saltos).
+- **Fallos**: archivo ausente o ilegible → esa pista no suena y el resto sigue; salida que no abre o se cae (dispositivo
+  desconectado) → se reintenta cada 2 s y se retoma sin reiniciar el loop; cierre → se detiene y libera todo sin fundido.
+- **Distribución**: los archivos son `Content` (se copian a `Assets\Music` en compilación y publicación; los incluyen el zip, el
+  instalador y el MSIX) y se leen desde `AppContext.BaseDirectory`.
+- **Comprobado**: 37 tests nuevos (`MusicCoordinatorTests`: estados, fundidos, volumen 0 y 1–100, cambios rápidos, fallos,
+  persistencia, cierre) con canales falsos y tiempo manual; en la app real, con el medidor de sesión de audio de Windows, el
+  proceso suena en el menú (pico ≈ 0,13–0,16 con 20 %), calla en la lista de canciones y vuelve al volver al menú y en Opciones.
+  **Sin comprobar a oído / con manos**: el aspecto de los fundidos, cantar una canción real y pasar a resultados (Heroic Loop), el
+  cambio de dispositivo de salida en caliente y el volumen en vivo.

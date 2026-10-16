@@ -12,7 +12,7 @@ public sealed class CharacterCatalog
     /// Cuántos avatares de fábrica hay en el repositorio (<c>avatar_001</c> … <c>avatar_NNN</c>): subirlo al sumar PNG.
     /// La edición Store ofrece menos (ver <see cref="CharacterEdition"/>): usar <see cref="Factory"/>.Count.
     /// </summary>
-    public const int FactoryCount = 30;
+    public const int FactoryCount = 45;
 
     /// <summary>
     /// Los avatares de fábrica, en orden. No tienen nombre propio (<c>Name</c> repite el ID y la interfaz no lo

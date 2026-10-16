@@ -76,6 +76,10 @@ public static class OptionsTexts
         ["audio.engine.asio.na"] = ("ASIO (no disponible)", "ASIO (unavailable)"),
         ["audio.driver"] = ("Controlador ASIO", "ASIO driver"),
         ["audio.output"] = ("Salida", "Output"),
+        ["audio.music"] = ("Música de interfaz", "Interface music"),
+        ["audio.music.help"] = (
+            "Volumen de la música del menú y de los resultados. 0 % la apaga. No cambia el volumen de las canciones ni de los micrófonos.",
+            "Volume of the menu and results music. 0 % turns it off. It does not change the volume of the songs or the microphones."),
         ["audio.mics"] = ("Micrófonos", "Microphones"),
         ["audio.mics.help"] = (
             "Cada micrófono es un dispositivo y uno de sus canales. La cantidad de micrófonos define cuántos jugadores pueden cantar a la vez (hasta 4). El audio no se reproduce ni se guarda.",

@@ -182,6 +182,7 @@ public partial class MainWindow : Window
             }
 
             _scoreTimer.Start();
+            StartMusic(); // la interfaz ya está lista: empieza la música de inicio
             var args = Environment.GetCommandLineArgs();
             if (args.Length > 1)
             {
@@ -217,6 +218,7 @@ public partial class MainWindow : Window
             _scoreTimer.Stop();
             StopRemote();
             StopGuest();
+            StopMusic();
             Video.Dispose();
             DisposeAudio();
             _preview.Dispose();
@@ -1786,6 +1788,7 @@ public partial class MainWindow : Window
         };
         Options.AutoAdvanceChanged += SetAutoAdvanceSetting;
         Options.RemoteControlChanged += SetRemoteControlSetting;
+        Options.MusicVolumeChanged += SetMusicVolume;
         Options.TechnicalBarChanged += on =>
             StatusBar.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
         Options.BackRequested += (_, _) => CloseOptions();
@@ -1812,6 +1815,7 @@ public partial class MainWindow : Window
         TechnicalBar = StatusBar.Visibility == Visibility.Visible,
         AutoAdvance = _prefs.AutoAdvance,
         RemoteControl = _prefs.RemoteControl,
+        MusicVolume = _prefs.MusicVolumePercent,
         GuestNetworks = [.. GuestNetwork.Candidates().Select(c => (c.Address.ToString(), $"{c.Address} ({c.Name})"))],
         GuestInterface = _prefs.GuestInterface,
         RemoteStatus = RemoteStatusText(),

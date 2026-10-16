@@ -49,7 +49,7 @@ Kantor no puede enseñarte a cantar. Pero puede documentar el intento.
   en el escenario.
 - **Avatares**: elegí uno de la galería o cargá los tuyos, con recorte de la cara.
 - **Cola de canciones** y **vista previa** al navegar la biblioteca.
-- **Video de fondo** si la canción lo trae.
+- **Música de interfaz** (temas de inicio y de resultados al estilo 8 bits, CC0) con su propio volumen; 0 % la apaga.
 - **Audio**: motor de Windows (WASAPI) o ASIO, con calibración de latencia (retardo de voz).
 - **Control remoto opcional** mediante una integración local (pipe con nombre, solo para el usuario actual),
   apagada por omisión. Está pensada para [Avyn](docs/AVYN_CONTRATO.md), un proyecto aparte.
@@ -144,6 +144,12 @@ avatar genérico. Más detalle en [docs/DISTRIBUCION.md](docs/DISTRIBUCION.md).
 | [docs/DISTRIBUCION.md](docs/DISTRIBUCION.md) | Cómo se arma el paquete y el camino a la Microsoft Store |
 | [docs/AVYN_CONTRATO.md](docs/AVYN_CONTRATO.md) | Protocolo del control remoto Avyn |
 | [docs/INVITADOS.md](docs/INVITADOS.md) | Acceso de invitados por LAN: uso, qué se permite, seguridad y límites |
+
+## Apoyar el proyecto
+
+Kantor es software libre hecho en ratos libres. Si te dio buenas noches de karaoke y querés ayudar a que siga creciendo, podés
+apoyar al autor en GitHub Sponsors: <https://github.com/sponsors/pablopramparo>. Es totalmente opcional: todo en Kantor funciona igual
+sin eso.
 
 ## Licencia y marca
 

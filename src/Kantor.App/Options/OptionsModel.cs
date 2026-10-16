@@ -62,6 +62,9 @@ public sealed class OptionsModel
     /// <summary>Dirección elegida para los invitados (<c>null</c> = automática).</summary>
     public string? GuestInterface { get; init; }
 
+    /// <summary>Volumen de la música de interfaz, de 0 a 100 %.</summary>
+    public int MusicVolume { get; init; } = Kantor.Core.Music.MusicVolume.DefaultPercent;
+
     /// <summary>Texto de estado del canal remoto (<c>null</c> si está apagado).</summary>
     public string? RemoteStatus { get; init; }
 }

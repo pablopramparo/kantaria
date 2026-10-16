@@ -267,7 +267,7 @@ entrada ya no exista. `available:false` = la entrada no está en el índice vige
 - Sin invitados anónimos: `playerId` existente, activo y, con partida abierta, miembro de ella. Un jugador, un
   puesto; `slot` ∈ 1..`maxSlots`. No cambia micrófonos ni calibración.
 - `selection.set` reemplaza la selección completa. `expectedSelectionRev` vencido ⇒ `CONFLICT` con la vigente.
-- **Personajes**: el catálogo trae 30 avatares de fábrica (`avatar_001` … `avatar_030`) y suma los que el usuario
+- **Personajes**: el catálogo trae 30 avatares de fábrica (`avatar_001` … `avatar_045`) y suma los que el usuario
   carga en la PC (`usuario-<id>`; no se crean ni se editan desde Avyn). **Los avatares no tienen nombre propio**:
   `name` repite el `characterId` y no debe mostrarse. `hasPortrait` / `hasFullBody` indican si el personaje tiene
   esa imagen. Un `characterId` desconocido (por ejemplo, un personaje borrado) se muestra con el primero del

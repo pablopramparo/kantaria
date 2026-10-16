@@ -47,6 +47,7 @@ Kantor can't teach you to sing. But it can document the attempt.
 - **Avatars**: pick one from the gallery or load your own, with face cropping.
 - **Song queue** and a **preview** while browsing the library.
 - **Background video** when the song includes one.
+- **Interface music** (8-bit title and results themes, CC0) with its own volume, off at 0 %.
 - **Audio**: Windows engine (WASAPI) or ASIO, with voice-delay latency calibration.
 - **Optional remote control** through a local integration (named pipe, current user only), off by default.
   It is built for [Avyn](docs/AVYN_CONTRATO.md), a separate project.
@@ -141,6 +142,12 @@ The technical documentation is written in Spanish.
 | [docs/DISTRIBUCION.md](docs/DISTRIBUCION.md) | How the package is built and the path to the Microsoft Store |
 | [docs/AVYN_CONTRATO.md](docs/AVYN_CONTRATO.md) | Avyn remote control protocol |
 | [docs/INVITADOS.en.md](docs/INVITADOS.en.md) | Guest access over the LAN: use, allowed actions, security and limits (English; Spanish: [INVITADOS.md](docs/INVITADOS.md)) |
+
+## Support the project
+
+Kantor is free software made in spare time. If it brings you good karaoke nights and you want to help it keep growing, you can
+sponsor the author on GitHub: <https://github.com/sponsors/pablopramparo>. It is entirely optional; everything in Kantor works the same
+without it.
 
 ## License and branding
 

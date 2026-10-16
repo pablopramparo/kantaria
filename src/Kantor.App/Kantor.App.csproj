@@ -20,6 +20,8 @@
     <Resource Include="Assets\Fonts\*.ttf" />
     <Resource Include="Assets\Characters\**\*.png" />
     <Resource Include="Assets\Branding\*.png" />
+    <!-- Música de la interfaz (CC0, ver Assets/Music/README.md): se copia junto al ejecutable (compilación y publicación) -->
+    <Content Include="Assets\Music\*.mp3;Assets\Music\*.wav" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <PropertyGroup>

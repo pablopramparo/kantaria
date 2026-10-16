@@ -86,6 +86,12 @@ public sealed record UserSettings
     public bool RemoteControl { get; init; }
 
     /// <summary>
+    /// Volumen de la música de la interfaz (inicio, navegación y resultados), de 0 a 100 %. 0 la apaga. No afecta a las
+    /// canciones, a los micrófonos ni al volumen del dispositivo.
+    /// </summary>
+    public int MusicVolumePercent { get; init; } = Music.MusicVolume.DefaultPercent;
+
+    /// <summary>
     /// Dirección IPv4 de la red local donde se ofrece el acceso de invitados (<c>null</c> = elegir sola). El acceso
     /// en sí nunca se guarda: arranca apagado cada vez.
     /// </summary>
@@ -167,6 +173,7 @@ public sealed record UserSettings
             Difficulty = Enum.IsDefined(Difficulty) ? Difficulty : Difficulty.Easy,
             AudioEngine = Enum.IsDefined(AudioEngine) ? AudioEngine : Audio.AudioEngineKind.Windows,
             VoiceDisplay = VoiceDisplay == 1 ? 1 : 0,
+            MusicVolumePercent = Music.MusicVolume.Clamp(MusicVolumePercent),
             VoiceDelayMs = SnapDelay(VoiceDelayMs),
             AsioVoiceDelayMs = SnapDelay(AsioVoiceDelayMs),
             AsioDriver = string.IsNullOrWhiteSpace(AsioDriver) ? null : AsioDriver,

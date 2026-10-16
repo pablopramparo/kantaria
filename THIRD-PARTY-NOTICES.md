@@ -13,6 +13,8 @@ componentes, cada uno con su propia licencia.
 | [SQLitePCLRaw](https://github.com/ericsink/SQLitePCL.raw) y SQLite | Motor de base de datos | Apache-2.0 / dominio público |
 | ASP.NET Core (Kestrel, `Microsoft.AspNetCore.App`) | Servidor HTTP del acceso de invitados | MIT |
 | [QRCoder](https://github.com/codebude/QRCoder) 1.6.0 | Matriz del código QR de invitados | MIT |
+| [8Bit Title Screen](https://opengameart.org/content/8bit-title-screen) de Joth (JPool), `8bit-title-screen.mp3` | Música de inicio y navegación | CC0 1.0 (sin modificar) |
+| [Heroic Loop](https://opengameart.org/content/heroic-loop) de Zane Little Music, `heroic-loop.wav` | Música de resultados | CC0 1.0 (convertido de PCM 32 bits flotante a 16 bits) |
 | [Jersey 15](https://fonts.google.com/specimen/Jersey+15) | Tipografía pixelada | SIL OFL 1.1 (`Assets/Fonts/OFL.txt`) |
 
 ## Recursos propios fuera de la GPL

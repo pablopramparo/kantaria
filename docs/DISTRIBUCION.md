@@ -90,5 +90,5 @@ completo, ancho 310×150, a escala 100/200/400 y tamaños fijos). Versión del p
 - Comprobado: `makeappx` valida el manifiesto y arma el paquete (132 MB). **Sin comprobar**: instalarlo (hace falta firmarlo
   con un certificado de prueba cuyo asunto sea el Publisher), la certificación de la Store (WACK) y el comportamiento de la
   app empaquetada (virtualización de `%APPDATA%`, micrófono, el servidor de invitados y el Firewall).
-- Pendiente para publicar: política de privacidad (URL), clasificación de edad, descripciones, capturas y decidir la lista de
-  avatares excluidos (`store-excluded.txt`, hoy vacía: la Store sale igual que la local).
+- Pendiente para publicar: política de privacidad (URL), clasificación de edad, descripciones, capturas y definir la versión (la lista de avatares ya está: 25, 29, 30 y 31 excluidos).
+

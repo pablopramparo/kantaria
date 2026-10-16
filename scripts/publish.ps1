@@ -65,7 +65,9 @@ if ($Edition -eq 'Store') {
 # Símbolos de depuración: no van al usuario final.
 Get-ChildItem $out -Filter *.pdb | Remove-Item -Force
 
-foreach ($file in 'LICENSE', 'README.md', 'THIRD-PARTY-NOTICES.md') {
+# La Store no admite pedir donaciones por fuera de su sistema de compras: su paquete no lleva el README (que enlaza a GitHub Sponsors).
+$docs = if ($Edition -eq 'Store') { 'LICENSE', 'THIRD-PARTY-NOTICES.md' } else { 'LICENSE', 'README.md', 'THIRD-PARTY-NOTICES.md' }
+foreach ($file in $docs) {
     Copy-Item (Join-Path $root $file) $out -Force
 }
 Copy-Item (Join-Path $root 'src\Kantor.App\Assets\LICENSE-ASSETS.md') $out -Force
@@ -102,7 +104,9 @@ if ($Msix) {
     $staging = Join-Path $root 'dist\msix-staging'
     if (Test-Path $staging) { Remove-Item $staging -Recurse -Force }
     Copy-Item $out $staging -Recurse
-    Copy-Item (Join-Path $root 'installer\store\Assets') (Join-Path $staging 'Assets') -Recurse
+    # Assets ya existe en la publicación (música, personajes): se copian los logos adentro, no una carpeta dentro de otra
+    New-Item -ItemType Directory -Force (Join-Path $staging 'Assets') | Out-Null
+    Copy-Item (Join-Path $root 'installer\store\Assets\*') (Join-Path $staging 'Assets') -Recurse -Force
     $manifest = (Get-Content (Join-Path $root 'installer\store\AppxManifest.xml') -Raw -Encoding UTF8).Replace('{{VERSION}}', "$version.0")
     [System.IO.File]::WriteAllText((Join-Path $staging 'AppxManifest.xml'), $manifest, (New-Object System.Text.UTF8Encoding($false)))
     $msixFile = Join-Path $root "dist\Kantor-$version-store.msix"
