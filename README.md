@@ -51,8 +51,8 @@ Kantor can't teach you to sing. But it can document the attempt.
 - **Optional remote control** through a local integration (named pipe, current user only), off by default.
   It is built for [Avyn](docs/AVYN_CONTRATO.md), a separate project.
 - **Guest access over your LAN** (off by default): a QR on the main menu and the song list lets guests search songs,
-  pick who sings and add them to the queue from their phones. Nothing else. See [docs/INVITADOS.md](docs/INVITADOS.md)
-  (Spanish) for how it works and its limits: plain HTTP on your local network, shared access key, no internet.
+  pick who sings and add them to the queue from their phones. Nothing else. See [docs/INVITADOS.en.md](docs/INVITADOS.en.md)
+  for how it works and its limits: plain HTTP on your local network, shared access key, no internet.
 
 ## Why does this exist?
 
@@ -83,6 +83,14 @@ There was no meeting where anyone approved this expansion. It just happened.
   <tr>
     <td width="50%" align="center"><a href="docs/screenshots/en/results.png"><img src="docs/screenshots/en/results.png" alt="Results with characters and verdicts" width="100%"></a><br><sub>Results with characters and verdicts</sub></td>
     <td width="50%" align="center"><a href="docs/screenshots/en/avatars.png"><img src="docs/screenshots/en/avatars.png" alt="Avatar picker" width="100%"></a><br><sub>Avatar picker</sub></td>
+  </tr>
+  <tr>
+    <td width="50%" align="center"><a href="docs/screenshots/en/guests-library.png"><img src="docs/screenshots/en/guests-library.png" alt="Guest QR in the song list" width="100%"></a><br><sub>Guest QR in the song list</sub></td>
+    <td width="50%" align="center"><a href="docs/screenshots/en/guests-menu.png"><img src="docs/screenshots/en/guests-menu.png" alt="Guest QR on the main menu" width="100%"></a><br><sub>Guest QR on the main menu</sub></td>
+  </tr>
+  <tr>
+    <td width="50%" align="center"><a href="docs/screenshots/en/guests-phone-list.png"><img src="docs/screenshots/en/guests-phone-list.png" alt="On the phone: find a song" width="55%"></a><br><sub>On the phone: find a song</sub></td>
+    <td width="50%" align="center"><a href="docs/screenshots/en/guests-phone-singers.png"><img src="docs/screenshots/en/guests-phone-singers.png" alt="On the phone: pick who sings" width="55%"></a><br><sub>On the phone: pick who sings</sub></td>
   </tr>
 </table>
 
@@ -132,7 +140,7 @@ The technical documentation is written in Spanish.
 | [docs/PUNTUACION_WORLDPARTY.md](docs/PUNTUACION_WORLDPARTY.md) | How WorldParty scores and what Kantor follows |
 | [docs/DISTRIBUCION.md](docs/DISTRIBUCION.md) | How the package is built and the path to the Microsoft Store |
 | [docs/AVYN_CONTRATO.md](docs/AVYN_CONTRATO.md) | Avyn remote control protocol |
-| [docs/INVITADOS.md](docs/INVITADOS.md) | Guest access over the LAN: use, allowed actions, security and limits |
+| [docs/INVITADOS.en.md](docs/INVITADOS.en.md) | Guest access over the LAN: use, allowed actions, security and limits (English; Spanish: [INVITADOS.md](docs/INVITADOS.md)) |
 
 ## License and branding
 

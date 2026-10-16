@@ -89,6 +89,14 @@ No hubo ninguna reunión en la que se aprobara semejante crecimiento. Simplement
     <td width="50%" align="center"><a href="docs/screenshots/es/results.png"><img src="docs/screenshots/es/results.png" alt="Resultados con personajes y veredictos" width="100%"></a><br><sub>Resultados con personajes y veredictos</sub></td>
     <td width="50%" align="center"><a href="docs/screenshots/es/avatars.png"><img src="docs/screenshots/es/avatars.png" alt="Selector de avatares" width="100%"></a><br><sub>Selector de avatares</sub></td>
   </tr>
+  <tr>
+    <td width="50%" align="center"><a href="docs/screenshots/es/guests-library.png"><img src="docs/screenshots/es/guests-library.png" alt="QR de invitados en la lista de canciones" width="100%"></a><br><sub>QR de invitados en la lista de canciones</sub></td>
+    <td width="50%" align="center"><a href="docs/screenshots/es/guests-menu.png"><img src="docs/screenshots/es/guests-menu.png" alt="QR de invitados en el menú principal" width="100%"></a><br><sub>QR de invitados en el menú principal</sub></td>
+  </tr>
+  <tr>
+    <td width="50%" align="center"><a href="docs/screenshots/es/guests-phone-list.png"><img src="docs/screenshots/es/guests-phone-list.png" alt="En el celular: buscar una canción" width="55%"></a><br><sub>En el celular: buscar una canción</sub></td>
+    <td width="50%" align="center"><a href="docs/screenshots/es/guests-phone-singers.png"><img src="docs/screenshots/es/guests-phone-singers.png" alt="En el celular: elegir quién canta" width="55%"></a><br><sub>En el celular: elegir quién canta</sub></td>
+  </tr>
 </table>
 
 <sub>Hacé clic en una imagen para verla en tamaño completo. Las capturas usan canciones y jugadores de demostración propios, con cantantes simulados.</sub>
