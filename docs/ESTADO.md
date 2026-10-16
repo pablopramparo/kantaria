@@ -10,30 +10,29 @@ UltraStar WorldParty; secundaria: USDX. Aplicación de escritorio en C# / .NET 1
 Abre una canción, la reproduce con su video de fondo, muestra notas y letra, captura hasta cuatro micrófonos,
 detecta el tono, puntúa por beat y guarda jugadores, partidas e historial (ver los incrementos de §3 y §8).
 
-## 2. Acuerdos de trabajo (vigentes)
+## 2. Principios del proyecto
 
-- Desarrollo incremental sobre la aplicación real; nada de prototipos descartables.
+- Desarrollo incremental sobre la aplicación real.
 - Sin sobreingeniería: no se agregan capas, abstracciones ni dependencias sin una necesidad concreta.
-- **No aplicar compensaciones de latencia** hasta tener evidencia de un desfase real medido.
+- **Sin compensaciones de latencia** hasta tener evidencia de un desfase real medido.
 - **Monitorización de audio apagada** (no hay código de reproducción del micrófono).
-- **Mantener YIN** como detector de tono; no copiar el de WorldParty sin evidencia de que mejore.
+- **YIN** como detector de tono; no se usa el de WorldParty sin evidencia de que mejore.
 - Canciones sin `#BPM` se rechazan: no se inventan valores para datos necesarios.
-- No agregar perfiles, rankings, sesiones ni cola hasta que se pidan.
-- Commits solo cuando el usuario lo pide. Trabajar sobre la base existente.
-- Verificar siempre compilación y tests; distinguir lo comprobado de lo que solo compila.
+- Licencia **GPL-3.0-or-later**; toda dependencia nueva debe ser compatible.
+- Se distingue siempre lo comprobado con tests o hardware de lo que solo compila.
 
 ## 3. Estado por incremento
 
 | # | Contenido | Commit |
 |---|---|---|
-| 1 | Abrir TXT UltraStar, reproducir audio, notas y letra sincronizadas, pantalla completa | `f09a036` |
-| 2 | Entradas de audio por canal, nivel en vivo, detección de tono (YIN), ventana "Entradas" | `70d922c` |
-| 3 | Tono ubicado en el tiempo de la canción (marcas de tiempo reales), estela en el escenario | `4f36bbf` |
-| — | Correcciones de las pruebas manuales: desfase acumulativo en pausa; plegado de octava de la estela | `8a34657`, `d6d390f` |
-| 4 | Puntuación por beat (una voz, una entrada), selector de dificultad, puntaje visible | sin commit (a probar) |
+| 1 | Abrir TXT UltraStar, reproducir audio, notas y letra sincronizadas, pantalla completa | `d0537c5` |
+| 2 | Entradas de audio por canal, nivel en vivo, detección de tono (YIN), ventana "Entradas" | `8c22edf` |
+| 3 | Tono ubicado en el tiempo de la canción (marcas de tiempo reales), estela en el escenario | `b701a35` |
+| — | Correcciones de las pruebas manuales: desfase acumulativo en pausa; plegado de octava de la estela | `390c893`, `2932c9f` |
+| 4 | Puntuación por beat (una voz, una entrada), selector de dificultad, puntaje visible | `fc93c6e` |
 
-Las pruebas funcionales de los incrementos 1–3 fueron aprobadas por el usuario. El incremento 4 está
-implementado y verificado por compilación y tests; falta su prueba manual (ver §6 ter y §9).
+Los incrementos 1–3 se verificaron con pruebas funcionales manuales. El incremento 4 está implementado y
+verificado por compilación y tests (ver §6 ter).
 
 ## 4. Estructura
 
@@ -87,8 +86,8 @@ tests/Kantor.Tests   xUnit; RealLibraryTests es opt-in con KANTOR_SONGS_DIR
 
 ## 5. Compilar, ejecutar y probar
 
-El SDK **.NET 10** se instaló a nivel usuario en `%USERPROFILE%\.dotnet` (la máquina solo tenía .NET 8
-global). No está en el PATH global:
+Se necesita el SDK **.NET 10**. Si está instalado a nivel usuario (`%USERPROFILE%\.dotnet`) y no en el
+PATH global:
 
 ```powershell
 $env:PATH = "$env:USERPROFILE\.dotnet;$env:PATH"
@@ -99,7 +98,7 @@ dotnet test Kantor.sln
 # prueba contra la biblioteca real (1000+ canciones):
 $env:KANTOR_SONGS_DIR = '<carpeta con canciones>'; dotnet test Kantor.sln
 # ejecutar con una canción:
-src\Kantor.App\bin\Debug\net10.0-windows\Kantor.App.exe "<carpeta de muestras>\Twenty One Pilots - Saturday\Twenty One Pilots - Saturday.txt"
+src\Kantor.App\bin\Debug\net10.0-windows\Kantor.App.exe "<carpeta>\Artista - Título\Artista - Título.txt"
 ```
 
 Atajos: Ctrl+O abrir, Espacio play/pausa, F11 pantalla completa, Esc salir, Ctrl+I entradas de audio.
@@ -111,7 +110,7 @@ advertencias), conversión beat↔tiempo, resolución de rutas sin escapar de la
 sintéticas (65–880 Hz, armónicos, silencio, ruido), decodificación hasta 8 canales, niveles,
 modelo de reloj (pausa/reanudación/extrapolación), marcas de tiempo de ventana, línea temporal.
 
-**Con la biblioteca real (`<carpeta con canciones>`):** 1068 de 1069 canciones se leen y nombran un audio válido.
+**Con una biblioteca real (`KANTOR_SONGS_DIR`):** 1068 de 1069 canciones se leen y nombran un audio válido.
 La única que falla es "Ace of Base – Beautiful Life" (sin `#BPM`).
 
 **Con hardware real (esta máquina):**
@@ -172,7 +171,7 @@ La única que falla es "Ace of Base – Beautiful Life" (sin `#BPM`).
 
 ## 8. Hallazgos de la biblioteca del usuario
 
-- `<carpeta de muestras>` (6 canciones de muestra, mp3 + mp4) y `<carpeta con canciones>` (~1100).
+- Una carpeta de muestra (6 canciones, mp3 + mp4) y una biblioteca real (~1100 canciones).
 - Audio casi todo `.mp3`; video `.avi` (596), `.mp4` (288), `.flv`, `.mpg`, `.webm`.
 - Sin duetos, sin `#RELATIVE`, sin cambios de BPM. 42 con BOM, 513 no UTF-8 (Windows-1252), 1016 con notas
   doradas, 313 con freestyle. Hay `.txt` que no son canciones (readmes) y `__MACOSX`.
@@ -193,7 +192,7 @@ Referencia de comportamiento: `docs/PUNTUACION_WORLDPARTY.md` (qué hace WorldPa
   retardo de llegada). Muestra elegida: la ventana de análisis que cubre el instante (extremos incluidos) con
   centro más cercano; empate, la anterior; sin ventana que lo cubra, el beat no suma. No usa la última muestra
   ni depende de los FPS. Una muestra que llega después de evaluado el beat se ignora.
-- **Octavas (decidido por el usuario tras la prueba manual)**: equivalencia por clase de nota, como WorldParty;
+- **Octavas (decidido tras la prueba manual)**: equivalencia por clase de nota, como WorldParty;
   cantar una octava distinta puntúa igual. No hay modo estricto. La estela sigue plegada al carril (no indica
   la octava real). Si algún día se quiere distinguir, es un cambio de regla a decidir aparte.
 - **Ciclo de vida**: pausa conserva el puntaje (la posición queda quieta y no se llama a `Advance`);
@@ -298,7 +297,7 @@ Referencia de comportamiento: `docs/PUNTUACION_WORLDPARTY.md` (qué hace WorldPa
 
 ## 8 ter. Identidad visual 16-bit (en curso, a validar visualmente)
 
-Orden acordado: (1) sistema visual, (2) resultados 1 jugador preparada para 2, (3) menú principal. El escenario
+Orden: (1) sistema visual, (2) resultados 1 jugador preparada para 2, (3) menú principal. El escenario
 durante la canción **no se toca** hasta el video de fondo. Video y dos jugadores son funciones aparte.
 
 - `src/Kantor.App/Theme.xaml`: paleta (P1 `#19D3FF`, P2 `#FF3DB8`, oro, noche, panel, tinta), `PixelFont`
@@ -458,7 +457,7 @@ durante la canción **no se toca** hasta el video de fondo. Video y dos jugadore
 - **Modelo** (`Kantor.Core/Audio/MicrophoneMap.cs`, probado): 4 *puestos* (0–3); cada uno apunta a un canal de un
   dispositivo (`MicrophoneSource`). Un canal alimenta un solo puesto (asignarlo a otro se lo quita al anterior);
   puede haber puestos vacíos en el medio. Sin sesiones todavía, el puesto *n* es "Jugador n+1", con su color
-  (`PlayerColors`). Decisión del usuario: los jugadores serán históricos y habrá sesiones más adelante
+  (`PlayerColors`). Decisión: los jugadores serán históricos y habrá sesiones más adelante
   (continuar o crear sesión al entrar en "Cantar", elegir jugadores, estadísticas globales y por sesión); **nada
   de eso está hecho**.
 - **Captura** (`ActiveInput`, reescrito): una sola sesión por dispositivo, con los canales con puesto como canales
@@ -582,13 +581,13 @@ básico. Sin rankings globales, gráficos ni estadísticas agregadas (nada agreg
   `UserSettings.SongPreview`, por omisión sí). Sin comprobar a oído en esta máquina.
 
 ### Nombre en pantalla
-- En español la "sesión" se llama **Partida** (decisión del usuario: "sesión" suena a sistema; "Continuar
+- En español la "sesión" se llama **Partida** (decisión: "sesión" suena a sistema; "Continuar
   partida / Nueva partida" es lo que ya conocen de los videojuegos) y cantar sin ella es **"Cantar suelto"**.
   En inglés queda "Session" / "Sing without session". En el código, el esquema y esta documentación el concepto
   sigue siendo *session* (Partida = `session`); solo cambian los textos de `PlayersTexts` y los mensajes de
   `KantorStore`.
 
-### Decisiones (acordadas con el usuario)
+### Decisiones
 - No hay participantes anónimos: cantar requiere jugadores elegidos. **En cada canción** se elige quién canta,
   sobre los **micrófonos habilitados** (Opciones › Audio): al empezar una interpretación de cero (Espacio o
   Reproducir) aparece "¿QUIÉN CANTA?" con la elección anterior cargada. No se pide al abrir la aplicación ni la
@@ -692,19 +691,16 @@ básico. Sin rankings globales, gráficos ni estadísticas agregadas (nada agreg
   `WithCulture="false"` en el `EmbeddedResource`.
 - Sin comprobar a mano: aspecto de la tarjeta y cambio de idioma en vivo (no hay prueba de UI).
 
-## 9. Siguientes pasos propuestos (no aprobados)
+## 9. Siguientes pasos
 
-1. ~~Commit del incremento 3~~ y de las dos correcciones (hecho).
-2. **El usuario prueba manualmente la puntuación** (cantar con voz real, los tres niveles, pausa, detener,
-   fin de canción) antes del commit del incremento 4.
-3. ~~Medición de latencia por loopback~~ (hecha: 173 ms, §7). Siguen pendientes: separar la parte de salida de
-   la de entrada, el desfase de arranque (§6 bis) y calibrar la compuerta de nivel con el micrófono.
-4. Decisión pendiente: asignación micrófono→voz por actuación y duetos (hoy solo la voz 0).
-5. Biblioteca con carpetas elegidas expresamente (SQLite) y búsqueda.
-6. Video (probablemente FFmpeg; hay que hacer el censo de códecs), y más adelante perfiles, sesiones, cola y Avyn.
+1. Prueba del ejecutable distribuible en una PC limpia (ver `docs/DISTRIBUCION.md`) y firma del `.exe`.
+2. Empaquetado MSIX y publicación en Microsoft Store (ver `docs/DISTRIBUCION.md`).
+3. Prueba con voz real del feedback por frase y de la señal de onda, con 2–4 jugadores.
+4. Medición de latencia: separar la parte de salida de la de entrada, el desfase de arranque (§6 bis) y
+   calibrar la compuerta de nivel con el micrófono.
 
-Decisiones abiertas del documento base: definición de "puntos de competición" y "efectividad", umbral de
-paridad con WorldParty, hardware objetivo.
+Decisiones abiertas: definición final de "puntos de competición" y "efectividad", y umbral de paridad
+con WorldParty.
 
 **Licencia (decidida): GPL-3.0-or-later.** Archivo `LICENSE` en la raíz y aviso en `README.md`.
 - WorldParty: GPL-3.0-or-later (verificado en `LICENSE` y en la cabecera de `src/base/UMain.pas`).
@@ -712,8 +708,8 @@ paridad con WorldParty, hardware objetivo.
   version", p. ej. `src/base/UMain.pas`). Compatible con GPL-3.0-or-later. Verificado en una muestra, no
   archivo por archivo: si algún día se reutiliza un archivo concreto, mirar su cabecera.
 - **Hasta hoy no se copió código de WorldParty ni de USDX.** El scoring es implementación propia, tomando
-  WorldParty solo como referencia de comportamiento. Reutilizar código concreto exige proponerlo antes y
-  verificar la cabecera del archivo (más atribución y conservar sus avisos de copyright).
+  WorldParty solo como referencia de comportamiento. Reutilizar código concreto exige verificar la
+  cabecera del archivo, dar atribución y conservar sus avisos de copyright.
 - Dependencias futuras (FFmpeg, ASIO, códecs): evaluar la licencia cuando se necesiten. Hoy: NAudio (MIT),
   .NET/WPF (MIT); xunit/coverlet solo en tests.
 - Sin infraestructura de contribuciones (CLA/DCO) por ahora.

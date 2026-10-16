@@ -6,7 +6,7 @@
 
 .DESCRIPTION
   Salida: dist\Kantor-<versión>-win-x64\ y dist\Kantor-<versión>-win-x64.zip.
-  El SDK de .NET 10 no está en el PATH global: se toma de $env:DOTNET_ROOT, de %USERPROFILE%\.dotnet o del PATH.
+  El SDK de .NET 10 no está en el PATH global: se toma de $env:DOTNET_ROOT, de $env:USERPROFILE\.dotnet o del PATH.
 #>
 param(
     [string]$Configuration = 'Release',
@@ -17,7 +17,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 
-$dotnetHome = if ($env:DOTNET_ROOT) { $env:DOTNET_ROOT } else { '%USERPROFILE%\.dotnet' }
+$dotnetHome = if ($env:DOTNET_ROOT) { $env:DOTNET_ROOT } else { Join-Path $env:USERPROFILE '.dotnet' }
 if (Test-Path (Join-Path $dotnetHome 'dotnet.exe')) {
     $env:DOTNET_ROOT = $dotnetHome
     $env:PATH = "$dotnetHome;$env:PATH"
