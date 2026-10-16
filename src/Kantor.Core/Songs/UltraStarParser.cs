@@ -24,7 +24,7 @@ public static class UltraStarParser
         var text = Decode(File.ReadAllBytes(path));
         var song = Parse(text);
         return new Song(song.Title, song.Artist, song.Bpm, song.GapMilliseconds, song.AudioFile,
-            song.Voices, song.Tags, song.Warnings)
+            song.Voices, song.Tags, song.Warnings, song.VideoFile, song.VideoGapSeconds)
         {
             Directory = Path.GetDirectoryName(Path.GetFullPath(path)),
         };
@@ -155,6 +155,15 @@ public static class UltraStarParser
             audio = Tag("MP3");
         }
 
+        var videoGap = 0.0;
+        if (Tag("VIDEOGAP").Length > 0 && !TryParseDouble(Tag("VIDEOGAP"), out videoGap))
+        {
+            warnings.Add("#VIDEOGAP no es un número; se usa 0.");
+            videoGap = 0;
+        }
+
+        var video = Tag("VIDEO");
+
         var built = voices
             .Select((v, i) => new Voice(v.Name ?? $"P{i + 1}", v.Lines))
             .Where(v => v.HasNotes)
@@ -165,7 +174,8 @@ public static class UltraStarParser
             throw new SongFormatException("El archivo no contiene notas.");
         }
 
-        return new Song(Tag("TITLE"), Tag("ARTIST"), bpm, gap, audio.Length == 0 ? null : audio, built, tags, warnings);
+        return new Song(Tag("TITLE"), Tag("ARTIST"), bpm, gap, audio.Length == 0 ? null : audio, built, tags, warnings,
+            video.Length == 0 ? null : video, videoGap);
     }
 
     private static VoiceBuilder GetVoice(List<VoiceBuilder> voices, int index)

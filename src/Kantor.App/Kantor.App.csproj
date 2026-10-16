@@ -1,11 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
+    <ApplicationIcon>Assets\Branding\kantor.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Kantor.Core\Kantor.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="LibVLCSharp" Version="3.9.4" />
     <PackageReference Include="NAudio" Version="2.2.1" />
+    <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.21" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Jersey 15 (SIL OFL 1.1): ver Assets/Fonts/OFL.txt -->
+    <Resource Include="Assets\Fonts\*.ttf" />
+    <Resource Include="Assets\Characters\**\*.png" />
+    <Resource Include="Assets\Branding\*.png" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -15,6 +29,20 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+    <Version>0.1.0</Version>
+    <Product>Kantor</Product>
+    <Copyright>Copyright (C) 2026 Pablo Pramparo</Copyright>
+    <!-- Solo las cadenas de la propia aplicación: sin las carpetas de idiomas de las bibliotecas de WPF. -->
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
+
+  <!-- Distribución: solo x64. LibVLC trae x86 y x64 y las bibliotecas de enlace (.lib); no hacen falta. -->
+  <Target Name="TrimLibVlcForDistribution" AfterTargets="Publish" Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+    <RemoveDir Directories="$(PublishDir)libvlc\win-x86" />
+    <ItemGroup>
+      <_ImportLibs Include="$(PublishDir)libvlc\win-x64\*.lib" />
+    </ItemGroup>
+    <Delete Files="@(_ImportLibs)" />
+  </Target>
 
 </Project>

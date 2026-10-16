@@ -12,16 +12,21 @@ public partial class CalibrationWindow : Window
 {
     private readonly AudioInputDevice _device;
     private readonly int _channel;
+    private readonly Func<AudioInputDevice, int, CalibrationResult> _run;
     private readonly Action<int> _apply;
     private int _suggested;
 
-    public CalibrationWindow(AudioInputDevice device, int channel, Action<int> apply)
+    /// <param name="engineName">Motor de audio que se mide (la calibración vale solo para él).</param>
+    /// <param name="run">Hace la medición con el motor activo; bloquea unos segundos.</param>
+    public CalibrationWindow(AudioInputDevice device, int channel, string engineName,
+        Func<AudioInputDevice, int, CalibrationResult> run, Action<int> apply)
     {
         InitializeComponent();
         _device = device;
         _channel = channel;
+        _run = run;
         _apply = apply;
-        DeviceText.Text = $"Entrada: {device.Name} · canal {channel + 1}";
+        DeviceText.Text = $"Motor: {engineName} · Entrada: {device.Name} · {device.ChannelLabel(channel)}";
     }
 
     private async void OnStartClick(object sender, RoutedEventArgs e)
@@ -33,7 +38,7 @@ public partial class CalibrationWindow : Window
 
         try
         {
-            var result = await Task.Run(() => CalibrationRunner.Run(_device, _channel));
+            var result = await Task.Run(() => _run(_device, _channel));
             Show(result);
         }
         catch (Exception ex) when (ex is System.Runtime.InteropServices.COMException or InvalidOperationException
@@ -60,8 +65,11 @@ public partial class CalibrationWindow : Window
         }
 
         _suggested = result.SuggestedDelayMs;
+        var compensated = result.CompensatedMs > 0
+            ? $" El controlador ya compensa {result.CompensatedMs:0.#} ms de eso."
+            : string.Empty;
         StatusText.Text = $"Latencia medida: {result.MedianMs:0} ms (± {result.SpreadMs:0.#} ms), " +
-                          $"{result.Accepted} de {result.Expected} barridos claros.";
+                          $"{result.Accepted} de {result.Expected} barridos claros.{compensated}";
         ResultText.Text = $"Retardo de voz sugerido: {result.SuggestedDelayMs} ms";
         ApplyButton.IsEnabled = true;
     }

@@ -1,0 +1,184 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- Copyright (C) 2026 Pablo Pramparo -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:pixel="clr-namespace:Kantor.App.Pixel">
+
+    <!-- Paleta -->
+    <Color x:Key="P1Color">#19D3FF</Color>
+    <Color x:Key="P2Color">#FF3DB8</Color>
+    <Color x:Key="GoldColor">#FFC933</Color>
+    <Color x:Key="NightColor">#0B1030</Color>
+    <Color x:Key="PanelColor">#10142E</Color>
+    <Color x:Key="TextColor">#F4F6FF</Color>
+    <Color x:Key="DimColor">#8A91B8</Color>
+    <Color x:Key="InkColor">#050718</Color>
+
+    <SolidColorBrush x:Key="P1Brush" Color="{StaticResource P1Color}" />
+    <SolidColorBrush x:Key="P2Brush" Color="{StaticResource P2Color}" />
+    <SolidColorBrush x:Key="GoldBrush" Color="{StaticResource GoldColor}" />
+    <SolidColorBrush x:Key="NightBrush" Color="{StaticResource NightColor}" />
+    <SolidColorBrush x:Key="PanelBrush" Color="{StaticResource PanelColor}" />
+    <SolidColorBrush x:Key="TextBrush" Color="{StaticResource TextColor}" />
+    <SolidColorBrush x:Key="DimBrush" Color="{StaticResource DimColor}" />
+    <SolidColorBrush x:Key="InkBrush" Color="{StaticResource InkColor}" />
+    <SolidColorBrush x:Key="HighlightBrush" Color="#33FFFFFF" />
+
+    <!-- Tipografías: pixel solo para títulos y elementos destacados; el texto corrido usa Segoe UI -->
+    <FontFamily x:Key="PixelFont">pack://application:,,,/Assets/Fonts/#Jersey 15</FontFamily>
+    <FontFamily x:Key="BodyFont">Segoe UI</FontFamily>
+
+    <!-- Botones de la barra de título propia (glifos de Segoe MDL2 Assets / Segoe Fluent Icons) -->
+    <Style x:Key="TitleButton" TargetType="Button">
+        <Setter Property="Width" Value="48" />
+        <Setter Property="Height" Value="38" />
+        <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Bg" Background="Transparent">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bg" Property="Background" Value="#2A3370" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Bg" Property="Background" Value="#3A4380" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="TitleCloseButton" TargetType="Button" BasedOn="{StaticResource TitleButton}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Bg" Background="Transparent">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bg" Property="Background" Value="#C42B1C" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Bg" Property="Background" Value="#8E1F14" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--
+        Barra de desplazamiento vertical pixel: carril oscuro y pulgar cian escalonado (dorado al agarrarlo) con un
+        largo mínimo visible (PixelScrollTrack). Es una clave, no un estilo implícito: se aplica a los visores que
+        la piden (los de pantallas verticales); una barra horizontal usaría el aspecto estándar.
+    -->
+    <Style x:Key="PixelScrollBar" TargetType="ScrollBar">
+        <Setter Property="Width" Value="22" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ScrollBar">
+                    <Grid Background="Transparent">
+                        <pixel:PixelScrollTrack />
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Botón pixel: marco escalonado, sombra dura, foco dorado con cursor, "se hunde" al presionar -->
+    <Style x:Key="PixelButton" TargetType="Button">
+        <Setter Property="FontFamily" Value="{StaticResource PixelFont}" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="FontSize" Value="20" />
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid x:Name="Root">
+                        <pixel:PixelFrame x:Name="Frame" Fill="{StaticResource PanelBrush}"
+                                          BorderBrush="{StaticResource P1Brush}" Highlight="{StaticResource HighlightBrush}"
+                                          Shadow="{StaticResource InkBrush}" BorderUnits="1" NotchUnits="2"
+                                          ShadowUnits="1" Padding="20,10">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Polygon x:Name="Cursor" Points="0,0 12,8 0,16" Fill="{StaticResource GoldBrush}"
+                                         VerticalAlignment="Center" Margin="0,0,10,0" Visibility="Collapsed" />
+                                <ContentPresenter VerticalAlignment="Center" />
+                            </StackPanel>
+                        </pixel:PixelFrame>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Frame" Property="BorderBrush" Value="{StaticResource GoldBrush}" />
+                            <Setter TargetName="Cursor" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Frame" Property="BorderBrush" Value="{StaticResource GoldBrush}" />
+                            <Setter TargetName="Cursor" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Frame" Property="Margin" Value="4,4,0,0" />
+                            <Setter TargetName="Frame" Property="ShadowUnits" Value="0" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Root" Property="Opacity" Value="0.45" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Botón "ficha": como PixelButton pero sin cursor de flecha (no agrega ancho ni corre el contenido al pasar el
+         mouse o enfocar): solo cambia el color del marco. Para grillas de imágenes y botones chicos. -->
+    <Style x:Key="PixelTileButton" TargetType="Button">
+        <Setter Property="FontFamily" Value="{StaticResource PixelFont}" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="FontSize" Value="20" />
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Padding" Value="6" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid x:Name="Root">
+                        <pixel:PixelFrame x:Name="Frame" Fill="{StaticResource PanelBrush}"
+                                          BorderBrush="{StaticResource P1Brush}" Highlight="{StaticResource HighlightBrush}"
+                                          Shadow="{StaticResource InkBrush}" BorderUnits="1" NotchUnits="2"
+                                          ShadowUnits="1" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </pixel:PixelFrame>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Frame" Property="BorderBrush" Value="{StaticResource GoldBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Frame" Property="BorderBrush" Value="{StaticResource GoldBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Frame" Property="Margin" Value="3,3,0,0" />
+                            <Setter TargetName="Frame" Property="ShadowUnits" Value="0" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Root" Property="Opacity" Value="0.45" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

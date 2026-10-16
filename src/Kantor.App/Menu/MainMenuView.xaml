@@ -1,0 +1,44 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- Copyright (C) 2026 Pablo Pramparo -->
+<UserControl x:Class="Kantor.App.Menu.MainMenuView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:pixel="clr-namespace:Kantor.App.Pixel"
+             Focusable="False">
+    <Grid Background="#070A24">
+        <pixel:PixelBackdrop x:Name="Backdrop" />
+
+        <!-- Composición de 1280 × 720 que escala con la ventana; el fondo llena todo el espacio -->
+        <pixel:PixelViewbox>
+            <Grid Width="1280" Height="720">
+                <Image x:Name="Logo" Source="/Assets/Branding/kantor-logo.png" Width="820"
+                       HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,40,0,0"
+                       RenderTransformOrigin="0.5,0.5">
+                    <Image.RenderTransform>
+                        <TranslateTransform x:Name="LogoBob" />
+                    </Image.RenderTransform>
+                </Image>
+
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,372,0,0">
+                    <Button x:Name="SingButton" Style="{StaticResource PixelButton}" FontSize="34" Width="460"
+                            Click="OnSingClick" />
+                    <Button x:Name="PlayersButton" Style="{StaticResource PixelButton}" FontSize="34" Width="460"
+                            Margin="0,12,0,0" Click="OnPlayersClick" />
+                    <Button x:Name="OptionsButton" Style="{StaticResource PixelButton}" FontSize="34" Width="460"
+                            Margin="0,12,0,0" Click="OnOptionsClick" />
+                    <Button x:Name="ExitButton" Style="{StaticResource PixelButton}" FontSize="34" Width="460"
+                            Margin="0,12,0,0" Click="OnExitClick" />
+                </StackPanel>
+
+                <TextBlock x:Name="SessionText" FontFamily="{StaticResource PixelFont}" FontSize="26"
+                           Foreground="{StaticResource P1Brush}" HorizontalAlignment="Right"
+                           VerticalAlignment="Top" Margin="0,12,24,0" TextTrimming="CharacterEllipsis"
+                           MaxWidth="560" />
+
+                <pixel:PixelText x:Name="HintText" FontFamily="{StaticResource PixelFont}" FontSize="26"
+                                 Foreground="{StaticResource DimBrush}" HorizontalAlignment="Center"
+                                 VerticalAlignment="Bottom" Margin="0,0,0,20" />
+            </Grid>
+        </pixel:PixelViewbox>
+    </Grid>
+</UserControl>

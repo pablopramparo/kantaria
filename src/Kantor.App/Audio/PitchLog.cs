@@ -18,7 +18,7 @@ public sealed class PitchLog : IDisposable
     public const string Variable = "KANTOR_PITCH_LOG";
 
     private const string Header =
-        "host_s,song_s,channel,level_db,hz,confidence,min_cmnd,voiced,dropped,discontinuities";
+        "host_s,song_s,channel,level_db,hz,confidence,min_cmnd,voiced,dropped,discontinuities,slot";
 
     private readonly object _gate = new();
     private readonly StreamWriter _writer;
@@ -55,13 +55,13 @@ public sealed class PitchLog : IDisposable
     }
 
     /// <param name="songTime">Posición en la canción del centro de la ventana; null si el cuadro se descartó.</param>
-    public void Frame(int channel, PitchFrame frame, TimeSpan? songTime, int discontinuities)
+    public void Frame(int channel, PitchFrame frame, TimeSpan? songTime, int discontinuities, int slot = 0)
     {
         var inv = CultureInfo.InvariantCulture;
         var line = string.Create(inv,
             $"{HostClock.ToSeconds(frame.CenterHost):F4},{(songTime is { } t ? t.TotalSeconds.ToString("F4", inv) : string.Empty)}," +
             $"{channel},{frame.LevelDb:F1},{frame.Frequency:F1},{frame.Confidence:F3},{frame.MinCmnd:F3}," +
-            $"{(frame.IsVoiced ? 1 : 0)},{(songTime is null ? 1 : 0)},{discontinuities}");
+            $"{(frame.IsVoiced ? 1 : 0)},{(songTime is null ? 1 : 0)},{discontinuities},{slot}");
 
         lock (_gate)
         {

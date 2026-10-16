@@ -24,6 +24,14 @@ public sealed record AudioInputDevice(
     public string Label => Channels == 1
         ? $"{Name} — 1 canal, {SampleRate / 1000.0:0.#} kHz"
         : $"{Name} — {Channels} canales, {SampleRate / 1000.0:0.#} kHz";
+
+    /// <summary>Nombre de cada canal según el controlador (por ejemplo "Input 1", "Loop 1"), si lo informa.</summary>
+    public IReadOnlyList<string>? ChannelNames { get; init; }
+
+    public string ChannelLabel(int channel) =>
+        ChannelNames is { } names && channel >= 0 && channel < names.Count && !string.IsNullOrWhiteSpace(names[channel])
+            ? $"Canal {channel + 1} · {names[channel]}"
+            : $"Canal {channel + 1}";
 }
 
 /// <summary>Última lectura de un canal: nivel del último bloque y último análisis de tono, si el canal se analiza.</summary>
@@ -98,6 +106,24 @@ public interface IAudioEngine : IDisposable
     IReadOnlyList<AudioInputDevice> ListInputs();
 
     ICaptureSession CreateCapture(AudioInputDevice device);
+
+    /// <summary>
+    /// Pares de salida elegibles ("Output 1 + Output 2", …). Vacío si el motor usa la salida predeterminada de
+    /// Windows y no deja elegir.
+    /// </summary>
+    IReadOnlyList<string> OutputPairs { get; }
+
+    /// <summary>Par de salida en uso (índice en <see cref="OutputPairs"/>); sin sentido si no hay pares.</summary>
+    int OutputPair { get; }
+
+    /// <summary>El motor dejó de funcionar (por ejemplo, el controlador pidió reiniciarse). El argumento explica por qué.</summary>
+    event EventHandler<string>? Failed;
+
+    /// <summary>
+    /// Mide el retardo de voz que necesita este motor con esta entrada y canal, con la reproducción de este
+    /// mismo motor. Bloquea unos segundos: llamar desde un hilo de trabajo.
+    /// </summary>
+    Calibration.CalibrationResult Calibrate(AudioInputDevice input, int channel);
 }
 
 /// <summary>Decisión de qué motor usar dada la preferencia del usuario y lo que hay disponible.</summary>

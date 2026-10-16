@@ -98,8 +98,12 @@ public sealed class Song
         string? audioFile,
         IReadOnlyList<Voice> voices,
         IReadOnlyList<KeyValuePair<string, string>> tags,
-        IReadOnlyList<string> warnings)
+        IReadOnlyList<string> warnings,
+        string? videoFile = null,
+        double videoGapSeconds = 0)
     {
+        VideoFile = videoFile;
+        VideoGapSeconds = videoGapSeconds;
         Title = title;
         Artist = artist;
         Bpm = bpm;
@@ -121,6 +125,15 @@ public sealed class Song
 
     /// <summary>Nombre de archivo de audio tal como figura en el TXT (#AUDIO, o #MP3 en el formato histórico).</summary>
     public string? AudioFile { get; }
+
+    /// <summary>Nombre del archivo de video tal como figura en el TXT (#VIDEO), si lo hay.</summary>
+    public string? VideoFile { get; }
+
+    /// <summary>
+    /// #VIDEOGAP en segundos: tiempo del video que corresponde al inicio del audio (el video se muestra en
+    /// <c>posición del audio + VideoGapSeconds</c>; si es negativo, el video arranca después).
+    /// </summary>
+    public double VideoGapSeconds { get; }
 
     public IReadOnlyList<Voice> Voices { get; }
 

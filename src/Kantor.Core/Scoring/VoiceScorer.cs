@@ -31,6 +31,17 @@ public readonly record struct ScoreSnapshot(
 public readonly record struct BeatResult(int Beat, NoteKind Kind, int DisplayTone, bool Hit);
 
 /// <summary>
+/// Cómo le fue a un jugador en una frase ya cerrada. <see cref="Fraction"/> es la parte de los puntos posibles de
+/// esa frase que obtuvo (0–1), con el mismo peso por nota que el puntaje: normal 1, dorada 2, rap 1, rap dorado 2.
+/// Es relativa a la propia frase, así que una frase corta no se penaliza. No incluye el bono de línea.
+/// </summary>
+/// <param name="Line">Índice de la frase en la voz.</param>
+/// <param name="Sequence">Orden de cierre dentro de la ejecución (0, 1, 2…).</param>
+/// <param name="Fraction">Parte de los puntos de la frase obtenidos, entre 0 y 1.</param>
+/// <param name="EndTime">Instante de la canción en que termina la frase.</param>
+public readonly record struct LineResult(int Line, int Sequence, double Fraction, TimeSpan EndTime);
+
+/// <summary>
 /// Puntúa una voz contra el historial de tono de una entrada. No conoce el origen del tono (YIN, WASAPI)
 /// ni el dibujo: consume la voz, la conversión beat/tiempo y un <see cref="PitchTimeline"/>.
 /// </summary>
@@ -57,6 +68,8 @@ public sealed class VoiceScorer
     private readonly ScoredBeat[] _beats;
     private readonly int[] _lineValue;
     private readonly int[] _lineBeats;
+    private readonly int[] _lineEndBeat;
+    private readonly List<LineResult> _lineResults = [];
     private readonly int _scoreValue;
     private readonly int _scoredLines;
     private readonly List<PitchSample> _scratch = [];
@@ -80,6 +93,7 @@ public sealed class VoiceScorer
         var beats = new List<ScoredBeat>();
         _lineValue = new int[voice.Lines.Count];
         _lineBeats = new int[voice.Lines.Count];
+        _lineEndBeat = new int[voice.Lines.Count];
         for (var l = 0; l < voice.Lines.Count; l++)
         {
             foreach (var note in voice.Lines[l].Notes)
@@ -92,6 +106,7 @@ public sealed class VoiceScorer
 
                 _lineValue[l] += note.Length * factor;
                 _lineBeats[l] += note.Length;
+                _lineEndBeat[l] = Math.Max(_lineEndBeat[l], note.EndBeat);
                 for (var b = note.StartBeat; b < note.EndBeat; b++)
                 {
                     beats.Add(new ScoredBeat(b, note.Kind, note.Tone, l));
@@ -122,6 +137,16 @@ public sealed class VoiceScorer
     /// llama a <see cref="Advance"/>.
     /// </summary>
     public IReadOnlyList<BeatResult> Results => _results;
+
+    /// <summary>
+    /// Frases con puntaje ya cerradas, en orden de cierre. Se vacía con <see cref="Reset"/> (y entonces sube
+    /// <see cref="Generation"/>). Quien las consume lleva su propio índice. Solo para el hilo que llama a
+    /// <see cref="Advance"/>.
+    /// </summary>
+    public IReadOnlyList<LineResult> LineResults => _lineResults;
+
+    /// <summary>Cuenta cuántas veces se volvió a cero: cambia cuando <see cref="LineResults"/> deja de ser continuación de lo visto.</summary>
+    public int Generation { get; private set; }
 
     public ScoreSnapshot Snapshot
     {
@@ -211,6 +236,8 @@ public sealed class VoiceScorer
         _linesCompleted = 0;
         _perfectionSum = 0;
         _results.Clear();
+        _lineResults.Clear();
+        Generation++;
         Array.Clear(_lineHitWeight);
         _lineRemaining = [.. _lineBeats];
     }
@@ -290,6 +317,9 @@ public sealed class VoiceScorer
         {
             return;
         }
+
+        _lineResults.Add(new LineResult(line, _lineResults.Count,
+            Math.Clamp((double)_lineHitWeight[line] / _lineValue[line], 0, 1), _timing.TimeOf(_lineEndBeat[line])));
 
         // Perfección = puntos de la frase / (máximo de la frase - 2), entre 0 y 1; los 2 puntos de holgura
         // evitan exigir una frase perfecta. Frases de máximo muy bajo cuentan como perfectas.

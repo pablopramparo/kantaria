@@ -81,10 +81,13 @@ public sealed class SongPlayer : ISongPlayer
 
     public void Load(string audioPath)
     {
+        // Abrir el archivo puede tardar (lectura del disco, cabeceras): se hace FUERA del candado. La interfaz
+        // consulta la posición y el estado cada 33 ms bajo ese mismo candado; abrir adentro la congelaba mientras tanto.
+        var reader = new AudioFileReader(audioPath);
         lock (_sync)
         {
             Unload();
-            _reader = new AudioFileReader(audioPath);
+            _reader = reader;
         }
     }
 

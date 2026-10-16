@@ -19,6 +19,12 @@ public static class DifficultyExtensions
 /// <summary>Parámetros de la puntuación. Son inmutables: cambiar uno implica puntuar de nuevo desde el principio.</summary>
 public sealed record ScoringRules
 {
+    /// <summary>
+    /// Versión del sistema de puntuación que se guarda con cada interpretación del historial. Subirla cuando una
+    /// regla cambie de modo que los puntajes ya no sean comparables.
+    /// </summary>
+    public const int ScoringVersion = 1;
+
     /// <summary>Máximo de la canción.</summary>
     public const int MaxSongPoints = 10_000;
 

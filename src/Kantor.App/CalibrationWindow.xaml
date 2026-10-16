@@ -14,7 +14,7 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" TextWrapping="Wrap" FontSize="14" LineHeight="21">
-            Kantor va a reproducir 5 barridos de sonido por la salida predeterminada de Windows y los va a
+            Kantor va a reproducir 5 barridos de sonido por la salida del motor de audio activo y los va a
             escuchar con la entrada elegida. Con eso mide cuánto tarda el audio en tu equipo y sugiere el
             retardo de voz.
         </TextBlock>

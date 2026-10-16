@@ -234,7 +234,8 @@ public sealed record CalibrationResult(
     int Accepted,
     int Expected,
     int SuggestedDelayMs,
-    string? Problem);
+    string? Problem,
+    double CompensatedMs = 0);
 
 public static class LatencyEvaluation
 {

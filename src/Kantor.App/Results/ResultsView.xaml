@@ -1,0 +1,45 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- Copyright (C) 2026 Pablo Pramparo -->
+<UserControl x:Class="Kantor.App.Results.ResultsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:pixel="clr-namespace:Kantor.App.Pixel"
+             Focusable="False">
+    <Grid Background="#070A24">
+        <pixel:PixelBackdrop x:Name="Backdrop" />
+
+        <!-- Composición de 1280 de ancho que escala con la ventana; su alto crece si el contenido lo necesita
+             (comentarios largos) y todo se reduce junto, sin superposiciones. El fondo llena todo el espacio. -->
+        <pixel:PixelViewbox>
+            <Grid Width="1280" MinHeight="720">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <pixel:PixelText x:Name="TitleText" Grid.Row="0" FontFamily="{StaticResource PixelFont}" FontSize="60"
+                                 Foreground="{StaticResource GoldBrush}" Outline="{StaticResource InkBrush}"
+                                 OutlineSize="4" Shadow="{StaticResource InkBrush}" ShadowOffset="4"
+                                 HorizontalAlignment="Center" Margin="0,18,0,0" />
+
+                <Grid x:Name="Columns" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Top"
+                      Margin="0,10,0,0" />
+
+                <StackPanel Grid.Row="2" Margin="0,10,0,28">
+                    <!-- Avance automático: la cuenta regresiva hasta la próxima canción de la cola -->
+                    <TextBlock x:Name="CountdownText" FontFamily="{StaticResource PixelFont}" FontSize="30"
+                               Foreground="{StaticResource GoldBrush}" HorizontalAlignment="Center"
+                               Margin="0,0,0,10" Visibility="Collapsed" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button x:Name="NextButton" Style="{StaticResource PixelButton}" Margin="0,0,28,0"
+                                Visibility="Collapsed" Click="OnNextClick" />
+                        <Button x:Name="ReplayButton" Style="{StaticResource PixelButton}" Click="OnReplayClick" />
+                        <Button x:Name="CloseButton" Style="{StaticResource PixelButton}" Margin="28,0,0,0"
+                                Click="OnCloseClick" />
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </pixel:PixelViewbox>
+    </Grid>
+</UserControl>

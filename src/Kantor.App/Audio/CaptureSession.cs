@@ -7,34 +7,30 @@ using NAudio.CoreAudioApi;
 namespace Kantor.App.Audio;
 
 /// <summary>
-/// Captura un dispositivo por WASAPI y mide el nivel de cada canal por separado. El tono solo se
-/// analiza en los canales elegidos con <see cref="SetPitchChannels"/>, y cada análisis lleva el
-/// intervalo de las muestras analizadas en la base de tiempo común. El audio no se reproduce ni
-/// se guarda: solo se miden niveles y tono.
+/// Captura un dispositivo por WASAPI (modo compartido) y mide el nivel de cada canal por separado. El tono
+/// solo se analiza en los canales elegidos con <see cref="SetPitchChannels"/>, y cada análisis lleva el
+/// intervalo de las muestras analizadas en la base de tiempo común. El audio no se reproduce ni se guarda:
+/// solo se miden niveles y tono.
 /// </summary>
 public sealed class CaptureSession : ICaptureSession
 {
-    private readonly object _gate = new();
     private readonly AudioInputDevice _device;
-    private readonly ChannelReading[] _readings;
-    private readonly Dictionary<int, PitchTracker> _trackers = [];
+    private readonly ChannelAnalyzer _analyzer;
     private readonly List<(int Channel, PitchFrame Frame)> _emitted = []; // solo el hilo de captura
 
     private WasapiInputCapture? _capture;
     private MMDevice? _mmDevice;
     private float[][] _channelBuffers;
+    private int _discontinuities;
 
     public CaptureSession(AudioInputDevice device)
     {
         _device = device;
-        _readings = new ChannelReading[device.Channels];
-        Array.Fill(_readings, new ChannelReading(LevelReading.Silence, null));
+        _analyzer = new ChannelAnalyzer(device.Channels, device.SampleRate);
         _channelBuffers = NewBuffers(4096);
     }
 
     public AudioInputDevice Device => _device;
-
-    private int _discontinuities;
 
     /// <summary>Paquetes que llegaron marcados con un hueco en el flujo desde que arrancó (diagnóstico).</summary>
     public int Discontinuities => Volatile.Read(ref _discontinuities);
@@ -67,31 +63,9 @@ public sealed class CaptureSession : ICaptureSession
     }
 
     /// <summary>Define qué canales se analizan para tono; el resto solo mide nivel.</summary>
-    public void SetPitchChannels(IEnumerable<int> channels)
-    {
-        var wanted = channels.Where(c => c >= 0 && c < _device.Channels).ToHashSet();
-        lock (_gate)
-        {
-            foreach (var c in _trackers.Keys.Where(c => !wanted.Contains(c)).ToList())
-            {
-                _trackers.Remove(c);
-                _readings[c] = _readings[c] with { Pitch = null };
-            }
+    public void SetPitchChannels(IEnumerable<int> channels) => _analyzer.SetPitchChannels(channels);
 
-            foreach (var c in wanted.Where(c => !_trackers.ContainsKey(c)))
-            {
-                _trackers[c] = new PitchTracker(_device.SampleRate);
-            }
-        }
-    }
-
-    public ChannelReading Read(int channel)
-    {
-        lock (_gate)
-        {
-            return _readings[channel];
-        }
-    }
+    public ChannelReading Read(int channel) => _analyzer.Read(channel);
 
     public void Dispose()
     {
@@ -128,37 +102,11 @@ public sealed class CaptureSession : ICaptureSession
             Interlocked.Increment(ref _discontinuities);
         }
 
-        var buffers = _channelBuffers;
-        var decoded = PcmDecoder.Deinterleave(data, _device.Format, _device.Channels, buffers);
-        var emitted = _emitted;
-        emitted.Clear();
+        var decoded = PcmDecoder.Deinterleave(data, _device.Format, _device.Channels, _channelBuffers);
+        _emitted.Clear();
+        _analyzer.Process(_channelBuffers, decoded, hostTicks, discontinuity, _emitted);
 
-        lock (_gate)
-        {
-            for (var c = 0; c < _device.Channels; c++)
-            {
-                var block = buffers[c].AsSpan(0, decoded);
-                var pitch = _readings[c].Pitch;
-                if (_trackers.TryGetValue(c, out var tracker))
-                {
-                    if (discontinuity)
-                    {
-                        // Hubo un hueco en el flujo: lo acumulado ya no es contiguo con este paquete.
-                        tracker.Reset();
-                    }
-
-                    if (tracker.Push(block, hostTicks, out var frame))
-                    {
-                        pitch = frame;
-                        emitted.Add((c, frame));
-                    }
-                }
-
-                _readings[c] = new ChannelReading(LevelMeter.Measure(block), pitch);
-            }
-        }
-
-        foreach (var (channel, frame) in emitted)
+        foreach (var (channel, frame) in _emitted)
         {
             PitchFrameReady?.Invoke(channel, frame);
         }
