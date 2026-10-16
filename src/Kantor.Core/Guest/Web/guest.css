@@ -1,0 +1,594 @@
+/*
+  Página de invitados de Kantor. Los valores salen de la aplicación WPF:
+  Theme.xaml (paleta, Jersey 15, PixelButton), Pixel/PixelFrame (marco de esquinas en escalera, relieve y sombra
+  dura de 1 unidad), SongListView.xaml (fila: borde #3A4380, seleccionada = borde dorado doble, sombra #C79A1A,
+  relleno #34408A; buscador #0A0D22 con borde P1; detalle con borde P2) y Pixel/PixelBackdrop (cielo en bandas
+  planas #070A24 → #241252, piso con perspectiva, estrellas y confeti).
+*/
+
+@font-face {
+  font-family: "Jersey 15";
+  src: url("/assets/Jersey15-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: dark;
+
+  /* Theme.xaml */
+  --p1: #19D3FF;
+  --p2: #FF3DB8;
+  --p3: #5BE56B;
+  --p4: #A06BFF;
+  --gold: #FFC933;
+  --night: #0B1030;
+  --panel: #10142E;
+  --text: #F4F6FF;
+  --dim: #8A91B8;
+  --ink: #050718;
+  --hl: rgba(255, 255, 255, 0.2);
+
+  /* SongListView.xaml / PixelUi.cs */
+  --row-border: #3A4380;
+  --row-selected: #34408A;
+  --gold-shadow: #C79A1A;
+  --text-2: #9AA3D6;
+  --field: #0A0D22;
+  --cover-bg: #1B1040;
+
+  /* PixelBackdrop.cs */
+  --sky-top: #070A24;
+  --sky-bottom: #241252;
+
+  --pixel: "Jersey 15", "Arial Narrow", Impact, sans-serif;
+  --body: system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* una "unidad de píxel" del marco (en la PC son 4 px de una composición de 1280) */
+  --u: 3px;
+}
+
+@media (min-width: 600px) {
+  :root { --u: 4px; }
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--sky-top);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.35;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
+}
+
+[hidden] { display: none !important; }
+
+#backdrop {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  image-rendering: pixelated;
+}
+
+.app {
+  position: relative;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 16px calc(24px + env(safe-area-inset-bottom));
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
+}
+
+/* ---- Marco pixel (PixelFrame): borde, relleno, relieve y sombra dura, esquinas en escalera ------------------ */
+
+.px {
+  --bc: var(--p1);
+  --fill: var(--panel);
+  --sh: var(--ink);
+  --b: 1;                                   /* grosor del borde en unidades */
+  position: relative;
+  isolation: isolate;
+  padding: calc(var(--u) * (var(--b) + 2));
+  margin-right: var(--u);
+  margin-bottom: var(--u);
+  filter: drop-shadow(var(--u) var(--u) 0 var(--sh));
+}
+
+.px::before,
+.px::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+
+.px::before {   /* borde: rectángulo con cada esquina cortada en dos escalones */
+  background: var(--bc);
+  clip-path: polygon(
+    0 calc(var(--u) * 2), var(--u) calc(var(--u) * 2), var(--u) var(--u), calc(var(--u) * 2) var(--u),
+    calc(var(--u) * 2) 0, calc(100% - var(--u) * 2) 0, calc(100% - var(--u) * 2) var(--u),
+    calc(100% - var(--u)) var(--u), calc(100% - var(--u)) calc(var(--u) * 2), 100% calc(var(--u) * 2),
+    100% calc(100% - var(--u) * 2), calc(100% - var(--u)) calc(100% - var(--u) * 2),
+    calc(100% - var(--u)) calc(100% - var(--u)), calc(100% - var(--u) * 2) calc(100% - var(--u)),
+    calc(100% - var(--u) * 2) 100%, calc(var(--u) * 2) 100%, calc(var(--u) * 2) calc(100% - var(--u)),
+    var(--u) calc(100% - var(--u)), var(--u) calc(100% - var(--u) * 2), 0 calc(100% - var(--u) * 2));
+}
+
+.px::after {    /* relleno, con la línea de relieve arriba */
+  inset: calc(var(--u) * var(--b));
+  background:
+    linear-gradient(var(--hl), var(--hl)) var(--u) 0 / calc(100% - var(--u) * 2) var(--u) no-repeat,
+    var(--fill);
+  clip-path: polygon(
+    0 var(--u), var(--u) var(--u), var(--u) 0, calc(100% - var(--u)) 0, calc(100% - var(--u)) var(--u),
+    100% var(--u), 100% calc(100% - var(--u)), calc(100% - var(--u)) calc(100% - var(--u)),
+    calc(100% - var(--u)) 100%, var(--u) 100%, var(--u) calc(100% - var(--u)), 0 calc(100% - var(--u)));
+}
+
+.px-gold { --bc: var(--gold); }
+.px-pink { --bc: var(--p2); }
+.px-small { padding: calc(var(--u) * 2) calc(var(--u) * 3); }
+.px-field { --fill: var(--field); }
+
+/* ---- Botón arcade (PixelButton): "se hunde" al presionar, foco dorado --------------------------------------- */
+
+.px-button {
+  appearance: none;
+  border: 0;
+  border-radius: 0;
+  color: var(--text);
+  font-family: var(--pixel);
+  font-size: 26px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  min-height: 52px;
+  padding: calc(var(--u) * 3) calc(var(--u) * 5);
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  background: transparent;
+}
+
+.px-button:focus-visible,
+.px-small:focus-visible { --bc: var(--gold); outline: none; }
+
+.px-button:active:not(:disabled),
+.px-small:active {
+  transform: translate(var(--u), var(--u));
+  filter: none;
+}
+
+.px-button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.px-primary { --bc: var(--gold); color: var(--gold); }
+
+@media (hover: hover) {
+  .px-button:hover:not(:disabled),
+  .px-small:hover { --bc: var(--gold); }
+}
+
+/* ---- Cabecera -------------------------------------------------------------------------------------------------- */
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: calc(10px + env(safe-area-inset-top));
+}
+
+.logo {
+  display: block;
+  height: auto;
+  width: min(46vw, 220px);
+  image-rendering: auto;
+}
+
+.lang {
+  background: transparent;
+  border: 0;
+  color: var(--text);
+  font-family: var(--pixel);
+  font-size: 24px;
+  min-width: 56px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.screen { padding-bottom: 28px; }
+
+.title {
+  margin: 8px 0 14px;
+  font-family: var(--pixel);
+  font-weight: 400;
+  font-size: 40px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--gold);
+  text-shadow: 2px 2px 0 var(--ink), -2px 2px 0 var(--ink), 2px -2px 0 var(--ink), -2px -2px 0 var(--ink);
+}
+
+/* ---- Buscador (SearchBox: relleno #0A0D22, borde P1) --------------------------------------------------------- */
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: sticky;
+  top: calc(env(safe-area-inset-top) + 4px);
+  z-index: 5;
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  appearance: none;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  caret-color: var(--gold);
+  font-family: var(--pixel);
+  font-size: 28px;
+  letter-spacing: 0.02em;
+}
+
+.search input::placeholder { color: var(--dim); opacity: 1; }
+.search input::-webkit-search-cancel-button { display: none; }
+
+.search:focus-within { --bc: var(--gold); }
+
+.clear {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--dim);
+  font-family: var(--pixel);
+  font-size: 36px;
+  line-height: 1;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.count {
+  margin: 8px 2px 10px;
+  color: var(--dim);
+  font-size: 15px;
+  min-height: 1.35em;
+}
+
+/* ---- Lista de canciones (SongRow) -------------------------------------------------------------------------- */
+
+.songs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.songs li { margin: 0 0 10px; content-visibility: auto; contain-intrinsic-size: auto 88px; }
+
+.song {
+  --bc: var(--row-border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: calc(100% - var(--u));
+  min-height: 72px;
+  text-align: left;
+  color: var(--text);
+  font: inherit;
+  appearance: none;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+  padding: calc(var(--u) * 3);
+}
+
+.song:active { --bc: var(--gold); --b: 2; --fill: var(--row-selected); --sh: var(--gold-shadow); }
+.song:focus-visible { --bc: var(--gold); outline: none; }
+
+@media (hover: hover) {
+  .song:hover { --bc: var(--p1); }
+}
+
+.cover {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  background: var(--cover-bg);
+  border: 2px solid var(--row-border);
+  display: grid;
+  place-items: center;
+  color: var(--row-border);
+  font-size: 26px;
+  overflow: hidden;
+}
+
+.cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.meta { flex: 1; min-width: 0; }
+
+.name,
+.sub {
+  font-family: var(--pixel);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.name { font-size: 28px; line-height: 1.05; color: var(--text); }
+.sub { font-size: 23px; line-height: 1.1; color: var(--text-2); }
+
+.tag {
+  color: var(--dim);
+  font-family: var(--body);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.go {          /* indicador de "se puede elegir": el cursor dorado de los botones */
+  flex: none;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 9px 0 9px 13px;
+  border-color: transparent transparent transparent var(--gold);
+}
+
+.more { display: block; margin: 8px auto 0; }
+
+.sentinel { height: 1px; }
+
+/* ---- Estados vacío / carga / error ---------------------------------------------------------------------- */
+
+.state {
+  margin: 20px 0 0;
+  padding: calc(var(--u) * 6) calc(var(--u) * 5);
+  text-align: center;
+}
+
+.state-box {
+  --bc: var(--row-border);
+  position: relative;
+}
+
+.state h2 {
+  margin: 0 0 6px;
+  font-family: var(--pixel);
+  font-weight: 400;
+  font-size: 34px;
+  color: var(--gold);
+}
+
+.state p { margin: 0 0 14px; color: var(--text-2); }
+.state p:last-child { margin-bottom: 0; }
+.state .px-button { margin-top: 4px; }
+
+.state.error h2 { color: var(--p2); }
+
+.loading h2::after { content: ""; display: inline-block; width: 0; }
+
+/* ---- Pantalla B ----------------------------------------------------------------------------------------- */
+
+.back { margin: 4px 0 6px; min-height: 48px; font-size: 24px; padding: calc(var(--u) * 2) calc(var(--u) * 4); }
+
+.chosen {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  --fill: var(--panel);
+}
+
+.chosen .cover { width: 64px; height: 64px; border-color: var(--p2); color: var(--p2); }
+
+.hint {
+  margin: 14px 2px 10px;
+  color: var(--text-2);
+  font-size: 15px;
+}
+
+.players {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 10px;
+}
+
+.player {
+  --bc: var(--row-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  color: var(--text);
+  font: inherit;
+  appearance: none;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+  padding: calc(var(--u) * 3) calc(var(--u) * 2);
+}
+
+.player .face {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  background: var(--cover-bg);
+  border: 3px solid var(--row-border);
+  display: grid;
+  place-items: center;
+  overflow: visible;
+}
+
+.player .face img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  image-rendering: pixelated;
+}
+
+.player .face .pic {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  font-family: var(--pixel);
+  font-size: 44px;
+  color: var(--dim);
+}
+
+.player .who {
+  max-width: 100%;
+  font-family: var(--pixel);
+  font-size: 28px;
+  line-height: 1.05;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.player .order {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 6px;
+  display: none;
+  place-items: center;
+  background: var(--slot, var(--p1));
+  color: var(--ink);
+  font-family: var(--pixel);
+  font-size: 26px;
+  line-height: 1;
+  border: 2px solid var(--ink);
+}
+
+.player[aria-pressed="true"] {
+  --bc: var(--gold);
+  --b: 2;
+  --fill: var(--row-selected);
+  --sh: var(--gold-shadow);
+}
+
+.player[aria-pressed="true"] .face { border-color: var(--slot, var(--gold)); }
+.player[aria-pressed="true"] .order { display: grid; }
+.player:focus-visible { --bc: var(--gold); outline: none; }
+
+@media (hover: hover) {
+  .player:hover { --bc: var(--p1); }
+  .player[aria-pressed="true"]:hover { --bc: var(--gold); }
+}
+
+.actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  margin: 18px -16px 0;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, var(--sky-top) 88%, rgba(7, 10, 36, 0));
+}
+
+.note {
+  margin: 0 0 8px;
+  min-height: 1.35em;
+  color: var(--text-2);
+  font-size: 15px;
+  text-align: center;
+}
+
+.note.bad { color: var(--p2); }
+
+.add { width: calc(100% - var(--u)); font-size: 30px; min-height: 60px; }
+
+/* ---- Aviso ¡EN COLA! ------------------------------------------------------------------------------------ */
+
+.toast {
+  --bc: var(--gold);
+  --fill: var(--row-selected);
+  position: fixed;
+  left: 50%;
+  top: 28%;
+  z-index: 20;
+  width: min(86vw, 360px);
+  margin: 0;
+  text-align: center;
+  transform: translateX(-50%);
+  padding: calc(var(--u) * 6);
+  pointer-events: none;
+}
+
+.toast-title {
+  font-family: var(--pixel);
+  font-size: 52px;
+  line-height: 1;
+  color: var(--gold);
+  text-shadow: 2px 2px 0 var(--ink);
+}
+
+.toast-sub {
+  margin-top: 8px;
+  font-family: var(--pixel);
+  font-size: 26px;
+  color: var(--text);
+}
+
+.toast.show { animation: pop 0.22s steps(4, end); }
+
+@keyframes pop {
+  from { transform: translateX(-50%) scale(0.85); }
+  to   { transform: translateX(-50%) scale(1); }
+}
+
+/* ---- Horizontal y pantallas bajas ---------------------------------------------------------------------- */
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .logo { width: 120px; }
+  .top { padding-top: 6px; }
+  .title { font-size: 32px; margin: 4px 0 8px; }
+  .players { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .player .face { width: 64px; height: 64px; }
+  .player .who { font-size: 24px; }
+  .actions { margin-top: 10px; padding-top: 8px; }
+  .add { min-height: 52px; font-size: 26px; }
+  .toast { top: 18%; }
+}
+
+@media (min-width: 520px) {
+  .players { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* ---- Movimiento ---------------------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}

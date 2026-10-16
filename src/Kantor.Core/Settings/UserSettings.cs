@@ -86,6 +86,12 @@ public sealed record UserSettings
     public bool RemoteControl { get; init; }
 
     /// <summary>
+    /// Dirección IPv4 de la red local donde se ofrece el acceso de invitados (<c>null</c> = elegir sola). El acceso
+    /// en sí nunca se guarda: arranca apagado cada vez.
+    /// </summary>
+    public string? GuestInterface { get; init; }
+
+    /// <summary>
     /// Al terminar los resultados de una canción, empieza sola la próxima de la cola (10 s después de la
     /// animación, cancelable), solo con jugadores válidos. Apagado por omisión.
     /// </summary>

@@ -50,6 +50,9 @@ Kantor can't teach you to sing. But it can document the attempt.
 - **Audio**: Windows engine (WASAPI) or ASIO, with voice-delay latency calibration.
 - **Optional remote control** through a local integration (named pipe, current user only), off by default.
   It is built for [Avyn](docs/AVYN_CONTRATO.md), a separate project.
+- **Guest access over your LAN** (off by default): a QR on the main menu and the song list lets guests search songs,
+  pick who sings and add them to the queue from their phones. Nothing else. See [docs/INVITADOS.md](docs/INVITADOS.md)
+  (Spanish) for how it works and its limits: plain HTTP on your local network, shared access key, no internet.
 
 ## Why does this exist?
 
@@ -129,6 +132,7 @@ The technical documentation is written in Spanish.
 | [docs/PUNTUACION_WORLDPARTY.md](docs/PUNTUACION_WORLDPARTY.md) | How WorldParty scores and what Kantor follows |
 | [docs/DISTRIBUCION.md](docs/DISTRIBUCION.md) | How the package is built and the path to the Microsoft Store |
 | [docs/AVYN_CONTRATO.md](docs/AVYN_CONTRATO.md) | Avyn remote control protocol |
+| [docs/INVITADOS.md](docs/INVITADOS.md) | Guest access over the LAN: use, allowed actions, security and limits |
 
 ## License and branding
 

@@ -56,6 +56,12 @@ public sealed class OptionsModel
     /// <summary>El canal local con el Agent de Avyn está habilitado.</summary>
     public bool RemoteControl { get; init; }
 
+    /// <summary>Redes locales donde se puede ofrecer el acceso de invitados (dirección y nombre).</summary>
+    public IReadOnlyList<(string Address, string Label)> GuestNetworks { get; init; } = [];
+
+    /// <summary>Dirección elegida para los invitados (<c>null</c> = automática).</summary>
+    public string? GuestInterface { get; init; }
+
     /// <summary>Texto de estado del canal remoto (<c>null</c> si está apagado).</summary>
     public string? RemoteStatus { get; init; }
 }

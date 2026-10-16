@@ -22,7 +22,7 @@ internal static class NativeMonitor
 {
     private const uint MonitorDefaultToNearest = 2;
     private const uint MonitorInfoPrimary = 1;
-    private static readonly IntPtr HwndTopmost = new(-1);
+    private const uint SwpNoZOrder = 0x0004;
     private const uint SwpNoActivate = 0x0010;
     private const uint SwpFrameChanged = 0x0020;
 
@@ -124,7 +124,8 @@ internal static class NativeMonitor
             return false;
         }
 
-        return SetWindowPos(hwnd, HwndTopmost, target.Left, target.Top, target.Right - target.Left,
-            target.Bottom - target.Top, SwpNoActivate | SwpFrameChanged);
+        // sin tocar el orden en Z: "siempre arriba" lo decide la propiedad Topmost de la ventana
+        return SetWindowPos(hwnd, IntPtr.Zero, target.Left, target.Top, target.Right - target.Left,
+            target.Bottom - target.Top, SwpNoActivate | SwpFrameChanged | SwpNoZOrder);
     }
 }

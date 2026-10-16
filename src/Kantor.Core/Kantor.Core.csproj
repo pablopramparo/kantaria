@@ -13,7 +13,20 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Servidor HTTP del acceso de invitados (Kestrel, MIT): ver Guest/GuestWebServer.cs -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Página de invitados: se sirve solo desde estos recursos embebidos (lista cerrada, nunca el disco). -->
+    <EmbeddedResource Include="Guest\Web\*" Exclude="Guest\Web\*.md" LogicalName="Kantor.Guest.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="..\Kantor.App\Assets\Fonts\Jersey15-Regular.ttf" LogicalName="Kantor.Guest.Jersey15-Regular.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.13" />
+    <!-- Matriz de módulos del QR (MIT) -->
+    <PackageReference Include="QRCoder" Version="1.6.0" />
   </ItemGroup>
 
 </Project>

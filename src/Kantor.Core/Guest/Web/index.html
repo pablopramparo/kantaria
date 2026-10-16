@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#070A24">
+<meta name="referrer" content="no-referrer">
+<title>Kantor</title>
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="/assets/guest.css">
+</head>
+<body>
+<canvas id="backdrop" aria-hidden="true"></canvas>
+
+<div class="app">
+  <header class="top">
+    <img class="logo" src="/assets/logo.png" alt="Kantor" width="640" height="256">
+    <button class="lang px px-small" id="lang" type="button" aria-label="Idioma / Language">EN</button>
+  </header>
+
+  <!-- Pantalla A: biblioteca -->
+  <main id="screenLibrary" class="screen" aria-labelledby="libraryTitle">
+    <h1 id="libraryTitle" class="title" data-t="find">BUSCAR CANCIÓN</h1>
+    <div class="search px px-field">
+      <input id="search" type="search" inputmode="search" enterkeyhint="search" autocomplete="off"
+             autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="100"
+             data-tp="placeholder" placeholder="Artista o título…" aria-label="Buscar">
+      <button id="clear" class="clear" type="button" hidden aria-label="Borrar">×</button>
+    </div>
+    <p id="count" class="count" aria-live="polite"></p>
+    <ul id="songs" class="songs" aria-label="Canciones"></ul>
+    <div id="libraryState" class="state" hidden></div>
+    <button id="more" class="px px-button more" type="button" hidden data-t="more">MÁS</button>
+    <div id="sentinel" class="sentinel" aria-hidden="true"></div>
+  </main>
+
+  <!-- Pantalla B: cantantes -->
+  <section id="screenSingers" class="screen" hidden aria-labelledby="singersTitle">
+    <button id="back" class="px px-button back" type="button" data-t="back">VOLVER</button>
+    <h1 id="singersTitle" class="title" data-t="whoSings">¿QUIÉN CANTA?</h1>
+    <div class="chosen px px-pink">
+      <div class="cover" id="chosenCover" aria-hidden="true"></div>
+      <div class="meta">
+        <div class="name" id="chosenTitle"></div>
+        <div class="sub" id="chosenArtist"></div>
+      </div>
+    </div>
+    <p id="pickHint" class="hint"></p>
+    <div id="players" class="players"></div>
+    <div id="singersState" class="state" hidden></div>
+    <div class="actions">
+      <p id="actionNote" class="note" role="status" aria-live="polite"></p>
+      <button id="add" class="px px-button px-primary add" type="button" disabled data-t="add">AGREGAR A LA COLA</button>
+    </div>
+  </section>
+</div>
+
+<div id="toast" class="toast px px-gold" role="status" aria-live="polite" hidden>
+  <div class="toast-title" id="toastTitle"></div>
+  <div class="toast-sub" id="toastSub"></div>
+</div>
+
+<script src="/assets/guest.js"></script>
+</body>
+</html>

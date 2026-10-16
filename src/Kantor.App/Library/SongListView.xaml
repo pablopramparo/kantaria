@@ -195,11 +195,16 @@
                 </ListBox>
 
                 <!-- Detalle (solo en la vista de lista) -->
-                <pixel:PixelFrame x:Name="DetailFrame" Grid.Row="2" Grid.Column="1" Margin="14,0,40,8"
+                <Grid Grid.Row="2" Grid.Column="1" Margin="14,0,40,8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <pixel:PixelFrame x:Name="DetailFrame" Margin="0,0,0,10"
                                   Fill="{StaticResource PanelBrush}" BorderBrush="{StaticResource P2Brush}"
                                   Shadow="{StaticResource InkBrush}" NotchUnits="3" BorderUnits="1" Padding="16">
                     <StackPanel x:Name="Detail">
-                        <Border Background="#1B1040" Width="290" Height="290" HorizontalAlignment="Center">
+                        <Border Background="#1B1040" Width="210" Height="210" HorizontalAlignment="Center">
                             <Image x:Name="BigCoverImage" Stretch="Uniform"
                                    RenderOptions.BitmapScalingMode="HighQuality" />
                         </Border>
@@ -214,6 +219,10 @@
                                          FontSize="26" Foreground="{StaticResource GoldBrush}" />
                     </StackPanel>
                 </pixel:PixelFrame>
+
+                <!-- QR de invitados: chico, debajo de la ficha -->
+                <Border x:Name="GuestHost" x:FieldModifier="public" Grid.Row="1" HorizontalAlignment="Stretch" />
+                </Grid>
 
                 <!-- Mensaje vacío / progreso -->
                 <pixel:PixelText x:Name="StatusText" Grid.Row="2" Grid.ColumnSpan="2" FontFamily="{StaticResource PixelFont}"

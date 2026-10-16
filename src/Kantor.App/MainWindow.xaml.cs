@@ -18,6 +18,7 @@ using Kantor.Core.Data;
 using Kantor.Core.Feedback;
 using Kantor.Core.Menu;
 using Kantor.Core.Humor;
+using Kantor.Core.Guest;
 using Kantor.Core.Library;
 using Kantor.Core.Remote;
 using Kantor.Core.Results;
@@ -154,6 +155,7 @@ public partial class MainWindow : Window
         using (Diag.Time("inicio: control remoto", 30))
         {
             StartRemote();
+            InitGuest();
         }
 
         _scoreTimer.Tick += (_, _) =>
@@ -208,10 +210,13 @@ public partial class MainWindow : Window
             // Recién con la ventana lista: preparar libVLC compite por CPU con el arranque y lo alarga.
             Dispatcher.BeginInvoke(Video.WarmUp, DispatcherPriority.ApplicationIdle);
         };
+        Activated += OnWindowActiveChanged;
+        Deactivated += OnWindowActiveChanged;
         Closed += (_, _) =>
         {
             _scoreTimer.Stop();
             StopRemote();
+            StopGuest();
             Video.Dispose();
             DisposeAudio();
             _preview.Dispose();
@@ -773,11 +778,34 @@ public partial class MainWindow : Window
             return false;
         }
 
+        ApplyQueueSlots(item);
         _queue.MarkRunning(itemId);
         OnQueueChanged();
         HideResult();
         LoadSong(path);
         return true;
+    }
+
+    /// <summary>
+    /// Si el elemento trae cantantes (los eligió un invitado o Avyn), quedan como la selección de "¿Quién canta?".
+    /// Solo si siguen siendo válidos (activos, de la partida y con micrófono): si no, no se toca nada.
+    /// </summary>
+    private void ApplyQueueSlots(QueueEntry item)
+    {
+        if (item.Slots.Count == 0 || _store is null)
+        {
+            return;
+        }
+
+        var open = UseSession ? _store.GetOpenSession() : null;
+        var members = open is null ? null : _store.SessionPlayers(open.Id).Select(p => p.Id).ToHashSet();
+        var valid = item.Slots.All(s => _store.GetPlayer(s.PlayerId) is { Archived: false }
+                                        && (members is null || members.Contains(s.PlayerId))
+                                        && _input.Map.ActiveSlots.Contains(s.Slot - 1));
+        if (valid)
+        {
+            SetSelection([.. item.Slots.Select(s => new SelectionEntry(s.Slot, s.PlayerId))]);
+        }
     }
 
     /// <summary>Botón "SIGUIENTE" de los resultados: toma la primera de la cola y la carga.</summary>
@@ -1719,6 +1747,7 @@ public partial class MainWindow : Window
         {
             LanguageBox.SelectedIndex = language == "en" ? 1 : 0;
             RefreshOptions();
+            RefreshGuest();
         };
         Options.NonsenseChanged += probability =>
         {
@@ -1770,6 +1799,8 @@ public partial class MainWindow : Window
         TechnicalBar = StatusBar.Visibility == Visibility.Visible,
         AutoAdvance = _prefs.AutoAdvance,
         RemoteControl = _prefs.RemoteControl,
+        GuestNetworks = [.. GuestNetwork.Candidates().Select(c => (c.Address.ToString(), $"{c.Address} ({c.Name})"))],
+        GuestInterface = _prefs.GuestInterface,
         RemoteStatus = RemoteStatusText(),
     };
 
@@ -2186,7 +2217,8 @@ public partial class MainWindow : Window
         NoteResultsInteraction();
         if ((Results.Visibility == Visibility.Visible || Menu.Visibility == Visibility.Visible
                 || SongList.Visibility == Visibility.Visible || Options.Visibility == Visibility.Visible
-                || PlayersScreen.Visibility == Visibility.Visible || SessionPrompt.Visibility == Visibility.Visible)
+                || PlayersScreen.Visibility == Visibility.Visible || SessionPrompt.Visibility == Visibility.Visible
+                || GuestScreen.Visibility == Visibility.Visible)
             && e.Key is Key.Space or Key.Enter or Key.Escape or Key.Up or Key.Down)
         {
             return; // el menú, las listas y la pantalla de resultados interpretan estas teclas
@@ -2496,6 +2528,7 @@ public partial class MainWindow : Window
         }
         else
         {
+            _fullscreen = false; // antes de mover la ventana: si no, el reajuste a monitor la vuelve a poner arriba de todo
             Topmost = _restoreTopmost;
             WindowState = WindowState.Normal;
             WindowStyle = _restoreStyle;
@@ -2540,6 +2573,18 @@ public partial class MainWindow : Window
         finally
         {
             _refitting = false;
+        }
+    }
+
+    /// <summary>
+    /// En pantalla completa la ventana está "siempre arriba" (así tapa la barra de tareas) solo mientras tiene el
+    /// foco: al pasar a otra aplicación deja de estarlo y esa aplicación se ve.
+    /// </summary>
+    private void OnWindowActiveChanged(object? sender, EventArgs e)
+    {
+        if (_fullscreen)
+        {
+            Topmost = IsActive;
         }
     }
 

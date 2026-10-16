@@ -90,6 +90,9 @@ public partial class OptionsView : UserControl
 
     public event Action<bool>? RemoteControlChanged;
 
+    /// <summary>Red elegida para el acceso de invitados (<c>null</c> = automática).</summary>
+    public event Action<string?>? GuestInterfaceChanged;
+
     public event Action<bool>? TechnicalBarChanged;
 
     public event EventHandler? BackRequested;
@@ -919,6 +922,15 @@ public partial class OptionsView : UserControl
             Choice("remote", [T("game.remote.off"), T("yes")], m.RemoteControl ? 1 : 0,
                 i => RemoteControlChanged?.Invoke(i == 1))));
         ContentPanel.Children.Add(PixelUi.Note(m.RemoteStatus ?? T("game.remote.help"), 18));
+
+        if (m.GuestNetworks.Count > 0)
+        {
+            var guestIndex = Math.Max(0, m.GuestNetworks.ToList().FindIndex(n => n.Address == m.GuestInterface) + 1);
+            ContentPanel.Children.Add(Row(GuestTexts.OptionLabel(m.Language),
+                Choice("guestnet", [GuestTexts.OptionAuto(m.Language), .. m.GuestNetworks.Select(n => n.Label)], guestIndex,
+                    i => GuestInterfaceChanged?.Invoke(i == 0 ? null : m.GuestNetworks[i - 1].Address))));
+            ContentPanel.Children.Add(PixelUi.Note(GuestTexts.OptionHelp(m.Language), 18));
+        }
     }
 
     // ---- Pantalla -----------------------------------------------------------------------------------------
@@ -941,7 +953,7 @@ public partial class OptionsView : UserControl
     /// </summary>
     private void BuildHelp()
     {
-        foreach (var topic in new[] { "songs", "mics", "latency", "play", "remote" })
+        foreach (var topic in new[] { "songs", "mics", "latency", "play", "remote", "guest" })
         {
             ContentPanel.Children.Add(Heading(T($"help.{topic}.title")));
             ContentPanel.Children.Add(Note(T($"help.{topic}.body"), 20));

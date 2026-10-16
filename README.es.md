@@ -53,6 +53,10 @@ Kantor no puede enseñarte a cantar. Pero puede documentar el intento.
 - **Audio**: motor de Windows (WASAPI) o ASIO, con calibración de latencia (retardo de voz).
 - **Control remoto opcional** mediante una integración local (pipe con nombre, solo para el usuario actual),
   apagada por omisión. Está pensada para [Avyn](docs/AVYN_CONTRATO.md), un proyecto aparte.
+- **Acceso de invitados por tu red local** (apagado por omisión): un QR en el menú principal y en la lista de
+  canciones permite que los invitados busquen canciones, elijan quién canta y las sumen a la cola desde el
+  celular. Nada más. Cómo funciona y sus límites en [docs/INVITADOS.md](docs/INVITADOS.md): HTTP sin cifrar en tu
+  red local, clave de acceso compartida, sin internet.
 
 ## ¿Por qué existe esto?
 
@@ -131,6 +135,7 @@ avatar genérico. Más detalle en [docs/DISTRIBUCION.md](docs/DISTRIBUCION.md).
 | [docs/PUNTUACION_WORLDPARTY.md](docs/PUNTUACION_WORLDPARTY.md) | Cómo puntúa WorldParty y qué sigue Kantor |
 | [docs/DISTRIBUCION.md](docs/DISTRIBUCION.md) | Cómo se arma el paquete y el camino a la Microsoft Store |
 | [docs/AVYN_CONTRATO.md](docs/AVYN_CONTRATO.md) | Protocolo del control remoto Avyn |
+| [docs/INVITADOS.md](docs/INVITADOS.md) | Acceso de invitados por LAN: uso, qué se permite, seguridad y límites |
 
 ## Licencia y marca
 

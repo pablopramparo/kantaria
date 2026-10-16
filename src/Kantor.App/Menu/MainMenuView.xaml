@@ -34,6 +34,9 @@
                         HorizontalAlignment="Left" VerticalAlignment="Top" Margin="24,16,0,0" MinWidth="64"
                         Click="OnHelpClick" Focusable="False" />
 
+                <Border x:Name="GuestHost" x:FieldModifier="public" HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom" Margin="0,0,44,64" />
+
                 <TextBlock x:Name="SessionText" FontFamily="{StaticResource PixelFont}" FontSize="26"
                            Foreground="{StaticResource P1Brush}" HorizontalAlignment="Right"
                            VerticalAlignment="Top" Margin="0,12,24,0" TextTrimming="CharacterEllipsis"

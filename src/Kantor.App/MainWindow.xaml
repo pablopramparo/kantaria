@@ -9,6 +9,7 @@
         xmlns:queue="clr-namespace:Kantor.App.Queue"
         xmlns:library="clr-namespace:Kantor.App.Library"
         xmlns:options="clr-namespace:Kantor.App.Options"
+        xmlns:guest="clr-namespace:Kantor.App.Guest"
         xmlns:players="clr-namespace:Kantor.App.Players"
         xmlns:video="clr-namespace:Kantor.App.Video"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
@@ -161,6 +162,10 @@
 
         <!-- Opciones: audio, biblioteca, juego y pantalla; sobre todo lo demás -->
         <options:OptionsView x:Name="Options" Grid.Row="0" Grid.RowSpan="3" Visibility="Collapsed" />
+
+        <!-- Acceso de invitados por LAN: QR grande -->
+        <guest:GuestAccessView x:Name="GuestScreen" Grid.Row="0" Grid.RowSpan="3" Visibility="Collapsed"
+                               BackRequested="OnGuestBack" ToggleRequested="OnGuestToggle" />
 
         <!-- Jugadores, sesión e historial -->
         <players:PlayersView x:Name="PlayersScreen" Grid.Row="0" Grid.RowSpan="3" Visibility="Collapsed" />

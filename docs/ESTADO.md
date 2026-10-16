@@ -1,6 +1,6 @@
 # Kantor — estado del proyecto
 
-Última actualización: 15 de octubre de 2026 (control remoto con Avyn, contrato v3; ver §8 undecies).
+Última actualización: 16 de octubre de 2026 (acceso de invitados por LAN; ver §8 duodecies).
 Resumen técnico del proyecto: estado, decisiones, mediciones, pendientes y trampas conocidas.
 
 ## 1. Qué es
@@ -952,3 +952,41 @@ solo recoge cómo quedó en el código y lo que cuesta cambiarlo).
   una interpretación en curso). Es una regla nuestra: el contrato no la enumeraba.
 - Una canción abierta con Ctrl+O desde fuera de la biblioteca recibe una entrada de biblioteca propia al guardarse
   (`EnsureLibraryEntry`), pero no figura en `library.search` mientras no esté en una carpeta configurada.
+
+## 8 duodecies. Acceso de invitados por LAN
+
+Guía de uso y seguridad: **`docs/INVITADOS.md`**. Aquí, lo que hay que saber para tocar el código.
+
+- **Qué es**: servidor Kestrel (`Kantor.Core/Guest/`, `FrameworkReference Microsoft.AspNetCore.App`) para que los
+  celulares busquen una canción, elijan cantantes **ya existentes** y la agreguen a la cola. Nada más. Apagado por
+  omisión **y siempre al arrancar** (no hay ajuste que lo deje encendido); el token se emite al activar y se revoca
+  al apagar o cerrar. Dependencia nueva: QRCoder 1.6.0 (MIT), solo la matriz de módulos (`GuestQr`).
+- **Piezas**: `GuestAccess` (token 128 bits, comparación en tiempo constante), `GuestRateLimiter`, `GuestNetwork`
+  (interfaces IPv4 privadas, activas y no virtuales; elección), `GuestService` (búsqueda, jugadores, agregado
+  idempotente), `GuestWebServer` (rutas, cabeceras, límites), `KantorController.Guest.cs`
+  (`GuestRosterSnapshot`/`GuestEnqueue`: **reutilizan `ValidatePlayers` y `QueueService.Add`** de `queue.add`; corren
+  en el hilo de la interfaz y publican a Avyn con `Flush()`).
+- **Reglas de cantantes**: máximo = micrófonos creados (no se sabe si la canción es un dueto: el índice no cuenta
+  voces); el cantante *i* ocupa el *i*-ésimo puesto con micrófono; con partida abierta solo sus jugadores, sin
+  partida (o cantando suelto) cualquier activo. Sin micrófonos no se agrega (`NO_MICROPHONES`).
+- **Cambio en el flujo local**: `StartQueueItem` (CANTAR YA / SIGUIENTE) ahora carga como selección los cantantes
+  del elemento (`ApplyQueueSlots`) si siguen siendo válidos. Antes solo los usaban Avyn y el avance automático.
+- **Interfaz**: `Guest/GuestCard` (QR chico, en el menú y en la lista; apagado es un botón «INVITADOS · QR»),
+  `Guest/GuestAccessView` (pantalla grande, interruptor), `Guest/QrView`, `MainWindow.Guest.cs`. Red a usar:
+  Opciones › Juego › «Red para invitados» (`UserSettings.GuestInterface`). Textos en `Menu/GuestTexts.cs`.
+- **Página**: `Guest/Web/` (HTML, CSS, JS sin frameworks, embebidos con `LogicalName` fijo; el servidor sirve solo esa
+  lista). Valores de `Theme.xaml`/`PixelFrame`/`SongListView.xaml` en variables CSS; Jersey 15 embebida desde
+  `Kantor.App/Assets/Fonts`. El logo (`logo.png`, 640 px) es una versión reducida del de la app.
+- **Trampa**: `HttpListener` exige permisos de administrador/urlacl; por eso Kestrel. **Trampa**: las imágenes llevan
+  el token, así que la página las pide con `fetch` y las muestra como blob (un `<img src>` no puede mandar el header).
+- **Comprobado**: 130+ tests nuevos (`GuestTests.cs`, con Kestrel real en loopback y el controlador real: estado
+  apagado, arranque/parada, revocación, token, búsqueda con acentos, paginación, vacíos, canciones/jugadores
+  inexistentes, reglas de cantantes, agregado a la cola con los puestos, duplicados, concurrencia, límites de pedidos,
+  rutas prohibidas, sin acceso a archivos, errores sin detalles, `Host`/`Origin`, tamaño de cuerpo, QR). La app real
+  arranca, escucha **solo** en la IP de la LAN (loopback rechazado), sirve la página y contesta 401/403 donde
+  corresponde; el QR se ve en el menú. La página, en Chrome headless con viewport de celular (vertical y horizontal):
+  búsqueda, selección de cantantes, «¡EN COLA!» y vuelta a la lista.
+- **Sin comprobar**: un celular real (escaneo del QR con la cámara, el teclado, el cambio de red), el Firewall de
+  Windows y Wi-Fi con aislamiento de clientes, varias personas a la vez, la tarjeta de la lista de canciones a
+  simple vista, la pantalla grande del QR, Opciones › Juego › Red para invitados y el cambio de red en caliente,
+  un dueto, y la lista de canciones con la biblioteca real.

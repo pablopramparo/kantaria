@@ -11,6 +11,8 @@ componentes, cada uno con su propia licencia.
 | [NAudio](https://github.com/naudio/NAudio) 2.2.1 | Captura y reproducción de audio (WASAPI, ASIO) | MIT |
 | [Microsoft.Data.Sqlite](https://github.com/dotnet/efcore) 10.0.13 | Historial de partidas | MIT |
 | [SQLitePCLRaw](https://github.com/ericsink/SQLitePCL.raw) y SQLite | Motor de base de datos | Apache-2.0 / dominio público |
+| ASP.NET Core (Kestrel, `Microsoft.AspNetCore.App`) | Servidor HTTP del acceso de invitados | MIT |
+| [QRCoder](https://github.com/codebude/QRCoder) 1.6.0 | Matriz del código QR de invitados | MIT |
 | [Jersey 15](https://fonts.google.com/specimen/Jersey+15) | Tipografía pixelada | SIL OFL 1.1 (`Assets/Fonts/OFL.txt`) |
 
 ## Recursos propios fuera de la GPL
