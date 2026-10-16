@@ -23,6 +23,10 @@
   </ItemGroup>
 
   <PropertyGroup>
+    <!-- Edition=Local (por omisión: instalador y zip) o Edition=Store (Microsoft Store: sin los avatares de
+         Kantor.Core/Characters/store-excluded.txt, que ni siquiera se embeben). Ver scripts/publish.ps1 -Edition. -->
+    <Edition Condition="'$(Edition)' == ''">Local</Edition>
+    <StoreExcludedText Condition="'$(Edition)' == 'Store'">$([MSBuild]::Unescape($([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\Kantor.Core\Characters\store-excluded.txt'))))</StoreExcludedText>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
@@ -35,6 +39,12 @@
     <!-- Solo las cadenas de la propia aplicación: sin las carpetas de idiomas de las bibliotecas de WPF. -->
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
+
+  <ItemGroup Condition="'$(Edition)' == 'Store'">
+    <_StoreExcluded Include="$(StoreExcludedText)" />
+    <Resource Remove="@(_StoreExcluded->'Assets\Characters\%(Identity)\portrait.png')" />
+    <Resource Remove="@(_StoreExcluded->'Assets\Characters\%(Identity)\fullbody.png')" />
+  </ItemGroup>
 
   <!-- Distribución: solo x64. LibVLC trae x86 y x64 y las bibliotecas de enlace (.lib); no hacen falta. -->
   <Target Name="TrimLibVlcForDistribution" AfterTargets="Publish" Condition="'$(RuntimeIdentifier)' == 'win-x64'">

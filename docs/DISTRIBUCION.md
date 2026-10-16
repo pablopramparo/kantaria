@@ -69,3 +69,26 @@ Lo que hay que resolver (nada de esto está hecho):
    (por ejemplo, que no haya micrófono o que no exista la carpeta de canciones: la app ya debe arrancar igual).
 
 Conviene hacer primero la prueba en PC limpia con el zip actual: es la misma verificación que pedirá la Store.
+
+## Ediciones: local y Store
+
+`scripts\publish.ps1` arma la edición **Local** por omisión (instalador, zip, todos los avatares). Con
+`-Edition Store` arma `dist\Kantor-<versión>-store-win-x64\` (y su zip) **sin** los avatares de
+`src\Kantor.Core\Characters\store-excluded.txt` (por licencias): ni se muestran ni se embeben. La Store es siempre
+un subconjunto de la local. No hay instalador Inno Setup para la Store (va como MSIX). El script limpia `obj`
+antes de publicar porque los recursos de WPF no se regeneran solos al cambiar de edición; compilar a mano con
+`-p:Edition=Store` exige lo mismo (borrar `src\Kantor.App\obj` y `src\Kantor.Core\obj` al volver a la local).
+
+## Paquete MSIX de la Store
+
+`scripts\publish.ps1 -Edition Store -Msix` arma `dist\Kantor-<versión>-store.msix` (sin firmar: la Store lo firma al
+publicarlo) con `makeappx` del Windows SDK. Usa `installer\store\AppxManifest.xml`, con la identidad reservada en
+Partner Center (Name `PabloPramparo.Kantor`, Publisher `CN=A1B8C5FA-571D-4C85-8594-85319C35543A`, PublisherDisplayName
+`Pablo Pramparo`, Id. de Store `9P8ZKZBJ4RHB`, PFN `PabloPramparo.Kantor_zz18sectgfr1r`), `runFullTrust` y micrófono, y los
+logos de `installer\store\Assets` (los genera `installer\store\make-assets.ps1` desde el logo; cuadrados con el logo
+completo, ancho 310×150, a escala 100/200/400 y tamaños fijos). Versión del paquete: la de `Kantor.App.csproj` + `.0`.
+- Comprobado: `makeappx` valida el manifiesto y arma el paquete (132 MB). **Sin comprobar**: instalarlo (hace falta firmarlo
+  con un certificado de prueba cuyo asunto sea el Publisher), la certificación de la Store (WACK) y el comportamiento de la
+  app empaquetada (virtualización de `%APPDATA%`, micrófono, el servidor de invitados y el Firewall).
+- Pendiente para publicar: política de privacidad (URL), clasificación de edad, descripciones, capturas y decidir la lista de
+  avatares excluidos (`store-excluded.txt`, hoy vacía: la Store sale igual que la local).

@@ -10,9 +10,9 @@ public class CharacterCatalogTests
     public void DefaultCatalogHasTheFactoryAvatarsAndFallsBackToTheFirst()
     {
         var all = CharacterCatalog.Default.All;
-        Assert.Equal(CharacterCatalog.FactoryCount, all.Count);
+        Assert.Equal(CharacterCatalog.Factory.Count, all.Count);
         Assert.Equal("avatar_001", all[0].Id);
-        Assert.Equal("avatar_030", all[^1].Id);
+        Assert.Equal(CharacterCatalog.Factory[^1].Id, all[^1].Id);
         Assert.Equal("avatar_001", CharacterCatalog.Default.GetOrDefault("provisional").Id);
         Assert.Same(CharacterCatalog.Fallback, CharacterCatalog.Default.GetOrDefault(null));
         Assert.Equal("Assets/Characters/avatar_003/portrait.png", all[2].ResolvedPortraitPath);

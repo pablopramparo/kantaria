@@ -1011,3 +1011,23 @@ Guía de uso y seguridad: **`docs/INVITADOS.md`**. Aquí, lo que hay que saber p
     final del formulario en vez de fijo.
   - **Sin comprobar**: teclado virtual real, la galería con el dedo, y la aparición del jugador en la pantalla de
     Jugadores de la PC mientras está abierta (cubierto por tests solo hasta `PlayersAdded`).
+
+### Ediciones: local y Microsoft Store (avatares)
+- `Edition=Local` (por omisión) trae los 30 avatares; `Edition=Store` define `STORE_EDITION` y quita los de
+  `Kantor.Core/Characters/store-excluded.txt` (ids separados por `;` o saltos de línea, un subconjunto de los locales).
+  `CharacterEdition` lee la lista (recurso embebido), `CharacterCatalog.Factory` se arma sin ellos y la App ni siquiera
+  embebe sus PNG (`Resource Remove` en `Kantor.App.csproj`). Todo lo que usa la galería (PC, web de invitados, validación
+  de la creación de jugadores) sale de `Factory`, así que sigue coherente. `FactoryCount` es el total del repositorio.
+- `scripts/publish.ps1 -Edition Store` → `dist\Kantor-<v>-store-win-x64`; sin instalador. **Trampa**: MSBuild no regenera los
+  recursos de WPF al cambiar solo la lista de recursos: el script borra `obj` antes y después.
+- Un jugador con un avatar que la Store no trae se muestra con el genérico (`GetOrDefault`); el id guardado no se toca.
+- Tests (`CharacterEditionTests`): análisis de la lista, subconjunto y orden, caída del genérico, y que el archivo real solo
+  nombre avatares de fábrica. Se corrieron en las dos ediciones. **La lista está vacía hasta decidir cuáles se excluyen.**
+
+### Paquete MSIX y créditos
+- `publish.ps1 -Edition Store -Msix` → `dist\Kantor-<v>-store.msix` (ver `docs/DISTRIBUCION.md`); manifiesto e identidad en
+  `installer/store/`. **Trampa**: `makeappx` exige los logos con el nombre exacto del manifiesto si no hay `resources.pri`
+  (por eso hay archivos sin calificador además de los `.scale-N`); la variable `$msix` choca con el parámetro `-Msix`.
+- Opciones › **CRÉDITOS** (`OptionsView.Section.Credits`, textos `credits.*` en `OptionsTexts`): versión y edición, autoría,
+  inspiración (UltraStar Deluxe / WorldParty, sin código copiado), arte y marca, tecnología de terceros y canciones. Las seis
+  pestañas entran con `MinWidth=160`. Sin controles enfocables: ↑↓ desplazan, como la guía.

@@ -7,6 +7,15 @@
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Edition)' == 'Store'">
+    <!-- Edición Microsoft Store: sin los avatares de Characters/store-excluded.txt (ver CharacterEdition) -->
+    <DefineConstants>$(DefineConstants);STORE_EDITION</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Characters\store-excluded.txt" LogicalName="Kantor.Characters.store-excluded.txt" />
+  </ItemGroup>
+
   <ItemGroup>
     <!-- WithCulture=false: ".es." en el nombre no debe tratarse como un ensamblado satélite de cultura. -->
     <EmbeddedResource Include="Humor\Texts\humor.*.json" WithCulture="false" />

@@ -8,15 +8,28 @@ namespace Kantor.Core.Characters;
 /// </summary>
 public sealed class CharacterCatalog
 {
-    /// <summary>Cuántos avatares de fábrica hay (<c>avatar_001</c> … <c>avatar_NNN</c>): subirlo al sumar PNG.</summary>
+    /// <summary>
+    /// Cuántos avatares de fábrica hay en el repositorio (<c>avatar_001</c> … <c>avatar_NNN</c>): subirlo al sumar PNG.
+    /// La edición Store ofrece menos (ver <see cref="CharacterEdition"/>): usar <see cref="Factory"/>.Count.
+    /// </summary>
     public const int FactoryCount = 30;
 
     /// <summary>
     /// Los avatares de fábrica, en orden. No tienen nombre propio (<c>Name</c> repite el ID y la interfaz no lo
     /// muestra); sus PNG están en <c>Assets/Characters/{id}/</c>.
     /// </summary>
-    public static readonly IReadOnlyList<CharacterDefinition> Factory =
-        [.. Enumerable.Range(1, FactoryCount).Select(i => new CharacterDefinition($"avatar_{i:000}", $"avatar_{i:000}"))];
+    public static readonly IReadOnlyList<CharacterDefinition> Factory = BuildFactory(CharacterEdition.Excluded);
+
+    /// <summary>
+    /// Los avatares de fábrica sin los excluidos (se conserva el orden). Si se excluyeran todos queda el primero: el
+    /// catálogo necesita al menos un personaje.
+    /// </summary>
+    public static IReadOnlyList<CharacterDefinition> BuildFactory(IReadOnlySet<string> excluded)
+    {
+        var ids = Enumerable.Range(1, FactoryCount).Select(i => $"avatar_{i:000}").ToList();
+        var kept = ids.Where(id => !excluded.Contains(id)).ToList();
+        return [.. (kept.Count > 0 ? kept : [ids[0]]).Select(id => new CharacterDefinition(id, id))];
+    }
 
     /// <summary>Personaje usado cuando no hay otro (o cuando el ID pedido no existe): el primero de fábrica.</summary>
     public static readonly CharacterDefinition Fallback = Factory[0];

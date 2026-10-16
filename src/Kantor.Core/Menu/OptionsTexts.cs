@@ -16,6 +16,30 @@ public static class OptionsTexts
         ["tab.game"] = ("JUEGO", "GAME"),
         ["tab.screen"] = ("PANTALLA", "SCREEN"),
         ["tab.help"] = ("GUÍA", "GUIDE"),
+        ["tab.credits"] = ("CRÉDITOS", "CREDITS"),
+
+        ["credits.app.title"] = ("Kantor", "Kantor"),
+        ["credits.app.body"] = (
+            "Karaoke local para Windows, compatible con canciones UltraStar. Creado por Pablo Pramparo. Software libre bajo GPL-3.0-or-later.",
+            "Local karaoke for Windows, compatible with UltraStar songs. Created by Pablo Pramparo. Free software under GPL-3.0-or-later."),
+        ["credits.inspired.title"] = ("Inspiración", "Inspiration"),
+        ["credits.inspired.body"] = (
+            "Inspirado en UltraStar Deluxe y UltraStar WorldParty: se tomó su comportamiento como referencia, sin copiar su código.",
+            "Inspired by UltraStar Deluxe and UltraStar WorldParty: their behavior was used as a reference, without copying their code."),
+        ["credits.art.title"] = ("Arte y marca", "Art and brand"),
+        ["credits.art.body"] = (
+            "El nombre Kantor, su logo y los personajes son © 2026 Pablo Pramparo, todos los derechos reservados; no están bajo la GPL.",
+            "The Kantor name, its logo and the characters are © 2026 Pablo Pramparo, all rights reserved; they are not under the GPL."),
+        ["credits.libs.title"] = ("Tecnología de terceros", "Third-party technology"),
+        ["credits.libs.body"] = (
+            "Jersey 15 (SIL OFL 1.1) · .NET y WPF (MIT) · NAudio (MIT) · LibVLC y LibVLCSharp (LGPL-2.1+) · SQLite y Microsoft.Data.Sqlite (MIT) · ASP.NET Core Kestrel (MIT) · QRCoder (MIT). Los textos completos están en THIRD-PARTY-NOTICES.md.",
+            "Jersey 15 (SIL OFL 1.1) · .NET and WPF (MIT) · NAudio (MIT) · LibVLC and LibVLCSharp (LGPL-2.1+) · SQLite and Microsoft.Data.Sqlite (MIT) · ASP.NET Core Kestrel (MIT) · QRCoder (MIT). Full texts are in THIRD-PARTY-NOTICES.md."),
+        ["credits.songs.title"] = ("Canciones", "Songs"),
+        ["credits.songs.body"] = (
+            "Kantor no incluye canciones: las aporta cada usuario y son responsabilidad de quien las posee.",
+            "Kantor includes no songs: each user brings their own, and they are the responsibility of whoever owns them."),
+        ["credits.version"] = ("Versión {0}", "Version {0}"),
+        ["credits.edition.store"] = ("edición Microsoft Store", "Microsoft Store edition"),
 
         ["help.songs.title"] = ("1. Cargar las canciones", "1. Load your songs"),
         ["help.songs.body"] = (

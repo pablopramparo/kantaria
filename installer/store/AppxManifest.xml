@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SPDX-License-Identifier: GPL-3.0-or-later
+  Copyright (C) 2026 Pablo Pramparo
+
+  Manifiesto del paquete MSIX de la edición Microsoft Store. scripts\publish.ps1 -Edition Store -Msix reemplaza
+  {{VERSION}} (versión de Kantor.App.csproj + ".0": la Store exige revisión 0) y empaqueta con makeappx.
+  Identity y Publisher son los del producto reservado en Partner Center (Id. de Store 9P8ZKZBJ4RHB); no cambiarlos
+  a mano. El paquete va sin firmar: la Store lo firma al publicarlo. Para probarlo localmente hace falta firmarlo con
+  un certificado de prueba cuyo asunto sea exactamente el Publisher.
+-->
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap rescap">
+
+  <Identity
+    Name="PabloPramparo.Kantor"
+    Publisher="CN=A1B8C5FA-571D-4C85-8594-85319C35543A"
+    Version="{{VERSION}}"
+    ProcessorArchitecture="x64" />
+
+  <Properties>
+    <DisplayName>Kantor</DisplayName>
+    <PublisherDisplayName>Pablo Pramparo</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.22621.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="es-AR" />
+    <Resource Language="es" />
+    <Resource Language="en-US" />
+  </Resources>
+
+  <Applications>
+    <Application Id="Kantor" Executable="Kantor.App.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        DisplayName="Kantor"
+        Description="Karaoke local para Windows, compatible con canciones UltraStar."
+        BackgroundColor="#070A24"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png">
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
+      </uap:VisualElements>
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+    <DeviceCapability Name="microphone" />
+  </Capabilities>
+</Package>

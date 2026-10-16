@@ -456,7 +456,7 @@ public sealed class KantorControllerTests : IDisposable
     {
         var items = _h.Read("kantor.characters.list").P["items"]!.AsArray();
 
-        Assert.Equal(CharacterCatalog.FactoryCount, items.Count);
+        Assert.Equal(CharacterCatalog.Factory.Count, items.Count);
         Assert.Equal("avatar_001", items[0]!["characterId"]!.GetValue<string>());
         Assert.All(items, i =>
         {

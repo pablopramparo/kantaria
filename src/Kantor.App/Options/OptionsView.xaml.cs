@@ -34,6 +34,7 @@ public partial class OptionsView : UserControl
         Game,
         Screen,
         Help,
+        Credits,
     }
 
     private const double MinDb = -60;
@@ -157,7 +158,7 @@ public partial class OptionsView : UserControl
     private void BuildTabs()
     {
         TabsPanel.Children.Clear();
-        var names = new[] { "tab.audio", "tab.library", "tab.game", "tab.screen", "tab.help" };
+        var names = new[] { "tab.audio", "tab.library", "tab.game", "tab.screen", "tab.help", "tab.credits" };
         for (var i = 0; i < names.Length; i++)
         {
             var section = (Section)i;
@@ -165,8 +166,8 @@ public partial class OptionsView : UserControl
             {
                 Content = T(names[i]),
                 FontSize = 24,
-                Margin = new Thickness(0, 0, 14, 0),
-                MinWidth = 190,
+                Margin = new Thickness(0, 0, 10, 0),
+                MinWidth = 160,
                 Foreground = section == _section ? (Brush)FindResource("GoldBrush") : (Brush)FindResource("TextBrush"),
                 Tag = $"tab{i}",
             };
@@ -207,6 +208,9 @@ public partial class OptionsView : UserControl
                 break;
             case Section.Screen:
                 BuildScreen(_model);
+                break;
+            case Section.Credits:
+                BuildCredits();
                 break;
             default:
                 BuildHelp();
@@ -262,7 +266,7 @@ public partial class OptionsView : UserControl
                 e.Handled = true;
                 break;
             case Key.Down or Key.Enter:
-                if (_section == Section.Help)
+                if (_section is Section.Help or Section.Credits)
                 {
                     ContentScroll.ScrollToVerticalOffset(ContentScroll.VerticalOffset + 60); // la guía no tiene controles
                 }
@@ -273,7 +277,7 @@ public partial class OptionsView : UserControl
 
                 e.Handled = true;
                 break;
-            case Key.Up when _section == Section.Help:
+            case Key.Up when _section is Section.Help or Section.Credits:
                 ContentScroll.ScrollToVerticalOffset(ContentScroll.VerticalOffset - 60);
                 e.Handled = true;
                 break;
@@ -957,6 +961,26 @@ public partial class OptionsView : UserControl
         {
             ContentPanel.Children.Add(Heading(T($"help.{topic}.title")));
             ContentPanel.Children.Add(Note(T($"help.{topic}.body"), 20));
+        }
+    }
+
+    /// <summary>Créditos: versión y edición, autoría, inspiración, marca y tecnología de terceros (texto sin controles).</summary>
+    private void BuildCredits()
+    {
+        var version = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version;
+        var line = string.Format(T("credits.version"), version is null ? "?" : $"{version.Major}.{version.Minor}.{version.Build}");
+        if (Kantor.Core.Characters.CharacterEdition.IsStore)
+        {
+            line += " · " + T("credits.edition.store");
+        }
+
+        ContentPanel.Children.Add(Heading(T("credits.app.title")));
+        ContentPanel.Children.Add(Note(line, 22));
+        ContentPanel.Children.Add(Note(T("credits.app.body"), 20));
+        foreach (var topic in new[] { "inspired", "art", "libs", "songs" })
+        {
+            ContentPanel.Children.Add(Heading(T($"credits.{topic}.title")));
+            ContentPanel.Children.Add(Note(T($"credits.{topic}.body"), 20));
         }
     }
 
