@@ -15,6 +15,29 @@ public static class OptionsTexts
         ["tab.library"] = ("BIBLIOTECA", "LIBRARY"),
         ["tab.game"] = ("JUEGO", "GAME"),
         ["tab.screen"] = ("PANTALLA", "SCREEN"),
+        ["tab.help"] = ("GUÍA", "GUIDE"),
+
+        ["help.songs.title"] = ("1. Cargar las canciones", "1. Load your songs"),
+        ["help.songs.body"] = (
+            "Kantor lee canciones en formato UltraStar: una carpeta por canción, con el archivo .txt, el audio y, si hay, el video y la tapa. En la pestaña BIBLIOTECA tocá «Agregar carpeta…» y elegí la carpeta que las contiene (se buscan también las subcarpetas). Se pueden agregar varias.",
+            "Kantor reads UltraStar songs: one folder per song, with the .txt file, the audio and, if present, the video and cover. In the LIBRARY tab choose “Add folder…” and pick the folder that contains them (subfolders are scanned too). You can add several."),
+        ["help.mics.title"] = ("2. Configurar los micrófonos", "2. Set up the microphones"),
+        ["help.mics.body"] = (
+            "En la pestaña AUDIO tocá «Crear micrófono» una vez por cada jugador (hasta 4) y elegí el dispositivo y el canal de cada uno. Hablá o cantá: el medidor y la nota detectada tienen que moverse. Si dice «Sin señal», revisá el canal o subí la ganancia de la interfaz. Con una interfaz de dos canales, cada micrófono va en un canal distinto.",
+            "In the AUDIO tab choose “Create microphone” once per player (up to 4) and pick each one’s device and channel. Speak or sing: the meter and the detected note should move. If it says “No signal”, check the channel or raise the interface gain. With a two-channel interface, each microphone goes on a different channel."),
+        ["help.latency.title"] = ("3. Retardo de la voz", "3. Voice delay"),
+        ["help.latency.body"] = (
+            "Con el motor «Windows (compartido)» la voz llega con bastante retardo (cerca de 170 ms con una interfaz USB); con ASIO baja a unos 20 ms. Si cantás bien y el puntaje no lo refleja, probá ASIO en AUDIO o ajustá el «Retardo» de cada micrófono; el botón «Calibrar» lo mide con un ejercicio guiado.",
+            "With the “Windows (shared)” engine the voice arrives quite late (about 170 ms with a USB interface); with ASIO it drops to about 20 ms. If you sing well but the score doesn’t show it, try ASIO in AUDIO or adjust each microphone’s “Delay”; the “Calibrate” button measures it with a guided exercise."),
+        ["help.play.title"] = ("4. Cantar y armar la partida", "4. Sing and set up a session"),
+        ["help.play.body"] = (
+            "En el menú elegí CANTAR, buscá la canción y tocá Enter. Con F4 abrís una partida para asignar jugadores a los micrófonos y guardar el historial; con F5 sumás canciones a la cola y con F6 la ves. Los atajos están siempre en la línea de abajo de cada pantalla.",
+            "From the menu choose SING, find the song and press Enter. F4 opens a session to assign players to microphones and keep a history; F5 adds songs to the queue and F6 shows it. The shortcuts are always on the bottom line of each screen."),
+        ["help.remote.title"] = ("5. Control remoto (opcional)", "5. Remote control (optional)"),
+        ["help.remote.body"] = (
+            "Si usás Avyn, activá «Control remoto (Avyn)» en la pestaña JUEGO. El canal es local a esta PC y a este usuario, sin red.",
+            "If you use Avyn, turn on “Remote control (Avyn)” in the GAME tab. The channel is local to this PC and user, with no network."),
+
         ["hint"] = ("← → PESTAÑAS  ·  ↑ ↓ OPCIONES  ·  ENTER ENTRAR / ABRIR  ·  ESC VOLVER",
             "← → TABS  ·  ↑ ↓ OPTIONS  ·  ENTER ENTER / OPEN  ·  ESC BACK"),
 

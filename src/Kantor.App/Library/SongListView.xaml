@@ -93,8 +93,6 @@
 
                 <!-- Título, vista y contador -->
                 <DockPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="40,22,40,0">
-                    <pixel:PixelText x:Name="CountText" DockPanel.Dock="Right" FontFamily="{StaticResource PixelFont}"
-                                     FontSize="32" Foreground="{StaticResource DimBrush}" VerticalAlignment="Bottom" />
                     <Button x:Name="QueueButton" DockPanel.Dock="Right" Style="{StaticResource PixelButton}" FontSize="22"
                             Margin="0,0,24,0" VerticalAlignment="Bottom" Click="OnQueueClick" Focusable="False" />
                     <Button x:Name="QueueAddButton" DockPanel.Dock="Right" Style="{StaticResource PixelButton}" FontSize="22"
@@ -115,6 +113,14 @@
                                   BorderBrush="{StaticResource P1Brush}" Shadow="{StaticResource InkBrush}"
                                   NotchUnits="2" BorderUnits="1" Padding="16,6">
                     <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <!-- El contador vive en el buscador: en la cabecera competía con el título por el ancho -->
+                        <pixel:PixelText x:Name="CountText" Grid.Column="1" Margin="16,0,0,0"
+                                         FontFamily="{StaticResource PixelFont}" FontSize="28"
+                                         Foreground="{StaticResource DimBrush}" VerticalAlignment="Center" />
                         <TextBlock x:Name="Placeholder" FontFamily="{StaticResource PixelFont}" FontSize="34"
                                    Foreground="#5E6693" VerticalAlignment="Center" IsHitTestVisible="False" />
                         <TextBox x:Name="SearchBox" Background="Transparent" BorderThickness="0"

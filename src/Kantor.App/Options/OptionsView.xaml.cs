@@ -33,6 +33,7 @@ public partial class OptionsView : UserControl
         Library,
         Game,
         Screen,
+        Help,
     }
 
     private const double MinDb = -60;
@@ -153,7 +154,7 @@ public partial class OptionsView : UserControl
     private void BuildTabs()
     {
         TabsPanel.Children.Clear();
-        var names = new[] { "tab.audio", "tab.library", "tab.game", "tab.screen" };
+        var names = new[] { "tab.audio", "tab.library", "tab.game", "tab.screen", "tab.help" };
         for (var i = 0; i < names.Length; i++)
         {
             var section = (Section)i;
@@ -201,8 +202,11 @@ public partial class OptionsView : UserControl
             case Section.Game:
                 BuildGame(_model);
                 break;
-            default:
+            case Section.Screen:
                 BuildScreen(_model);
+                break;
+            default:
+                BuildHelp();
                 break;
         }
 
@@ -255,7 +259,19 @@ public partial class OptionsView : UserControl
                 e.Handled = true;
                 break;
             case Key.Down or Key.Enter:
-                FindFirstFocusable(ContentPanel)?.Focus();
+                if (_section == Section.Help)
+                {
+                    ContentScroll.ScrollToVerticalOffset(ContentScroll.VerticalOffset + 60); // la guía no tiene controles
+                }
+                else
+                {
+                    FindFirstFocusable(ContentPanel)?.Focus();
+                }
+
+                e.Handled = true;
+                break;
+            case Key.Up when _section == Section.Help:
+                ContentScroll.ScrollToVerticalOffset(ContentScroll.VerticalOffset - 60);
                 e.Handled = true;
                 break;
         }
@@ -915,6 +931,21 @@ public partial class OptionsView : UserControl
         ContentPanel.Children.Add(Row(T("screen.techbar"),
             Choice("techbar", [T("hidden"), T("visible")], m.TechnicalBar ? 1 : 0,
                 i => TechnicalBarChanged?.Invoke(i == 1))));
+    }
+
+    // ---- Guía ---------------------------------------------------------------------------------------------
+
+    /// <summary>
+    /// Texto de ayuda sin controles enfocables: el foco queda en la pestaña y ↑ ↓ no recorren nada; la rueda
+    /// del mouse desplaza el contenido.
+    /// </summary>
+    private void BuildHelp()
+    {
+        foreach (var topic in new[] { "songs", "mics", "latency", "play", "remote" })
+        {
+            ContentPanel.Children.Add(Heading(T($"help.{topic}.title")));
+            ContentPanel.Children.Add(Note(T($"help.{topic}.body"), 20));
+        }
     }
 
     private sealed class MicRow(int slot, PixelMeter meter, TextBlock level, TextBlock note, TextBlock detail)

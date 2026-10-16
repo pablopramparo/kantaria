@@ -826,6 +826,8 @@ public partial class MainWindow : Window
 
     private void OnMenuOptions(object? sender, EventArgs e) => ShowOptions();
 
+    private void OnMenuHelp(object? sender, EventArgs e) => ShowOptions(OptionsView.Section.Help);
+
     private void OnMenuExit(object? sender, EventArgs e) => Close();
 
     private HumorBank GetBank(string language)

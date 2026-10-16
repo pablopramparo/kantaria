@@ -22,6 +22,8 @@ public partial class MainMenuView : UserControl
 
     public event EventHandler? OptionsRequested;
 
+    public event EventHandler? HelpRequested;
+
     public event EventHandler? ExitRequested;
 
     public MainMenuView()
@@ -55,6 +57,8 @@ public partial class MainMenuView : UserControl
     private void OnPlayersClick(object sender, RoutedEventArgs e) => PlayersRequested?.Invoke(this, EventArgs.Empty);
 
     private void OnOptionsClick(object sender, RoutedEventArgs e) => OptionsRequested?.Invoke(this, EventArgs.Empty);
+
+    private void OnHelpClick(object sender, RoutedEventArgs e) => HelpRequested?.Invoke(this, EventArgs.Empty);
 
     private void OnExitClick(object sender, RoutedEventArgs e) => ExitRequested?.Invoke(this, EventArgs.Empty);
 

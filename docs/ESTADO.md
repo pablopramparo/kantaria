@@ -494,6 +494,11 @@ durante la canción **no se toca** hasta el video de fondo. Video y dos jugadore
 
 ## 8 nonies. Opciones
 
+- **Guía** (pestaña `GUÍA`/`GUIDE`, `Section.Help`): cinco temas de texto (canciones, micrófonos, retardo, cantar/partida,
+  control remoto), claves `help.*` en `OptionsTexts`. Sin controles enfocables: con el foco en la pestaña, ↑↓ desplazan
+  y la rueda también. Se abre con el botón **?** arriba a la izquierda del menú principal. Pantalla de canciones: el
+  contador "N canciones" pasó de la cabecera al buscador (la cabecera se quedaba sin ancho). Sin ver en pantalla.
+
 - `Kantor.App/Options/OptionsView` (+ `OptionsModel`) reemplaza a la ventana "Configuración de audio" (borrada). El
   menú principal pasa de `AUDIO` a `OPCIONES`; Ctrl+I y el botón "Opciones…" de la barra abren la sección Audio.
   **Abrirla detiene la canción** (como "Menú"): cambiar micrófonos, dificultad o retardo reinicia el puntaje.
@@ -695,7 +700,7 @@ básico. Sin rankings globales, gráficos ni estadísticas agregadas (nada agreg
 
 1. Prueba del ejecutable distribuible en una PC limpia (ver `docs/DISTRIBUCION.md`) y firma del `.exe`.
 2. Empaquetado MSIX y publicación en Microsoft Store (ver `docs/DISTRIBUCION.md`).
-3. Prueba con voz real del feedback por frase y de la señal de onda, con 2–4 jugadores.
+3. ~~Prueba con voz real del feedback por frase y de la señal de onda~~ (probados por el usuario).
 4. Medición de latencia: separar la parte de salida de la de entrada, el desfase de arranque (§6 bis) y
    calibrar la compuerta de nivel con el micrófono.
 

@@ -148,7 +148,7 @@
         <!-- Menú principal: pantalla completa (cubre barra de herramientas y de estado) -->
         <menu:MainMenuView x:Name="Menu" Grid.Row="0" Grid.RowSpan="3"
                            SingRequested="OnMenuSing" PlayersRequested="OnMenuPlayers" OptionsRequested="OnMenuOptions"
-                           ExitRequested="OnMenuExit" />
+                           HelpRequested="OnMenuHelp" ExitRequested="OnMenuExit" />
 
         <!-- Lista de canciones con buscador, sobre el menú -->
         <library:SongListView x:Name="SongList" Grid.Row="0" Grid.RowSpan="3" Visibility="Collapsed"
