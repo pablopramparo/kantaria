@@ -172,6 +172,12 @@ public interface IKantorHost
 
     /// <summary>La partida o los jugadores cambiaron por el control remoto: refrescar cachés y pantalla.</summary>
     void DataChanged();
+
+    /// <summary>
+    /// Se agregó un jugador (desde el celular de un invitado): refrescar los nombres y la pantalla de jugadores sin
+    /// tocar la canción en curso, el puntaje ni la selección (a diferencia de <see cref="DataChanged"/>).
+    /// </summary>
+    void PlayersAdded();
 }
 
 /// <summary>Miniatura de una portada para enviarla al Agent (la decodificación la hace la aplicación).</summary>

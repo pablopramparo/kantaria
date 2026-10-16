@@ -15,9 +15,17 @@
       scan: 'ESCANEÁ EL QR', scanHint: 'Abrí esta página con el código QR que muestra la pantalla de Kantor.',
       closed: 'ACCESO CERRADO', closedHint: 'El anfitrión cerró el acceso. Escaneá el QR otra vez.',
       offline: 'SIN CONEXIÓN', offlineHint: 'No se llega a Kantor. Revisá que estés en la misma red Wi-Fi.',
-      noPlayers: 'TODAVÍA NO HAY JUGADORES', noPlayersHint: 'Se crean desde la PC, en JUGADORES.',
+      noPlayers: 'TODAVÍA NO HAY JUGADORES', noPlayersHint: 'Creá el tuyo con + NUEVO JUGADOR.',
+      newPlayer: '+ NUEVO JUGADOR', newPlayerTitle: 'NUEVO JUGADOR', yourName: 'TU NOMBRE',
+      pickCharacter: 'ELEGÍ TU PERSONAJE', create: 'CREAR Y SELECCIONAR', creating: 'CREANDO…', cancel: 'CANCELAR',
+      namePlaceholder: 'Tu nombre', created: '¡JUGADOR CREADO!', selectedNow: 'Ya está elegido para cantar',
       noMic: 'FALTA UN MICRÓFONO', noMicHint: 'En la PC: OPCIONES › Audio › Crear micrófono.',
       errors: {
+        NAME_EMPTY: 'Escribí tu nombre.',
+        NAME_TOO_LONG: 'El nombre es demasiado largo.',
+        NAME_INVALID: 'El nombre tiene caracteres que no se pueden usar.',
+        NAME_TAKEN: 'Ya hay un jugador con ese nombre. Probá con otro, o buscalo en la lista.',
+        INVALID_AVATAR: 'Ese personaje no está disponible. Elegí otro.',
         TOO_MANY_SINGERS: 'Hay más cantantes que micrófonos.',
         PLAYER_NOT_AVAILABLE: 'Alguien ya no está en la partida. Actualizá la lista.',
         PLAYER_NOT_FOUND: 'Ese jugador ya no existe.',
@@ -43,9 +51,17 @@
       scan: 'SCAN THE QR', scanHint: "Open this page with the QR code shown on Kantor's screen.",
       closed: 'ACCESS CLOSED', closedHint: 'The host closed access. Scan the QR again.',
       offline: 'NO CONNECTION', offlineHint: "Can't reach Kantor. Make sure you are on the same Wi-Fi.",
-      noPlayers: 'NO PLAYERS YET', noPlayersHint: 'They are created on the PC, under PLAYERS.',
+      noPlayers: 'NO PLAYERS YET', noPlayersHint: 'Create yours with + NEW PLAYER.',
+      newPlayer: '+ NEW PLAYER', newPlayerTitle: 'NEW PLAYER', yourName: 'YOUR NAME',
+      pickCharacter: 'PICK YOUR CHARACTER', create: 'CREATE & SELECT', creating: 'CREATING…', cancel: 'CANCEL',
+      namePlaceholder: 'Your name', created: 'PLAYER CREATED!', selectedNow: 'Already picked to sing',
       noMic: 'MICROPHONE NEEDED', noMicHint: 'On the PC: OPTIONS › Audio › Create microphone.',
       errors: {
+        NAME_EMPTY: 'Type your name.',
+        NAME_TOO_LONG: 'That name is too long.',
+        NAME_INVALID: 'The name has characters that can’t be used.',
+        NAME_TAKEN: 'A player with that name already exists. Try another, or find it in the list.',
+        INVALID_AVATAR: 'That character is not available. Pick another.',
         TOO_MANY_SINGERS: 'There are more singers than microphones.',
         PLAYER_NOT_AVAILABLE: 'Someone is no longer in the session. Refresh the list.',
         PLAYER_NOT_FOUND: 'That player no longer exists.',
@@ -70,14 +86,17 @@
     lang: $('lang'), library: $('screenLibrary'), singers: $('screenSingers'), search: $('search'),
     clear: $('clear'), count: $('count'), songs: $('songs'), libState: $('libraryState'), more: $('more'),
     sentinel: $('sentinel'), back: $('back'), chosenCover: $('chosenCover'), chosenTitle: $('chosenTitle'),
-    chosenArtist: $('chosenArtist'), hint: $('pickHint'), players: $('players'), singState: $('singersState'),
+    chosenArtist: $('chosenArtist'), hint: $('pickHint'), newPlayer: $('newPlayer'), create: $('create'),
+    screenCreate: $('screenCreate'), createBack: $('createBack'), nameInput: $('nameInput'), avatars: $('avatars'),
+    avatarBlock: $('avatarBlock'), createState: $('createState'), createNote: $('createNote'), players: $('players'), singState: $('singersState'),
     note: $('actionNote'), add: $('add'), toast: $('toast'), toastTitle: $('toastTitle'), toastSub: $('toastSub')
   };
 
   var state = {
     lang: (navigator.language || 'es').slice(0, 2) === 'en' ? 'en' : 'es',
     token: null, query: '', nextOffset: 0, total: 0, loading: false, seq: 0, abort: null,
-    song: null, max: 0, players: [], selected: [], requestId: null, adding: false, closed: false, libraryScroll: 0
+    song: null, max: 0, players: [], selected: [], requestId: null, adding: false, closed: false, libraryScroll: 0,
+    maxName: 24, avatarList: null, avatar: null, createId: null, creating: false, pendingSelect: null, afterBack: null
   };
 
   function t() { return TEXTS[state.lang]; }
@@ -173,11 +192,13 @@
     document.documentElement.lang = state.lang;
     document.querySelectorAll('[data-t]').forEach(function (n) { n.textContent = t()[n.getAttribute('data-t')]; });
     el.search.placeholder = t().placeholder;
+    el.nameInput.placeholder = t().namePlaceholder;
     el.clear.setAttribute('aria-label', t().clear);
     el.lang.textContent = state.lang === 'es' ? 'EN' : 'ES';
     if (!state.adding) { el.add.textContent = t().add; }
     if (state.total || state.loadedOnce) { el.count.textContent = t().songs(state.total); }
     if (!el.singers.hidden) { renderHint(); }
+    if (!state.creating) { el.create.textContent = t().create; }
   }
 
   // ---- Estados ----------------------------------------------------------------------------------------------
@@ -300,26 +321,38 @@
     el.chosenArtist.textContent = song.artist + (song.edition ? ' · ' + song.edition : '');
     el.chosenCover.textContent = '♪';
     if (song.cover) { setImage(el.chosenCover, '/api/cover/' + encodeURIComponent(song.id) + '?v=' + encodeURIComponent(song.cover), ''); }
-    el.library.hidden = true; el.singers.hidden = false;
     try { history.pushState({ screen: 'singers' }, ''); } catch (e) { /* sin historial: queda el botón VOLVER */ }
     el.players.textContent = ''; el.hint.textContent = ''; setNote('');
-    window.scrollTo(0, 0);
+    showScreen('singers');
     loadPlayers();
   }
 
-  // El botón "atrás" del celular vuelve a la biblioteca en vez de salir de la página.
-  window.addEventListener('popstate', function () {
-    if (!el.singers.hidden && !state.adding) { showLibrary(); }
+  // Tres pantallas: biblioteca → cantantes → nuevo jugador. El botón "atrás" del celular retrocede una, en vez de
+  // salir de la página.
+  function showScreen(name) {
+    el.library.hidden = name !== 'library';
+    el.singers.hidden = name !== 'singers';
+    el.screenCreate.hidden = name !== 'create';
+    window.scrollTo(0, name === 'library' ? state.libraryScroll : 0);
+  }
+
+  window.addEventListener('popstate', function (e) {
+    showScreen((e.state && e.state.screen) || 'library');
+    runAfterBack();
   });
 
-  function leaveSingers() {
-    if (history.state && history.state.screen === 'singers') { history.back(); } else { showLibrary(); }
+  function runAfterBack() {
+    var fn = state.afterBack; state.afterBack = null;
+    if (fn) { fn(); }
   }
 
-  function showLibrary() {
-    el.singers.hidden = true; el.library.hidden = false;
-    window.scrollTo(0, state.libraryScroll);
+  function goBack(to, afterwards) {
+    state.afterBack = afterwards || null;
+    if (history.state && history.state.screen && history.state.screen !== to) { history.back(); return; }
+    showScreen(to); runAfterBack();
   }
+
+  function leaveSingers() { goBack('library'); }
 
   function renderHint() {
     el.hint.textContent = state.max > 0 && state.players.length ? t().pick(state.max) : '';
@@ -331,7 +364,8 @@
     showState(el.singState, 'loading', t().loading);
     api('/api/players').then(function (data) {
       hideState(el.singState);
-      state.players = data.players; state.max = data.maxSingers;
+      state.players = data.players; state.max = data.maxSingers; state.maxName = data.maxName || 24;
+      applyPendingSelect();
       if (state.max === 0) { showState(el.singState, 'empty', t().noMic, t().noMicHint); renderHint(); return; }
       if (state.players.length === 0) { showState(el.singState, 'empty', t().noPlayers, t().noPlayersHint); renderHint(); return; }
       renderPlayers(); renderHint(); updateAdd();
@@ -377,6 +411,17 @@
     });
   }
 
+  // El jugador recién creado queda elegido; si ya estaba completo el cupo, ocupa el lugar del último elegido.
+  function applyPendingSelect() {
+    var id = state.pendingSelect; state.pendingSelect = null;
+    if (id === null || state.max === 0 || !state.players.some(function (p) { return p.id === id; })) { return; }
+    if (state.selected.indexOf(id) < 0) {
+      if (state.selected.length >= state.max) { state.selected.pop(); }
+      state.selected.push(id);
+      state.requestId = newRequestId();
+    }
+  }
+
   function updateAdd() { el.add.disabled = state.adding || state.selected.length === 0; }
 
   function setNote(text, bad) { el.note.textContent = text; el.note.className = 'note' + (bad ? ' bad' : ''); }
@@ -399,6 +444,86 @@
   });
 
   el.back.addEventListener('click', function () { if (!state.adding) { leaveSingers(); } });
+
+  // ---- Pantalla C: nuevo jugador ------------------------------------------------------------------------------
+
+  function setCreateNote(text, bad) { el.createNote.textContent = text; el.createNote.className = 'note' + (bad ? ' bad' : ''); }
+
+  function updateCreate() { el.create.disabled = state.creating || el.nameInput.value.trim().length === 0; }
+
+  function openCreate() {
+    if (state.adding) { return; }
+    state.createId = newRequestId(); state.creating = false; state.avatar = null;
+    el.nameInput.value = ''; el.nameInput.maxLength = state.maxName;
+    setCreateNote(''); hideState(el.createState); updateCreate();
+    try { history.pushState({ screen: 'create' }, ''); } catch (e) { /* sin historial: queda CANCELAR */ }
+    showScreen('create');
+    loadAvatars();
+  }
+
+  // La galería es la de fábrica de Kantor (la misma de la PC); las imágenes se piden por identificador.
+  function loadAvatars() {
+    if (state.avatarList) { renderAvatars(); return; }
+    api('/api/avatars').then(function (d) { state.avatarList = d.items || []; renderAvatars(); })
+      .catch(function (e) {
+        if (state.closed) { showFailure(el.createState, e); return; }
+        state.avatarList = []; renderAvatars();   // sin galería se crea con el personaje genérico
+      });
+  }
+
+  function renderAvatars() {
+    var list = state.avatarList || [];
+    el.avatarBlock.hidden = list.length === 0;
+    el.avatars.textContent = '';
+    list.forEach(function (id, i) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'px avatar'; b.dataset.id = id;
+      b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', 'false'); b.setAttribute('aria-label', '#' + (i + 1));
+      var pic = document.createElement('span'); pic.className = 'pic'; pic.setAttribute('aria-hidden', 'true');
+      b.appendChild(pic);
+      b.addEventListener('click', function () { chooseAvatar(id); });
+      el.avatars.appendChild(b);
+      setImage(pic, '/api/avatar/' + encodeURIComponent(id), '');
+    });
+    paintAvatars();
+  }
+
+  function paintAvatars() {
+    Array.prototype.forEach.call(el.avatars.children, function (b) {
+      b.setAttribute('aria-checked', b.dataset.id === state.avatar ? 'true' : 'false');
+    });
+  }
+
+  function chooseAvatar(id) {
+    if (state.creating) { return; }
+    state.avatar = id; state.createId = newRequestId(); setCreateNote('');
+    paintAvatars();
+  }
+
+  el.newPlayer.addEventListener('click', openCreate);
+  el.createBack.addEventListener('click', function () { if (!state.creating) { goBack('singers'); } });
+  el.nameInput.addEventListener('input', function () { state.createId = newRequestId(); setCreateNote(''); updateCreate(); });
+  el.nameInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); el.nameInput.blur(); if (!el.create.disabled) { el.create.click(); } }
+  });
+
+  el.create.addEventListener('click', function () {
+    var name = el.nameInput.value.trim();
+    if (state.creating || !name) { return; }
+    state.creating = true; updateCreate(); el.create.textContent = t().creating; setCreateNote('');
+    var body = JSON.stringify({ name: name, avatar: state.avatar, requestId: state.createId });
+    api('/api/players', { method: 'POST', body: body }).then(function (res) {
+      state.creating = false; el.create.textContent = t().create;
+      state.pendingSelect = res.player.id;
+      toast(t().created, res.player.name);
+      goBack('singers', loadPlayers);   // vuelve a "¿Quién canta?" con el jugador nuevo ya elegido
+    }).catch(function (e) {
+      state.creating = false; el.create.textContent = t().create; updateCreate();
+      if (state.closed) { showFailure(el.createState, e); el.create.disabled = true; return; }
+      var known = e instanceof ApiError && t().errors[e.code];
+      setCreateNote(known ? t().errors[e.code] : (isOffline(e) ? t().offlineHint : t().generic), true);
+    });
+  });
 
   // ---- Aviso -----------------------------------------------------------------------------------------------
 
@@ -463,6 +588,7 @@
 
   // ---- Arranque ----------------------------------------------------------------------------------------------
 
+  try { if (history.state) { history.replaceState(null, ''); } } catch (e) { /* ignorar */ }
   initToken();
   drawBackdrop();
   applyTexts();

@@ -648,7 +648,14 @@ public partial class MainWindow : Window
         }, TaskScheduler.FromCurrentSynchronizationContext());
     }
 
-    private void OnSongChosen(object? sender, SongEntry entry) => LoadSong(entry.Path);
+    /// <summary>La canción cargada se eligió en la lista: VOLVER en "¿Quién canta?" regresa a ella.</summary>
+    private bool _songFromLibrary;
+
+    private void OnSongChosen(object? sender, SongEntry entry)
+    {
+        LoadSong(entry.Path);
+        _songFromLibrary = true;
+    }
 
     // ---- Cola de canciones ----------------------------------------------------------------------------------
 
@@ -1539,6 +1546,12 @@ public partial class MainWindow : Window
                 _singersConfirmed = true;
                 TogglePlayPause(); // ya hay quién cante: arranca la interpretación que se había pedido
             }
+            else if (!ready && _songFromLibrary)
+            {
+                _songFromLibrary = false;
+                _player.Stop();
+                OpenLibrary(); // la canción se había elegido en la lista: VOLVER regresa a ella
+            }
 
             return;
         }
@@ -2290,6 +2303,7 @@ public partial class MainWindow : Window
             _player.Stop();
         }
 
+        _songFromLibrary = false;
         var version = ++_loadVersion;
         LoadingText.Text = MenuTexts.Loading(_prefs.CommentLanguage);
         LoadingLayer.Visibility = Visibility.Visible;

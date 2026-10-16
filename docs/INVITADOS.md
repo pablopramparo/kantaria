@@ -1,6 +1,7 @@
 # Acceso de invitados por LAN
 
-Los invitados usan el celular para **buscar una canción, elegir quién la canta y agregarla a la cola**. Nada más.
+Los invitados usan el celular para **buscar una canción, elegir quién la canta (o crear su propio jugador con nombre y
+personaje) y agregarla a la cola**. Nada más.
 Kantor sigue funcionando igual sin esto: el servidor está **apagado por omisión** y se apaga solo al cerrar Kantor.
 
 ## Cómo se usa
@@ -11,6 +12,9 @@ Kantor sigue funcionando igual sin esto: el servidor está **apagado por omisió
 2. El celular tiene que estar en **la misma red Wi-Fi** que la PC. Escanear el QR con la cámara abre la página.
 3. El invitado busca, toca una canción, elige cantantes (hasta tantos como micrófonos creados en
    Opciones › Audio) y toca **AGREGAR A LA COLA**. Aparece "¡EN COLA!" con su puesto.
+   Si todavía no tiene jugador, toca **+ NUEVO JUGADOR**, escribe su nombre, elige un personaje de la galería y toca
+   **CREAR Y SELECCIONAR**: vuelve a "¿Quién canta?" con el jugador nuevo ya elegido (la canción se agrega recién al
+   tocar AGREGAR A LA COLA).
 4. Para cerrar: **APAGAR** en la pantalla del QR (o cerrar Kantor). Se revoca el token y se cierra el puerto.
 
 Si la PC tiene varias redes, Kantor elige la que tiene puerta de enlace; se puede fijar otra en
@@ -20,14 +24,19 @@ Si la PC tiene varias redes, Kantor elige la que tiene puerta de enlace; se pued
 
 | Permitido | No permitido |
 |---|---|
-| Buscar canciones (título, artista…, sin importar mayúsculas ni acentos) | Crear, editar o borrar jugadores; perfiles temporales |
-| Elegir cantantes entre los jugadores **ya existentes** (los de la partida abierta; sin partida, los activos) | Micrófonos, avatares, ajustes |
+| Buscar canciones (título, artista…, sin importar mayúsculas ni acentos) | Perfiles temporales o de invitado |
+| Elegir cantantes entre los jugadores **ya existentes** (los de la partida abierta; sin partida, los activos) | Micrófonos, ajustes |
+| **Crear un jugador nuevo**: nombre y un personaje de la galería de fábrica | Editar, renombrar, archivar o borrar jugadores (ni los propios); cargar imágenes propias |
 | Agregar la canción a la cola | Reproducir, pausar, saltar, detener; reordenar o quitar de la cola |
 | | Historial, puntajes, estadísticas, Avyn, archivos de la PC |
 
 El primer cantante elegido ocupa el primer micrófono creado, el segundo el siguiente, etc. En un dueto, cada
 micrófono canta la voz que le corresponde por la regla de siempre (se puede cambiar en "¿Quién canta?" en la PC).
-Sin jugadores o sin micrófonos la página lo avisa: se crean desde la PC. Al cantar un elemento de la cola desde la
+Sin micrófonos la página lo avisa: se crean desde la PC. Los jugadores creados desde el celular son **jugadores
+normales**: se guardan en la misma base, entran a la partida abierta (como los que se crean desde "¿Quién canta?" en
+la PC; cantando suelto no entran a ninguna), figuran enseguida en la PC, en Avyn y en el resto de los celulares, y
+cuentan en resultados, historial y rankings. Crearlos no cambia la selección de micrófonos ni la canción en curso.
+Renombrarlos o borrarlos se hace solo en la PC. Al cantar un elemento de la cola desde la
 PC (CANTAR YA / SIGUIENTE), los cantantes elegidos por el invitado quedan cargados en "¿Quién canta?" si siguen
 siendo válidos.
 
@@ -43,8 +52,8 @@ siendo válidos.
 - La página (`Guest/Web/`: HTML, CSS, JS sin frameworks) sale de **recursos embebidos por nombre fijo**, con
   Jersey 15, el logo y los valores de color y marco de `Theme.xaml`, `PixelFrame` y `SongListView.xaml` en
   variables CSS. Sin CDN, sin servicios externos.
-- Rutas: `GET /` y `/assets/*` (lista cerrada) y, con token, `GET /api/config|songs|players`, `GET /api/cover/{id}`,
-  `GET /api/avatar/{id}` y `POST /api/queue`. Portadas y avatares se piden por identificador, nunca por ruta.
+- Rutas: `GET /` y `/assets/*` (lista cerrada) y, con token, `GET /api/config|songs|players|avatars`,
+  `GET /api/cover/{id}`, `GET /api/avatar/{id}`, `POST /api/queue` y `POST /api/players` (solo crea). Portadas y avatares se piden por identificador, nunca por ruta.
 
 ## Seguridad (y sus límites)
 
@@ -55,6 +64,10 @@ siendo válidos.
 - Rechaza clientes que no sean de una red privada; valida `Host` (anti-rebinding) y `Origin`; sin CORS; cabeceras
   CSP/`nosniff`/`no-referrer`; cuerpo máximo 1 KiB; JSON estricto; límite de pedidos por cliente (120 / 10 s),
   de agregados (6 / 30 s), bloqueo temporal tras 10 tokens inválidos por minuto y máximo de 32 pedidos a la vez.
+- Crear jugadores: las reglas son las de la PC (`KantorStore.CreatePlayer`: nombre de 1 a 24 caracteres sin
+  espacios en los extremos, único entre los activos sin distinguir mayúsculas), más: sin caracteres de control y
+  personaje solo de la galería de fábrica (los cargados por el usuario no se ofrecen ni se aceptan; sin personaje, el
+  genérico). Todo se valida en el servidor. Límite: 5 por cliente cada 10 minutos y 40 en total por activación.
 - Doble toque y reintentos: el mismo `requestId` (la página lo reusa hasta que se cambia la elección o se vuelve
   a la lista) agrega **una sola vez**. Un pedido nuevo siempre agrega, aunque sea la misma canción con los mismos
   cantantes: repetir una canción es legítimo.

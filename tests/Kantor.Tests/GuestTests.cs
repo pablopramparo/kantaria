@@ -112,6 +112,10 @@ internal sealed class GuestServerOptionsBuilder
 
     public int MaxInFlight { get; set; } = 32;
 
+    public int PlayerCreatesPerClient { get; set; } = 1000;
+
+    public int PlayerCreatesTotal { get; set; } = 1000;
+
     public int PreferredPort { get; set; }
 
     public Func<DateTimeOffset>? Clock { get; set; }
@@ -124,6 +128,8 @@ internal sealed class GuestServerOptionsBuilder
         QueueWritesPerWindow = QueueWritesPerWindow,
         AuthFailuresPerMinute = AuthFailuresPerMinute,
         MaxInFlight = MaxInFlight,
+        PlayerCreatesPerClient = PlayerCreatesPerClient,
+        PlayerCreatesTotal = PlayerCreatesTotal,
         Clock = Clock,
     };
 }
@@ -472,7 +478,9 @@ public class GuestRoutingTests
     [InlineData("PUT", "/api/queue")]
     [InlineData("GET", "/api/queue")]
     [InlineData("POST", "/api/songs")]
-    [InlineData("POST", "/api/players")]
+    [InlineData("DELETE", "/api/players")]
+    [InlineData("PUT", "/api/players")]
+    [InlineData("POST", "/api/avatars")]
     [InlineData("POST", "/api/config")]
     public async Task Known_routes_reject_other_methods(string method, string path)
     {

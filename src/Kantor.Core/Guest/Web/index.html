@@ -49,9 +49,30 @@
     <p id="pickHint" class="hint"></p>
     <div id="players" class="players"></div>
     <div id="singersState" class="state" hidden></div>
+    <button id="newPlayer" class="px px-button newplayer" type="button" data-t="newPlayer">+ NUEVO JUGADOR</button>
     <div class="actions">
       <p id="actionNote" class="note" role="status" aria-live="polite"></p>
       <button id="add" class="px px-button px-primary add" type="button" disabled data-t="add">AGREGAR A LA COLA</button>
+    </div>
+  </section>
+
+  <!-- Pantalla C: nuevo jugador (nombre + personaje de la galería de Kantor) -->
+  <section id="screenCreate" class="screen" hidden aria-labelledby="createTitle">
+    <button id="createBack" class="px px-button back" type="button" data-t="cancel">CANCELAR</button>
+    <h1 id="createTitle" class="title" data-t="newPlayerTitle">NUEVO JUGADOR</h1>
+    <label class="label" for="nameInput" data-t="yourName">TU NOMBRE</label>
+    <div class="namefield px px-field">
+      <input id="nameInput" type="text" maxlength="24" autocomplete="off" autocapitalize="words" autocorrect="off"
+             spellcheck="false" enterkeyhint="done">
+    </div>
+    <div id="avatarBlock">
+      <p class="label" data-t="pickCharacter">ELEGÍ TU PERSONAJE</p>
+      <div id="avatars" class="avatars" role="radiogroup" aria-labelledby="createTitle"></div>
+    </div>
+    <div id="createState" class="state" hidden></div>
+    <div class="actions">
+      <p id="createNote" class="note" role="status" aria-live="polite"></p>
+      <button id="create" class="px px-button px-primary add" type="button" disabled data-t="create">CREAR Y SELECCIONAR</button>
     </div>
   </section>
 </div>

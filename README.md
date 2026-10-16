@@ -51,7 +51,7 @@ Kantor can't teach you to sing. But it can document the attempt.
 - **Optional remote control** through a local integration (named pipe, current user only), off by default.
   It is built for [Avyn](docs/AVYN_CONTRATO.md), a separate project.
 - **Guest access over your LAN** (off by default): a QR on the main menu and the song list lets guests search songs,
-  pick who sings and add them to the queue from their phones. Nothing else. See [docs/INVITADOS.en.md](docs/INVITADOS.en.md)
+  pick who sings (or create their own player with a name and a character) and add them to the queue from their phones. Nothing else. See [docs/INVITADOS.en.md](docs/INVITADOS.en.md)
   for how it works and its limits: plain HTTP on your local network, shared access key, no internet.
 
 ## Why does this exist?

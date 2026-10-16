@@ -451,6 +451,12 @@ public partial class MainWindow
             w.OnQueueChanged();
         }
 
+        public void PlayersAdded()
+        {
+            w.RefreshPlayerCache();
+            RefreshPlayersScreen();
+        }
+
         private void RefreshPlayersScreen()
         {
             if (w.PlayersScreen.Visibility == Visibility.Visible && w._store is not null)

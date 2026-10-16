@@ -140,6 +140,10 @@ internal sealed class FakeHost : IKantorHost
 
     public void DataChanged() => DataChangedCount++;
 
+    public int PlayersAddedCount { get; private set; }
+
+    public void PlayersAdded() => PlayersAddedCount++;
+
     // ---- Lo que haría la persona frente a la PC ---------------------------------------------------------------
 
     /// <summary>La canción terminó: resultados en pantalla, con la animación en curso.</summary>

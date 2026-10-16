@@ -54,8 +54,8 @@ Kantor no puede enseñarte a cantar. Pero puede documentar el intento.
 - **Control remoto opcional** mediante una integración local (pipe con nombre, solo para el usuario actual),
   apagada por omisión. Está pensada para [Avyn](docs/AVYN_CONTRATO.md), un proyecto aparte.
 - **Acceso de invitados por tu red local** (apagado por omisión): un QR en el menú principal y en la lista de
-  canciones permite que los invitados busquen canciones, elijan quién canta y las sumen a la cola desde el
-  celular. Nada más. Cómo funciona y sus límites en [docs/INVITADOS.md](docs/INVITADOS.md): HTTP sin cifrar en tu
+  canciones permite que los invitados busquen canciones, elijan quién canta (o creen su propio jugador con nombre y
+  personaje) y las sumen a la cola desde el celular. Nada más. Cómo funciona y sus límites en [docs/INVITADOS.md](docs/INVITADOS.md): HTTP sin cifrar en tu
   red local, clave de acceso compartida, sin internet.
 
 ## ¿Por qué existe esto?

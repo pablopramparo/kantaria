@@ -31,6 +31,14 @@ public sealed class GuestServerOptions
 
     public int QueueWritesPerWindow { get; init; } = 6;
 
+    /// <summary>Jugadores que puede crear un mismo cliente en la ventana (una reunión normal: uno por persona).</summary>
+    public int PlayerCreatesPerClient { get; init; } = 5;
+
+    public TimeSpan PlayerCreateWindow { get; init; } = TimeSpan.FromMinutes(10);
+
+    /// <summary>Tope de jugadores creados por todos los celulares juntos en la ventana (contra abusos).</summary>
+    public int PlayerCreatesTotal { get; init; } = 40;
+
     public TimeSpan QueueWriteWindow { get; init; } = TimeSpan.FromSeconds(30);
 
     /// <summary>Tokens inválidos tolerados por cliente y minuto antes de bloquearlo un rato.</summary>
@@ -70,6 +78,8 @@ public sealed partial class GuestWebServer : IAsyncDisposable
     private readonly GuestServerOptions _options;
     private readonly GuestRateLimiter _requests;
     private readonly GuestRateLimiter _writes;
+    private readonly GuestRateLimiter _creates;
+    private readonly GuestRateLimiter _createsTotal;
     private readonly GuestRateLimiter _failures;
     private readonly SemaphoreSlim _inFlight;
     private WebApplication? _app;
@@ -82,6 +92,8 @@ public sealed partial class GuestWebServer : IAsyncDisposable
         _options = options;
         _requests = new GuestRateLimiter(options.RequestsPerWindow, options.RequestWindow, options.Clock);
         _writes = new GuestRateLimiter(options.QueueWritesPerWindow, options.QueueWriteWindow, options.Clock);
+        _creates = new GuestRateLimiter(options.PlayerCreatesPerClient, options.PlayerCreateWindow, options.Clock);
+        _createsTotal = new GuestRateLimiter(options.PlayerCreatesTotal, options.PlayerCreateWindow, options.Clock);
         _failures = new GuestRateLimiter(options.AuthFailuresPerMinute, TimeSpan.FromMinutes(1), options.Clock);
         _inFlight = new SemaphoreSlim(options.MaxInFlight, options.MaxInFlight);
     }
@@ -347,8 +359,14 @@ public sealed partial class GuestWebServer : IAsyncDisposable
             case "/api/players" when isGet:
                 await PlayersAsync(ctx);
                 break;
+            case "/api/avatars" when isGet:
+                await Ok(ctx, new { items = GuestService.FactoryAvatars() });
+                break;
             case "/api/queue" when HttpMethods.IsPost(request.Method):
                 await EnqueueAsync(ctx, client);
+                break;
+            case "/api/players" when HttpMethods.IsPost(request.Method):
+                await CreatePlayerAsync(ctx, client);
                 break;
             default:
                 if (isGet && path.StartsWith("/api/cover/", StringComparison.Ordinal))
@@ -359,7 +377,7 @@ public sealed partial class GuestWebServer : IAsyncDisposable
                 {
                     await ImageAsync(ctx, path["/api/avatar/".Length..], cover: false);
                 }
-                else if (path is "/api/config" or "/api/songs" or "/api/players" or "/api/queue")
+                else if (path is "/api/config" or "/api/songs" or "/api/players" or "/api/queue" or "/api/avatars")
                 {
                     await Fail(ctx, 405, "METHOD_NOT_ALLOWED");
                 }
@@ -400,6 +418,7 @@ public sealed partial class GuestWebServer : IAsyncDisposable
         await Ok(ctx, new
         {
             maxSingers = roster.MaxSingers,
+            maxName = Kantor.Core.Data.KantorStore.MaxNameLength,
             players = roster.Players.Select(p => new { id = p.Id, name = p.Name, avatar = GuestService.AvatarIdOf(p.CharacterId) }),
         });
     }
@@ -425,6 +444,79 @@ public sealed partial class GuestWebServer : IAsyncDisposable
         var result = await _service.EnqueueAsync(songId, playerIds, requestId).WaitAsync(ctx.RequestAborted)
             .ConfigureAwait(false);
         await Ok(ctx, new { queued = true, duplicate = result.Duplicate, position = result.Position, pending = result.Pending });
+    }
+
+    private async Task CreatePlayerAsync(HttpContext ctx, string client)
+    {
+        var request = ctx.Request;
+        if (request.ContentType is not { } type || !type.StartsWith("application/json", StringComparison.OrdinalIgnoreCase))
+        {
+            await Fail(ctx, 415, GuestErrors.InvalidRequest);
+            return;
+        }
+
+        if (!_creates.TryAcquire(client) || !_createsTotal.TryAcquire("all"))
+        {
+            ctx.Response.Headers.RetryAfter = "30";
+            await Fail(ctx, 429, "RATE_LIMITED");
+            return;
+        }
+
+        ctx.Features.Get<IHttpMaxRequestBodySizeFeature>()!.MaxRequestBodySize = MaxBodyBytes;
+        var (name, avatar, requestId) = await ReadCreateBody(request).ConfigureAwait(false);
+        var player = await _service.CreatePlayerAsync(name, avatar, requestId).WaitAsync(ctx.RequestAborted)
+            .ConfigureAwait(false);
+        await Ok(ctx, new
+        {
+            created = true, duplicate = player.Duplicate,
+            player = new { id = player.Id, name = player.Name, avatar = player.Avatar },
+        });
+    }
+
+    private static async Task<(string Name, string? Avatar, string RequestId)> ReadCreateBody(HttpRequest request)
+    {
+        JsonDocument document;
+        try
+        {
+            document = await JsonDocument.ParseAsync(request.Body, new JsonDocumentOptions { MaxDepth = 4 },
+                request.HttpContext.RequestAborted).ConfigureAwait(false);
+        }
+        catch (JsonException)
+        {
+            throw new GuestException(GuestErrors.InvalidRequest, 400);
+        }
+
+        using (document)
+        {
+            var root = document.RootElement;
+            if (root.ValueKind != JsonValueKind.Object
+                || !root.TryGetProperty("name", out var name) || name.ValueKind != JsonValueKind.String
+                || !root.TryGetProperty("requestId", out var rid) || rid.ValueKind != JsonValueKind.String)
+            {
+                throw new GuestException(GuestErrors.InvalidRequest, 400);
+            }
+
+            string? avatar = null;
+            if (root.TryGetProperty("avatar", out var av) && av.ValueKind != JsonValueKind.Null)
+            {
+                // el avatar es un identificador del catálogo, nunca una ruta: formato estricto y luego catálogo
+                if (av.ValueKind != JsonValueKind.String || !IdPattern().IsMatch(av.GetString()!))
+                {
+                    throw new GuestException(GuestErrors.InvalidAvatar, 400);
+                }
+
+                avatar = av.GetString();
+            }
+
+            var text = name.GetString()!;
+            var requestId = rid.GetString()!;
+            if (text.Length > 200 || !RequestIdPattern().IsMatch(requestId))
+            {
+                throw new GuestException(GuestErrors.InvalidRequest, 400);
+            }
+
+            return (text, avatar, requestId);
+        }
     }
 
     private static async Task<(string SongId, List<long> PlayerIds, string RequestId)> ReadEnqueueBody(HttpRequest request)

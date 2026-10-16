@@ -40,8 +40,8 @@ public static class OptionsTexts
 
         ["help.guest.title"] = ("6. Invitados con el celular (opcional)", "6. Guests with their phones (optional)"),
         ["help.guest.body"] = (
-            "Tocá «INVITADOS · QR» en el menú o en la lista de canciones: aparece un QR. Con la cámara del celular (en la misma red Wi-Fi) los invitados buscan una canción, eligen quién canta y la suman a la cola; nada más. Se apaga desde la pantalla del QR o al cerrar Kantor. Es HTTP sin cifrar en tu red local: no lo uses en redes ajenas.",
-            "Click “GUESTS · QR” on the menu or in the song list: a QR appears. With their phone camera (on the same Wi-Fi) guests find a song, pick who sings and add it to the queue; nothing else. Turn it off from the QR screen or by closing Kantor. It is plain, unencrypted HTTP on your local network: don’t use it on networks you don’t control."),
+            "Tocá «INVITADOS · QR» en el menú o en la lista de canciones: aparece un QR. Con la cámara del celular (en la misma red Wi-Fi) los invitados buscan una canción, eligen quién canta (o crean su jugador con nombre y personaje) y la suman a la cola; nada más. Se apaga desde la pantalla del QR o al cerrar Kantor. Es HTTP sin cifrar en tu red local: no lo uses en redes ajenas.",
+            "Click “GUESTS · QR” on the menu or in the song list: a QR appears. With their phone camera (on the same Wi-Fi) guests find a song, pick who sings (or create their own player with a name and character) and add it to the queue; nothing else. Turn it off from the QR screen or by closing Kantor. It is plain, unencrypted HTTP on your local network: don’t use it on networks you don’t control."),
 
         ["hint"] = ("← → PESTAÑAS  ·  ↑ ↓ OPCIONES  ·  ENTER ENTRAR / ABRIR  ·  ESC VOLVER",
             "← → TABS  ·  ↑ ↓ OPTIONS  ·  ENTER ENTER / OPEN  ·  ESC BACK"),

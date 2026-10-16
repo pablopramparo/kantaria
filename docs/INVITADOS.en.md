@@ -1,6 +1,7 @@
 # Guest access over the LAN
 
-Guests use their phones to **find a song, pick who sings it and add it to the queue**. Nothing else.
+Guests use their phones to **find a song, pick who sings it (or create their own player with a name and character)
+and add it to the queue**. Nothing else.
 Kantor works exactly the same without this: the server is **off by default** and switches itself off when Kantor
 closes. (Spanish version: [INVITADOS.md](INVITADOS.md).)
 
@@ -11,6 +12,9 @@ closes. (Spanish version: [INVITADOS.md](INVITADOS.md).)
 2. The phone must be on **the same Wi-Fi network** as the PC. Scanning the QR with the camera opens the page.
 3. The guest searches, taps a song, picks singers (up to as many as there are microphones created in
    Options › Audio) and taps **ADD TO QUEUE**. "QUEUED!" appears with their position.
+   A guest with no player yet taps **+ NEW PLAYER**, types a name, picks a character from the gallery and taps
+   **CREATE & SELECT**: they land back on "Who's singing?" with the new player already picked (the song is only added
+   when they tap ADD TO QUEUE).
 4. To close: **TURN OFF** on the QR screen (or close Kantor). The token is revoked and the port is closed.
 
 If the PC has several networks, Kantor picks the one with a gateway; you can choose another under
@@ -20,14 +24,19 @@ If the PC has several networks, Kantor picks the one with a gateway; you can cho
 
 | Allowed | Not allowed |
 |---|---|
-| Search songs (title, artist…, ignoring case and accents) | Create, edit or delete players; temporary profiles |
-| Pick singers among **existing** players (those in the open session; with no session, the active ones) | Microphones, avatars, settings |
+| Search songs (title, artist…, ignoring case and accents) | Temporary or guest profiles |
+| Pick singers among **existing** players (those in the open session; with no session, the active ones) | Microphones, settings |
+| **Create a new player**: a name and a character from the factory gallery | Edit, rename, archive or delete players (not even their own); upload custom images |
 | Add the song to the queue | Play, pause, skip, stop; reorder or remove queue items |
 | | History, scores, statistics, Avyn, files on the PC |
 
 The first singer picked takes the first microphone created, the second takes the next, and so on. In a duet, each
 microphone sings the voice it gets by the usual rule (it can be changed in "Who sings?" on the PC). If there are no
-players or no microphones the page says so: they are created on the PC. When a queue item is sung from the PC
+microphones the page says so: they are created on the PC. Players created from a phone are **normal players**: they
+are stored in the same database, join the open session (like those created from "Who sings?" on the PC; when
+singing solo they join none), show up at once on the PC, in Avyn and on other phones, and count in results, history
+and rankings. Creating them changes neither the microphone selection nor the song in progress. Renaming or deleting
+them is done only on the PC. When a queue item is sung from the PC
 (SING NOW / NEXT), the singers the guest picked are preloaded in "Who sings?" if they are still valid.
 
 ## How it works
@@ -41,8 +50,8 @@ players or no microphones the page says so: they are created on the PC. When a q
 - The page (`Guest/Web/`: HTML, CSS, plain JS) is served from **embedded resources by fixed name**, with Jersey 15,
   the logo and the colour and frame values of `Theme.xaml`, `PixelFrame` and `SongListView.xaml` as CSS variables.
   No CDN, no external services.
-- Routes: `GET /` and `/assets/*` (closed list) and, with the token, `GET /api/config|songs|players`,
-  `GET /api/cover/{id}`, `GET /api/avatar/{id}` and `POST /api/queue`. Covers and avatars are requested by
+- Routes: `GET /` and `/assets/*` (closed list) and, with the token, `GET /api/config|songs|players|avatars`,
+  `GET /api/cover/{id}`, `GET /api/avatar/{id}` `POST /api/queue` and `POST /api/players` (create only). Covers and avatars are requested by
   identifier, never by path.
 
 ## Security (and its limits)
@@ -54,6 +63,10 @@ players or no microphones the page says so: they are created on the PC. When a q
 - Rejects clients that are not on a private network; validates `Host` (anti-rebinding) and `Origin`; no CORS;
   CSP/`nosniff`/`no-referrer` headers; 1 KiB maximum body; strict JSON; per-client limits on requests (120 / 10 s)
   and on adds (6 / 30 s), a temporary block after 10 invalid tokens per minute, and at most 32 simultaneous requests.
+- Creating players: the rules are the PC's (`KantorStore.CreatePlayer`: 1 to 24 characters, trimmed, unique among
+  active players ignoring case), plus: no control characters and a character only from the factory gallery (user-loaded
+  ones are neither offered nor accepted; with none, the generic one). Everything is validated on the server. Limit:
+  5 per client every 10 minutes and 40 in total per activation.
 - Double taps and retries: the same `requestId` (the page reuses it until the choice changes or the guest goes back
   to the list) adds **once**. A new request always adds, even for the same song with the same singers: repeating a
   song is legitimate.

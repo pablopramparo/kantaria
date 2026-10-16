@@ -26,12 +26,20 @@ public static class GuestErrors
     public const string QueueFull = "QUEUE_FULL";
     public const string RequestReused = "REQUEST_REUSED";
     public const string Unavailable = "UNAVAILABLE";
+    public const string NameEmpty = "NAME_EMPTY";
+    public const string NameTooLong = "NAME_TOO_LONG";
+    public const string NameInvalid = "NAME_INVALID";
+    public const string NameTaken = "NAME_TAKEN";
+    public const string InvalidAvatar = "INVALID_AVATAR";
 }
 
 public sealed record GuestSong(string Id, string Artist, string Title, string? Edition, bool HasCover, string? CoverId,
     bool HasVideo);
 
 public sealed record GuestSongPage(int Total, int Offset, int? NextOffset, IReadOnlyList<GuestSong> Items);
+
+/// <summary>Jugador recién creado. <see cref="Duplicate"/> si era el reintento de una creación ya hecha.</summary>
+public sealed record GuestCreatedPlayer(long Id, string Name, string Avatar, bool Duplicate);
 
 /// <summary>Resultado de agregar: <see cref="Duplicate"/> si era un reintento o un doble toque de algo ya agregado.</summary>
 public sealed record GuestEnqueueResult(int Position, int Pending, bool Duplicate);
@@ -68,7 +76,7 @@ public sealed class GuestService
     private readonly object _gate = new();
     private readonly Dictionary<string, Remembered> _byRequest = new(StringComparer.Ordinal);
 
-    private sealed record Remembered(string Fingerprint, Task<GuestEnqueueResult> Task, DateTimeOffset At);
+    private sealed record Remembered(string Fingerprint, Task Task, DateTimeOffset At);
 
     public GuestService(LibraryCatalog catalog, KantorController controller, IUiInvoker ui, ICoverProvider? covers,
         IGuestAvatars? avatars, Func<string> language, Func<DateTimeOffset>? clock = null)
@@ -131,6 +139,36 @@ public sealed class GuestService
     /// <summary>Identificador de personaje que la página puede pedir: el del jugador o, si ya no existe, el de reserva.</summary>
     public static string AvatarIdOf(string? characterId) => CharacterCatalog.Default.GetOrDefault(characterId).Id;
 
+    /// <summary>
+    /// La galería de personajes de fábrica de Kantor (la misma de la PC, en su orden). Los cargados por el usuario no
+    /// se ofrecen. Si no hubiera ninguno, la lista queda vacía y el jugador se crea con el personaje genérico.
+    /// </summary>
+    public static IReadOnlyList<string> FactoryAvatars() =>
+        [.. CharacterCatalog.Default.All.Where(c => !c.IsUser).Select(c => c.Id)];
+
+    /// <summary>
+    /// Crea un jugador normal de Kantor con ese nombre y avatar (<c>null</c> = el genérico). Idempotente por
+    /// <paramref name="requestId"/> (reintento o doble toque devuelve el mismo jugador); dos pedidos independientes
+    /// siguen las reglas normales: el segundo con un nombre ya usado se rechaza (<c>NAME_TAKEN</c>).
+    /// </summary>
+    public Task<GuestCreatedPlayer> CreatePlayerAsync(string name, string? avatar, string requestId) =>
+        Idempotent("p:" + requestId, name.Trim() + "|" + avatar, async () =>
+        {
+            try
+            {
+                var player = await _ui.InvokeAsync(() => _controller.GuestCreatePlayer(name, avatar)).ConfigureAwait(false);
+                return new GuestCreatedPlayer(player.Id, player.Name, AvatarIdOf(player.CharacterId), false);
+            }
+            catch (RemoteException e)
+            {
+                throw Translate(e);
+            }
+            catch (Exception e) when (e is Microsoft.Data.Sqlite.SqliteException or IOException or InvalidOperationException)
+            {
+                throw new GuestException(GuestErrors.Unavailable, 503);
+            }
+        }, created => created with { Duplicate = true });
+
     // ---- Cola -------------------------------------------------------------------------------------------------
 
     /// <summary>
@@ -139,16 +177,23 @@ public sealed class GuestService
     /// identificador) siempre agrega, aunque sea la misma canción con los mismos cantantes: repetir una canción es
     /// legítimo. Las solicitudes que llegan juntas se serializan en el hilo de la interfaz.
     /// </summary>
-    public async Task<GuestEnqueueResult> EnqueueAsync(string songId, IReadOnlyList<long> playerIds, string requestId)
+    public Task<GuestEnqueueResult> EnqueueAsync(string songId, IReadOnlyList<long> playerIds, string requestId) =>
+        Idempotent("q:" + requestId, songId + "|" + string.Join(",", playerIds), () => RunAsync(songId, playerIds),
+            result => result with { Duplicate = true });
+
+    /// <summary>
+    /// Ejecuta <paramref name="run"/> una sola vez por <paramref name="key"/>: los reintentos esperan el mismo
+    /// resultado. La misma clave con otro contenido es un error; un pedido rechazado no se recuerda.
+    /// </summary>
+    private async Task<T> Idempotent<T>(string key, string fingerprint, Func<Task<T>> run, Func<T, T> asDuplicate)
     {
-        var fingerprint = songId + "|" + string.Join(",", playerIds);
         Remembered entry;
         bool created;
         lock (_gate)
         {
             var now = _clock();
             Prune(now);
-            if (_byRequest.TryGetValue(requestId, out var same))
+            if (_byRequest.TryGetValue(key, out var same))
             {
                 if (same.Fingerprint != fingerprint)
                 {
@@ -159,20 +204,20 @@ public sealed class GuestService
             }
             else
             {
-                entry = new Remembered(fingerprint, RunAsync(songId, playerIds), now);
-                _byRequest[requestId] = entry;
+                entry = new Remembered(fingerprint, run(), now);
+                _byRequest[key] = entry;
                 created = true;
             }
         }
 
         try
         {
-            var result = await entry.Task.ConfigureAwait(false);
-            return created ? result : result with { Duplicate = true };
+            var result = await ((Task<T>)entry.Task).ConfigureAwait(false);
+            return created ? result : asDuplicate(result);
         }
         catch (GuestException)
         {
-            Forget(requestId, entry); // un pedido rechazado no se recuerda: se puede reintentar
+            Forget(key, entry); // un pedido rechazado no se recuerda: se puede reintentar
             throw;
         }
     }
@@ -204,17 +249,28 @@ public sealed class GuestService
         ErrorCodes.NoMicrophones => new GuestException(GuestErrors.NoMicrophones, 409),
         ErrorCodes.SlotUnavailable => new GuestException(GuestErrors.TooManySingers, 409),
         ErrorCodes.QueueFull => new GuestException(GuestErrors.QueueFull, 409),
-        ErrorCodes.InvalidPayload => new GuestException(GuestErrors.InvalidRequest, 400),
+        ErrorCodes.InvalidPayload => InvalidPayload(e),
+        ErrorCodes.PlayerNameTaken => new GuestException(GuestErrors.NameTaken, 409),
         _ => new GuestException(GuestErrors.Unavailable, 503),
     };
 
-    private void Forget(string requestId, Remembered entry)
+    private static GuestException InvalidPayload(RemoteException e) =>
+        e.Details?["reason"]?.GetValue<string>() switch
+        {
+            "empty" => new GuestException(GuestErrors.NameEmpty, 400),
+            "too-long" => new GuestException(GuestErrors.NameTooLong, 400),
+            "invalid-chars" => new GuestException(GuestErrors.NameInvalid, 400),
+            "unknown-avatar" => new GuestException(GuestErrors.InvalidAvatar, 400),
+            _ => new GuestException(GuestErrors.InvalidRequest, 400),
+        };
+
+    private void Forget(string key, Remembered entry)
     {
         lock (_gate)
         {
-            if (_byRequest.TryGetValue(requestId, out var r) && ReferenceEquals(r, entry))
+            if (_byRequest.TryGetValue(key, out var r) && ReferenceEquals(r, entry))
             {
-                _byRequest.Remove(requestId);
+                _byRequest.Remove(key);
             }
         }
     }

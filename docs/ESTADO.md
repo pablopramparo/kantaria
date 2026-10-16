@@ -990,3 +990,24 @@ Guía de uso y seguridad: **`docs/INVITADOS.md`**. Aquí, lo que hay que saber p
   Windows y Wi-Fi con aislamiento de clientes, varias personas a la vez, la tarjeta de la lista de canciones a
   simple vista, la pantalla grande del QR, Opciones › Juego › Red para invitados y el cambio de red en caliente,
   un dueto, y la lista de canciones con la biblioteca real.
+- **Crear jugadores desde el celular** (ampliación): pantalla «+ NUEVO JUGADOR» (nombre + galería de avatares de fábrica)
+  y `POST /api/players` (solo crea) + `GET /api/avatars`. Reutiliza `KantorStore.CreatePlayer` (mismas reglas que la PC:
+  1–24 caracteres, único entre activos sin distinguir mayúsculas) y `CharacterCatalog.Factory`/`Fallback`; se suman
+  solo: sin caracteres de control, avatar únicamente de fábrica (los del usuario no se ofrecen ni se aceptan) y
+  validación en el servidor (`KantorController.GuestCreatePlayer`, en el hilo de la interfaz).
+  - **Partida**: con una partida abierta y sin cantar suelto, el jugador entra a ella (`AddPlayerToSession`), igual que
+    los creados desde «¿Quién canta?» en la PC; sin eso no podría elegirse (la lista de invitados es la de la partida).
+    No toca la selección de micrófonos.
+  - **Nuevo `IKantorHost.PlayersAdded()`**: refresca la caché de nombres y la pantalla de jugadores **sin** llamar a
+    `DataChanged`, que recrea los puntajes (`CreateScorers`) y reiniciaría una canción en curso. (`players.create` de
+    Avyn sigue usando `DataChanged`: no se tocó el contrato.)
+  - **Idempotencia**: por `requestId` (mismo mecanismo que la cola, con claves separadas `p:`/`q:`); mismo id y mismo
+    contenido devuelve el mismo jugador (`duplicate`), mismo id con otro contenido es `REQUEST_REUSED`; un pedido
+    rechazado no se recuerda. Dos pedidos independientes con el mismo nombre siguen la regla normal (`NAME_TAKEN`).
+  - **Límites**: 5 creaciones por cliente cada 10 min y 40 en total por activación (`GuestServerOptions`).
+  - **Página**: tercera pantalla (biblioteca → cantantes → nuevo jugador) con historial del navegador (el botón atrás
+    retrocede una pantalla); al crear vuelve a «¿Quién canta?» con el jugador ya elegido (si el cupo de micrófonos
+    estaba completo, ocupa el lugar del último elegido). En pantallas bajas en horizontal, el botón de crear queda al
+    final del formulario en vez de fijo.
+  - **Sin comprobar**: teclado virtual real, la galería con el dedo, y la aparición del jugador en la pantalla de
+    Jugadores de la PC mientras está abierta (cubierto por tests solo hasta `PlayersAdded`).

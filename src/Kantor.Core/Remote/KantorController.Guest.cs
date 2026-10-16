@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Pablo Pramparo
 using System.Text.Json.Nodes;
+using Kantor.Core.Characters;
 using Kantor.Core.Data;
 
 namespace Kantor.Core.Remote;
@@ -39,6 +40,63 @@ public sealed partial class KantorController
             [.. players.Where(p => !p.Archived).Select(p => new GuestPlayer(p.Id, p.Name, p.CharacterId))],
             Math.Min(host.MicrophoneSlots.Count, KantorStore.MaxPlayersPerPerformance));
     }
+
+    /// <summary>
+    /// Crea un jugador normal de Kantor (el mismo registro que crea la PC) con un avatar de fábrica. Con una partida
+    /// abierta (y sin cantar suelto) entra a ella, como los que se crean desde "¿Quién canta?" en la PC: si no, no
+    /// se podría elegir. No toca la selección de micrófonos ni la canción en curso. Hilo de la interfaz.
+    /// </summary>
+    /// <exception cref="RemoteException">
+    /// <c>INVALID_PAYLOAD</c> con <c>details.reason</c> (<c>empty</c>, <c>too-long</c>, <c>invalid-chars</c>,
+    /// <c>unknown-avatar</c>) o <c>PLAYER_NAME_TAKEN</c>; no cambió nada.
+    /// </exception>
+    public GuestPlayer GuestCreatePlayer(string name, string? avatarId)
+    {
+        var store = RequireStore();
+        name = (name ?? string.Empty).Trim();
+        if (name.Length == 0)
+        {
+            throw Reason("name", "empty");
+        }
+
+        if (name.Length > KantorStore.MaxNameLength)
+        {
+            throw Reason("name", "too-long");
+        }
+
+        if (name.Any(char.IsControl))
+        {
+            throw Reason("name", "invalid-chars");
+        }
+
+        // solo los avatares de fábrica: los cargados por el usuario no se ofrecen ni se aceptan desde el celular
+        if (avatarId is not null && !CharacterCatalog.Factory.Any(c => c.Id == avatarId))
+        {
+            throw Reason("avatar", "unknown-avatar");
+        }
+
+        var host = _host.Capture();
+        PlayerRecord player;
+        try
+        {
+            player = store.CreatePlayer(name, avatarId);
+        }
+        catch (StoreRuleException)
+        {
+            throw new RemoteException(ErrorCodes.PlayerNameTaken, "An active player already has that name.");
+        }
+
+        if (store.GetOpenSession() is { } open && !host.Solo)
+        {
+            store.AddPlayerToSession(open.Id, player.Id);
+        }
+
+        _host.PlayersAdded();
+        return new GuestPlayer(player.Id, player.Name, player.CharacterId);
+    }
+
+    private static RemoteException Reason(string field, string reason) =>
+        new(ErrorCodes.InvalidPayload, $"Invalid {field}.", new JsonObject { ["field"] = field, ["reason"] = reason });
 
     /// <summary>
     /// Agrega una canción a la cola con los cantantes elegidos, por la misma ruta que <c>kantor.queue.add</c>: el
