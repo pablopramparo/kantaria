@@ -99,7 +99,9 @@ There was no meeting where anyone approved this expansion. It just happened.
 
 ## Download
 
-Packages are published on [Releases](../../releases). You don't need to install .NET:
+**Microsoft Store:** <https://apps.microsoft.com/detail/9P8ZKZBJ4RHB> (updates automatically; includes a subset of the characters).
+
+Other packages are published on [Releases](../../releases). You don't need to install .NET:
 
 - **Installer** (`Kantor-Setup-<version>.exe`): installs for the current user, no administrator rights, adds a
   Start menu entry and uninstalls from *Installed apps*. Running a newer installer over it updates Kantor and keeps

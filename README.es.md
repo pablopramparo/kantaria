@@ -103,7 +103,9 @@ No hubo ninguna reunión en la que se aprobara semejante crecimiento. Simplement
 
 ## Descargar
 
-Los paquetes se publican en [Releases](../../releases). No hace falta instalar .NET:
+**Microsoft Store:** <https://apps.microsoft.com/detail/9P8ZKZBJ4RHB> (se actualiza sola; trae un subconjunto de los personajes).
+
+Los demás paquetes se publican en [Releases](../../releases). No hace falta instalar .NET:
 
 - **Instalador** (`Kantor-Setup-<versión>.exe`): instala para el usuario actual, sin permisos de administrador,
   crea el acceso en el menú Inicio y se desinstala desde *Aplicaciones instaladas*. Ejecutar un instalador más
