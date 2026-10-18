@@ -85,6 +85,9 @@ public partial class OptionsView : UserControl
 
     public event Action<bool>? PhraseFeedbackChanged;
 
+    /// <summary>Variante de los mensajes por frase en español: <c>true</c> = argentina, <c>false</c> = neutra.</summary>
+    public event Action<bool>? PhraseDialectChanged;
+
     public event Action<bool>? StartFullscreenChanged;
 
     public event Action<bool>? AutoAdvanceChanged;
@@ -928,6 +931,9 @@ public partial class OptionsView : UserControl
             Choice("preview", [T("no"), T("yes")], m.SongPreview ? 1 : 0, i => SongPreviewChanged?.Invoke(i == 1))));
         ContentPanel.Children.Add(Row(T("game.feedback"),
             Choice("feedback", [T("no"), T("yes")], m.PhraseFeedback ? 1 : 0, i => PhraseFeedbackChanged?.Invoke(i == 1))));
+        ContentPanel.Children.Add(Row(T("game.dialect"),
+            Choice("dialect", [T("game.dialect.neutral"), T("game.dialect.argentine")], m.ArgentinePhrases ? 1 : 0,
+                i => PhraseDialectChanged?.Invoke(i == 1))));
         ContentPanel.Children.Add(Row(T("game.autoadvance"),
             Choice("autoadvance", [T("no"), T("yes")], m.AutoAdvance ? 1 : 0, i => AutoAdvanceChanged?.Invoke(i == 1))));
         ContentPanel.Children.Add(PixelUi.Note(T("game.autoadvance.help"), 18));

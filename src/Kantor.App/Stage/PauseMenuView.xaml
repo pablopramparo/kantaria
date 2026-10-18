@@ -1,0 +1,30 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- Copyright (C) 2026 Pablo Pramparo -->
+<UserControl x:Class="Kantor.App.Stage.PauseMenuView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:pixel="clr-namespace:Kantor.App.Pixel"
+             Focusable="False">
+    <Grid Background="#B0070A24">
+        <pixel:PixelViewbox>
+            <Grid Width="1280" Height="720">
+                <pixel:PixelFrame Fill="#F010142E" BorderBrush="{StaticResource GoldBrush}"
+                                  Shadow="{StaticResource InkBrush}" BorderUnits="1" NotchUnits="2" ShadowUnits="1"
+                                  Width="700" Height="440" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                  Padding="36,28">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <pixel:PixelText x:Name="TitleText" FontFamily="{StaticResource PixelFont}" FontSize="64"
+                                         Foreground="{StaticResource GoldBrush}" Shadow="{StaticResource InkBrush}"
+                                         HorizontalAlignment="Center" Margin="0,0,0,26" />
+                        <Button x:Name="ResumeButton" Style="{StaticResource PixelButton}" FontSize="34" Width="460"
+                                Click="OnResume" />
+                        <Button x:Name="FinishButton" Style="{StaticResource PixelButton}" FontSize="34" Width="460"
+                                Margin="0,14,0,0" Click="OnFinish" />
+                        <Button x:Name="ExitButton" Style="{StaticResource PixelButton}" FontSize="34" Width="460"
+                                Margin="0,14,0,0" Click="OnExit" />
+                    </StackPanel>
+                </pixel:PixelFrame>
+            </Grid>
+        </pixel:PixelViewbox>
+    </Grid>
+</UserControl>

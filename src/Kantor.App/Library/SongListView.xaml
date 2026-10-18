@@ -5,6 +5,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:pixel="clr-namespace:Kantor.App.Pixel"
              xmlns:lib="clr-namespace:Kantor.App.Library"
+             xmlns:video="clr-namespace:Kantor.App.Video"
              Focusable="False">
     <UserControl.Resources>
         <lib:CoverConverter x:Key="Thumb" DecodeWidth="200" />
@@ -205,8 +206,12 @@
                                   Shadow="{StaticResource InkBrush}" NotchUnits="3" BorderUnits="1" Padding="16">
                     <StackPanel x:Name="Detail">
                         <Border Background="#1B1040" Width="210" Height="210" HorizontalAlignment="Center">
-                            <Image x:Name="BigCoverImage" Stretch="Uniform"
-                                   RenderOptions.BitmapScalingMode="HighQuality" />
+                            <Grid>
+                                <Image x:Name="BigCoverImage" Stretch="Uniform"
+                                       RenderOptions.BitmapScalingMode="HighQuality" />
+                                <!-- Vista previa en video: aparece sobre la carátula cuando llega el primer cuadro -->
+                                <video:VideoBackground x:Name="PreviewVideo" Visibility="Collapsed" />
+                            </Grid>
                         </Border>
                         <TextBlock x:Name="DetailTitle" Margin="0,14,0,0" FontFamily="{StaticResource PixelFont}"
                                    FontSize="38" Foreground="{StaticResource TextBrush}"

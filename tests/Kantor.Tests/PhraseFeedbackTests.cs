@@ -161,7 +161,7 @@ public class PhraseFeedbackTests
     // ---- Catálogo ---------------------------------------------------------------------------------------------
 
     [Fact]
-    public void Every_message_has_at_most_three_words_and_lists_have_no_duplicates()
+    public void Every_message_has_at_most_eight_words_and_lists_have_no_duplicates()
     {
         var catalog = PhraseFeedbackCatalog.Spanish;
         var lists = catalog.ByRating.Values.Concat([catalog.Streak, catalog.Recovery, catalog.Duel]).ToList();
@@ -172,7 +172,7 @@ public class PhraseFeedbackTests
             foreach (var message in list)
             {
                 var words = message.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                Assert.InRange(words.Length, 1, 3);
+                Assert.InRange(words.Length, 1, 8);
             }
         }
 

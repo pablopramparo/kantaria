@@ -220,6 +220,7 @@ public partial class MainWindow : Window
             StopGuest();
             StopMusic();
             Video.Dispose();
+            SongList.DisposePreviewVideo();
             DisposeAudio();
             _preview.Dispose();
             _store?.Dispose(); // la sesión abierta NO se cierra: se retoma al volver a abrir Kantor
@@ -411,18 +412,24 @@ public partial class MainWindow : Window
         UpdateControls();
     }
 
-    private void OnResultsClose(object? sender, EventArgs e) => ShowMenu();
+    /// <summary>Volver desde los resultados: a la lista de canciones (con su selección y desplazamiento); sin biblioteca, al menú.</summary>
+    private void OnResultsClose(object? sender, EventArgs e) => ShowMenu(toLibrary: _library.Count > 0);
 
     // ---- Menú principal -----------------------------------------------------------------------------------
 
-    /// <summary>Vuelve al menú: detiene la canción, descarta el resultado y deja el puntaje en cero.</summary>
-    private void ShowMenu()
+    /// <summary>
+    /// Vuelve al menú (o a la lista de canciones con <paramref name="toLibrary"/>): detiene la canción, descarta el
+    /// resultado y deja el puntaje en cero.
+    /// </summary>
+    private void ShowMenu(bool toLibrary = false)
     {
         _abandonSeq++;
         _loadVersion++; // si había una canción cargándose, se descarta
         LoadingLayer.Visibility = Visibility.Collapsed;
         QueueScreen.Visibility = Visibility.Collapsed;
         FinishPrompt.Visibility = Visibility.Collapsed;
+        PauseMenu.Visibility = Visibility.Collapsed;
+        _finishFromPauseMenu = false;
         SessionPrompt.Visibility = Visibility.Collapsed;
         PlayersScreen.Visibility = Visibility.Collapsed;
         _pendingPlay = false;
@@ -433,6 +440,13 @@ public partial class MainWindow : Window
         UpdateControls();
         Options.Visibility = Visibility.Collapsed;
         SongList.Visibility = Visibility.Collapsed;
+        if (toLibrary)
+        {
+            Menu.Visibility = Visibility.Collapsed;
+            OpenLibrary();
+            return;
+        }
+
         Menu.Show(_prefs.CommentLanguage);
         Menu.Visibility = Visibility.Visible;
     }
@@ -646,7 +660,20 @@ public partial class MainWindow : Window
             if (task.IsCompletedSuccessfully && task.Result is { } info && ReferenceEquals(_previewPending, entry)
                 && SongList.IsVisible)
             {
-                _preview.Play(info.AudioPath, info.StartSeconds);
+                // El video arranca junto con el audio, en el mismo segundo (el audio decide el inicio real).
+                _preview.Play(info.AudioPath, info.StartSeconds, start =>
+                {
+                    if (info.VideoPath is { } video)
+                    {
+                        Dispatcher.BeginInvoke(() =>
+                        {
+                            if (ReferenceEquals(_previewPending, entry) && SongList.IsVisible)
+                            {
+                                SongList.ShowPreviewVideo(video, info.VideoGapSeconds, start);
+                            }
+                        });
+                    }
+                });
             }
         }, TaskScheduler.FromCurrentSynchronizationContext());
     }
@@ -1782,6 +1809,11 @@ public partial class MainWindow : Window
 
             SaveSettings();
         };
+        Options.PhraseDialectChanged += argentine =>
+        {
+            _prefs = _prefs with { ArgentinePhrases = argentine };
+            SaveSettings();
+        };
         Options.StartFullscreenChanged += on =>
         {
             _prefs = _prefs with { StartFullscreen = on };
@@ -1812,6 +1844,7 @@ public partial class MainWindow : Window
         Nonsense = _prefs.NonsenseProbability,
         SongPreview = _prefs.SongPreview,
         PhraseFeedback = _prefs.PhraseFeedback,
+        ArgentinePhrases = _prefs.ArgentinePhrases,
         StartFullscreen = _prefs.StartFullscreen,
         TechnicalBar = StatusBar.Visibility == Visibility.Visible,
         AutoAdvance = _prefs.AutoAdvance,
@@ -2098,7 +2131,8 @@ public partial class MainWindow : Window
 
         if (_prefs.PhraseFeedback)
         {
-            _feedback.SetLanguage(_prefs.CommentLanguage); // idioma de la interfaz, no el de la canción
+            // idioma de la interfaz, no el de la canción; en español, neutro o argentino según la opción
+            _feedback.SetLanguage(_prefs.CommentLanguage == "es" && _prefs.ArgentinePhrases ? "es-AR" : _prefs.CommentLanguage);
             Stage.ShowFeedback(_feedback.Poll(position));
         }
 
@@ -2143,7 +2177,7 @@ public partial class MainWindow : Window
         && Menu.Visibility != Visibility.Visible && SongList.Visibility != Visibility.Visible
         && Results.Visibility != Visibility.Visible && Options.Visibility != Visibility.Visible
         && PlayersScreen.Visibility != Visibility.Visible && SessionPrompt.Visibility != Visibility.Visible
-        && FinishPrompt.Visibility != Visibility.Visible;
+        && FinishPrompt.Visibility != Visibility.Visible && PauseMenu.Visibility != Visibility.Visible;
 
     private void OnWindowMouseMove(object sender, MouseEventArgs e)
     {
@@ -2160,7 +2194,7 @@ public partial class MainWindow : Window
 
         var recent = DateTime.UtcNow - _lastMouseMove < TimeSpan.FromSeconds(3);
         var lyricsDone = LyricsFinished();
-        var visible = StageIsShowing && (recent || !_player.IsPlaying || lyricsDone);
+        var visible = StageIsShowing && (recent || !_player.IsPlaying || lyricsDone || StageControls.IsKeyboardFocusWithin);
         StageControls.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
         if (visible)
         {
@@ -2225,6 +2259,7 @@ public partial class MainWindow : Window
     private void FinishNow(bool save)
     {
         FinishPrompt.Visibility = Visibility.Collapsed;
+        _finishFromPauseMenu = false;
         var duration = _player.Duration;
         _player.Stop();
         _lastPosition = duration;
@@ -2246,6 +2281,15 @@ public partial class MainWindow : Window
     private void OnFinishContinue(object? sender, EventArgs e)
     {
         FinishPrompt.Visibility = Visibility.Collapsed;
+        if (_finishFromPauseMenu)
+        {
+            // se llegó desde el menú de pausa: se vuelve a él, sin reanudar
+            _finishFromPauseMenu = false;
+            _finishWasPlaying = false;
+            ShowPauseMenu();
+            return;
+        }
+
         if (_finishWasPlaying && _player.IsPaused)
         {
             TogglePlayPause(); // seguía sonando antes de preguntar: vuelve a sonar
@@ -2254,6 +2298,47 @@ public partial class MainWindow : Window
         _finishWasPlaying = false;
         UpdateStageControls();
     }
+
+    // ---- Menú de pausa (Escape durante el canto) ----------------------------------------------------------------
+
+    private bool _finishFromPauseMenu;
+
+    /// <summary>Pausa la canción (si suena) y abre "seguir / terminar / salir" sobre el escenario, sin salir de pantalla completa.</summary>
+    private void ShowPauseMenu()
+    {
+        if (_player.IsPlaying)
+        {
+            TogglePlayPause();
+        }
+
+        PauseMenu.Show(_prefs.CommentLanguage);
+        PauseMenu.Visibility = Visibility.Visible;
+        UpdateStageControls();
+    }
+
+    private void OnPauseResume(object? sender, EventArgs e)
+    {
+        PauseMenu.Visibility = Visibility.Collapsed;
+        if (_player.IsPaused)
+        {
+            TogglePlayPause();
+        }
+
+        UpdateStageControls();
+    }
+
+    private void OnPauseFinish(object? sender, EventArgs e)
+    {
+        PauseMenu.Visibility = Visibility.Collapsed;
+        _finishFromPauseMenu = true;
+        FinishSong();
+        if (FinishPrompt.Visibility != Visibility.Visible)
+        {
+            _finishFromPauseMenu = false; // terminó directo (ya no quedaba letra) o no había nada que terminar
+        }
+    }
+
+    private void OnPauseExit(object? sender, EventArgs e) => ShowMenu(toLibrary: _library.Count > 0);
 
     private void OnStagePauseClick(object sender, RoutedEventArgs e)
     {
@@ -2296,10 +2381,17 @@ public partial class MainWindow : Window
         if ((Results.Visibility == Visibility.Visible || Menu.Visibility == Visibility.Visible
                 || SongList.Visibility == Visibility.Visible || Options.Visibility == Visibility.Visible
                 || PlayersScreen.Visibility == Visibility.Visible || SessionPrompt.Visibility == Visibility.Visible
-                || GuestScreen.Visibility == Visibility.Visible || FinishPrompt.Visibility == Visibility.Visible)
+                || GuestScreen.Visibility == Visibility.Visible || FinishPrompt.Visibility == Visibility.Visible
+                || PauseMenu.Visibility == Visibility.Visible)
             && e.Key is Key.Space or Key.Enter or Key.Escape or Key.Up or Key.Down)
         {
             return; // el menú, las listas y la pantalla de resultados interpretan estas teclas
+        }
+
+        if (StageIsShowing && HandleStageControlsKey(e))
+        {
+            e.Handled = true;
+            return;
         }
 
         switch (e.Key)
@@ -2322,14 +2414,8 @@ public partial class MainWindow : Window
             case Key.F9:
                 StatusBar.Visibility = StatusBar.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
                 break;
-            case Key.Escape when _fullscreen:
-                SetFullscreen(false);
-                break;
-            case Key.Escape when _player.IsPlaying:
-                TogglePlayPause(); // primera vez: pausa
-                break;
-            case Key.Escape when _player.IsPaused:
-                FinishSong(); // segunda (en pausa): termina y va a los resultados, desde donde se vuelve al menú o se repite
+            case Key.Escape when StageIsShowing && (_player.IsPlaying || _player.IsPaused):
+                ShowPauseMenu(); // pausa y ofrece seguir / terminar / salir; la pantalla completa se deja con F11
                 break;
             case Key.Escape:
                 ShowMenu(); // sin canción en curso (cargada y sin empezar): vuelve al menú
@@ -2342,6 +2428,47 @@ public partial class MainWindow : Window
         }
 
         e.Handled = true;
+    }
+
+    /// <summary>
+    /// Teclado sobre los botones del escenario (TERMINAR / PAUSA / MENÚ): Tab los muestra y enfoca; Tab, Mayús+Tab y las
+    /// flechas ← → los recorren; Enter activa el enfocado (Espacio también, sin pausar la canción). Devuelve si consumió la tecla.
+    /// </summary>
+    private bool HandleStageControlsKey(KeyEventArgs e)
+    {
+        var inside = StageControls.IsKeyboardFocusWithin;
+        switch (e.Key)
+        {
+            case Key.Tab:
+            case Key.Left or Key.Right when inside:
+                if (!inside)
+                {
+                    _lastMouseMove = DateTime.UtcNow;
+                    UpdateStageControls();
+                }
+
+                var buttons = new[] { StageFinishButton, StagePauseButton, StageMenuButton }
+                    .Where(b => b.Visibility == Visibility.Visible).ToList();
+                if (!inside)
+                {
+                    buttons[buttons.Count > 1 ? 1 : 0].Focus(); // el primero enfocado es PAUSA / SEGUIR
+                    return true;
+                }
+
+                var back = e.Key == Key.Left || (e.Key == Key.Tab && Keyboard.Modifiers == ModifierKeys.Shift);
+                var index = buttons.IndexOf((Button)Keyboard.FocusedElement);
+                buttons[(index + (back ? buttons.Count - 1 : 1)) % buttons.Count].Focus();
+                return true;
+            case Key.Space when inside:
+                if (Keyboard.FocusedElement is Button button)
+                {
+                    button.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent));
+                }
+
+                return true;
+            default:
+                return false;
+        }
     }
 
     private void OpenSongDialog()

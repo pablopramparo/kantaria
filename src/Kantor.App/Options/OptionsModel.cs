@@ -46,6 +46,8 @@ public sealed class OptionsModel
     /// <summary>Valoración breve al cerrar cada frase durante el canto.</summary>
     public bool PhraseFeedback { get; init; } = true;
 
+    public bool ArgentinePhrases { get; init; } = true;
+
     public bool StartFullscreen { get; init; }
 
     public bool TechnicalBar { get; init; }

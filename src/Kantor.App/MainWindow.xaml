@@ -175,6 +175,10 @@
                                 SaveRequested="OnFinishSave" DiscardRequested="OnFinishDiscard"
                                 ContinueRequested="OnFinishContinue" />
 
+        <!-- Menú de pausa (Escape durante el canto): seguir, terminar o salir -->
+        <stage:PauseMenuView x:Name="PauseMenu" Grid.Row="0" Grid.RowSpan="3" Visibility="Collapsed"
+                             ResumeRequested="OnPauseResume" FinishRequested="OnPauseFinish" ExitRequested="OnPauseExit" />
+
         <!-- Aviso de sesión abierta al arrancar -->
         <players:SessionPromptView x:Name="SessionPrompt" Grid.Row="0" Grid.RowSpan="3" Visibility="Collapsed"
                                    ContinueRequested="OnSessionContinue" NewRequested="OnSessionNew"

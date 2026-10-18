@@ -53,19 +53,22 @@ public class PhraseFeedbackLanguageTests
             {
                 Assert.False(string.IsNullOrWhiteSpace(message));
                 Assert.Equal(message.Trim(), message);
-                Assert.InRange(message.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length, 1, 3);
-                Assert.True(message.Length <= 22, $"{language}: demasiado largo para la franja: {message}");
+                // las frases largas se encogen para entrar en la franja del escenario
+                const int maxWords = 12;
+                const int maxLength = 56;
+                Assert.InRange(message.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length, 1, maxWords);
+                Assert.True(message.Length <= maxLength, $"{language}: demasiado largo para la franja: {message}");
             }
         }
     }
 
     [Fact]
-    public void English_messages_are_plain_uppercase_with_exclamation_marks_only()
+    public void English_messages_are_plain_uppercase_without_spanish_punctuation()
     {
         foreach (var message in All(En))
         {
             Assert.Equal(message.ToUpperInvariant(), message);
-            Assert.True(message.EndsWith('!'), message);
+            Assert.True(message[^1] is '!' or '.' or '?', message); // el tono varía: los niveles bajos cierran con punto
             Assert.DoesNotContain('¡', message);
             Assert.DoesNotContain('’', message); // apóstrofo recto: la fuente pixelada no garantiza el tipográfico
         }
@@ -77,9 +80,7 @@ public class PhraseFeedbackLanguageTests
         Assert.Contains("ON FIRE!", En.Streak);
         Assert.Contains("COMEBACK!", En.Recovery);
         Assert.Contains("DOUBLE PERFECT!", En.Duel);
-        Assert.Equal(8, En.Streak.Count);
-        Assert.Equal(8, En.Recovery.Count);
-        Assert.Equal(8, En.Duel.Count);
+        Assert.True(En.Streak.Count >= 8 && En.Recovery.Count >= 8 && En.Duel.Count >= 8);
     }
 
     [Fact]
@@ -94,15 +95,14 @@ public class PhraseFeedbackLanguageTests
     }
 
     [Fact]
-    public void The_spanish_catalog_keeps_its_original_content()
+    public void The_spanish_catalog_is_large_enough_to_avoid_repeats()
     {
-        Assert.Equal(12, Es.ByRating[PhraseRating.Perfect].Count);
-        Assert.Equal("¡PERFECTO!", Es.ByRating[PhraseRating.Perfect][0]);
-        Assert.Equal("¡DE OTRO PLANETA!", Es.ByRating[PhraseRating.Perfect][^1]);
-        Assert.Equal("¡SILENCIO INCÓMODO!", Es.ByRating[PhraseRating.Disaster][^1]);
-        Assert.Equal(["¡EN RACHA!", "¡IMPARABLE!", "¡NO AFLOJES!", "¡ON FIRE!"], Es.Streak);
-        Assert.Equal(["¡REMONTADA!", "¡AHORA SÍ!", "¡VOLVIÓ!", "¡DESPERTÓ!"], Es.Recovery);
-        Assert.Equal(["¡DOBLE PERFECTO!", "¡DUELO ÉPICO!", "¡LOS DOS!", "¡SIN PIEDAD!"], Es.Duel);
+        foreach (var (rating, list) in Es.ByRating)
+        {
+            Assert.True(list.Count >= 100, $"{rating}: {list.Count}");
+        }
+
+        Assert.True(Es.Streak.Count >= 8 && Es.Recovery.Count >= 8 && Es.Duel.Count >= 8);
     }
 
     // ---- Selección de idioma y fallback --------------------------------------------------------------------------
@@ -117,7 +117,6 @@ public class PhraseFeedbackLanguageTests
 
     [Theory]
     [InlineData("es")]
-    [InlineData("es-AR")]
     [InlineData(null)]
     [InlineData("")]
     [InlineData("fr")]
@@ -125,6 +124,30 @@ public class PhraseFeedbackLanguageTests
     [InlineData("end")]
     public void Anything_else_falls_back_to_spanish(string? language) =>
         Assert.Same(Es, PhraseFeedbackCatalog.For(language));
+
+    [Theory]
+    [InlineData("es-AR")]
+    [InlineData("es_AR")]
+    [InlineData("ES-ar")]
+    public void The_argentine_code_selects_the_argentine_catalog(string language) =>
+        Assert.Same(PhraseFeedbackCatalog.ArgentineSpanish, PhraseFeedbackCatalog.For(language));
+
+    [Fact]
+    public void The_argentine_catalog_differs_from_the_neutral_one_but_keeps_its_structure()
+    {
+        var ar = PhraseFeedbackCatalog.ArgentineSpanish;
+        Assert.NotSame(Es, ar);
+        Assert.Equal(Es.ByRating.Keys.OrderBy(k => k), ar.ByRating.Keys.OrderBy(k => k));
+        foreach (var rating in Es.ByRating.Keys)
+        {
+            Assert.Equal(Es.ByRating[rating].Count, ar.ByRating[rating].Count);
+        }
+
+        Assert.Equal(Es.Streak.Count, ar.Streak.Count);
+        Assert.Equal(Es.Recovery.Count, ar.Recovery.Count);
+        Assert.Equal(Es.Duel.Count, ar.Duel.Count);
+        Assert.NotEmpty(All(Es).Except(All(ar)));
+    }
 
     // ---- El motor con cada idioma --------------------------------------------------------------------------------
 

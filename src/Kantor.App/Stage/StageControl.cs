@@ -84,6 +84,11 @@ public sealed class StageControl : FrameworkElement
     private static readonly Brush White = Freeze(new SolidColorBrush(Color.FromRgb(0xF4, 0xF6, 0xFF)));
     private static readonly Brush Dim = Freeze(new SolidColorBrush(Color.FromRgb(0xA9, 0xB1, 0xDA)));
 
+    // Sílabas freestyle (no se cantan ni puntúan): lila en cursiva, aparte del blanco / dorado / tenue de lo cantable.
+    private static readonly Brush FreestyleWhite = Freeze(new SolidColorBrush(Color.FromRgb(0xB7, 0x94, 0xFF)));
+    private static readonly Brush FreestyleGold = Freeze(new SolidColorBrush(Color.FromRgb(0xE2, 0xD0, 0xFF)));
+    private static readonly Brush FreestyleDim = Freeze(new SolidColorBrush(Color.FromRgb(0x84, 0x70, 0xBC)));
+
     private static readonly Brush SlotFill = Freeze(new SolidColorBrush(Color.FromRgb(0x14, 0x1B, 0x4A)));
     private static readonly Brush SlotGoldFill = Freeze(new SolidColorBrush(Color.FromRgb(0x4A, 0x35, 0x08)));
     private static readonly Brush SlotRapFill = Freeze(new SolidColorBrush(Color.FromRgb(0x4A, 0x24, 0x08)));
@@ -184,7 +189,7 @@ public sealed class StageControl : FrameworkElement
             return;
         }
 
-        var size = Math.Clamp(area.Height * 0.62, 24, 56);
+        var size = Math.Clamp(area.Height * 0.53, 21, 48);
         var text = Format(message.Text, PixelFace, size, White);
         var natural = text.WidthIncludingTrailingWhitespace;
         var fit = natural > area.Width ? area.Width / natural : 1.0;
@@ -750,8 +755,8 @@ public sealed class StageControl : FrameworkElement
         var size = Math.Clamp(area.Height * 0.55, 26, 76);
         var text = Display(current);
         size = FittedSize(text, PixelFace, size, area.Width - 40);
-        var white = Format(text, PixelFace, size, White);
-        var gold = Format(text, PixelFace, size, Gold);
+        var white = Format(text, PixelFace, size, White, current);
+        var gold = Format(text, PixelFace, size, Gold, current);
         var x = area.Left + (area.Width - white.WidthIncludingTrailingWhitespace) / 2;
 
         // Sin recuadro: directo sobre el video, con contorno oscuro (copias desplazadas del texto: mucho más
@@ -793,7 +798,7 @@ public sealed class StageControl : FrameworkElement
         {
             var nextText = Display(voice.Lines[index + 1]);
             var nextSize = FittedSize(nextText, PixelFace, size * 0.7, area.Width - 40);
-            var next = Format(nextText, PixelFace, nextSize, Dim);
+            var next = Format(nextText, PixelFace, nextSize, Dim, voice.Lines[index + 1]);
             var nx = area.Left + (area.Width - next.WidthIncludingTrailingWhitespace) / 2;
             var ny = area.Top + size * 1.2;
             DrawTextRing(dc, nextText, nextSize, new Point(nx, ny), Math.Max(2, Math.Round(nextSize / 16)));
@@ -929,7 +934,8 @@ public sealed class StageControl : FrameworkElement
     // Los textos del HUD y la letra se repiten cuadro tras cuadro: se reutilizan en vez de formatearlos de nuevo.
     private readonly Dictionary<(string, Typeface, double, Brush), FormattedText> _textCache = [];
 
-    private FormattedText Format(string text, Typeface face, double size, Brush brush)
+    /// <param name="line">Si se da, sus sílabas freestyle se pintan en lila cursiva (según el pincel base).</param>
+    private FormattedText Format(string text, Typeface face, double size, Brush brush, Line? line = null)
     {
         var key = (text, face, size, brush);
         if (!_textCache.TryGetValue(key, out var formatted))
@@ -942,10 +948,31 @@ public sealed class StageControl : FrameworkElement
 
             formatted = new FormattedText(text, CultureInfo.CurrentUICulture, FlowDirection.LeftToRight, face, size,
                 brush, Dpi());
+            if (line is not null)
+            {
+                MarkFreestyle(formatted, line, brush == Gold ? FreestyleGold : brush == Dim ? FreestyleDim : FreestyleWhite);
+            }
+
             _textCache[key] = formatted;
         }
 
         return formatted;
+    }
+
+    private static void MarkFreestyle(FormattedText text, Line line, Brush brush)
+    {
+        var offset = 0;
+        foreach (var note in line.Notes)
+        {
+            var length = Display(note).Length;
+            if (note.Kind == NoteKind.Freestyle && length > 0)
+            {
+                text.SetForegroundBrush(brush, offset, length);
+                text.SetFontStyle(FontStyles.Italic, offset, length);
+            }
+
+            offset += length;
+        }
     }
 
     /// <summary>Texto con contorno oscuro duro (ocho copias desplazadas) para leerse sobre cualquier fondo.</summary>

@@ -117,6 +117,9 @@ public static class OptionsTexts
         ["game.language"] = ("Idioma", "Language"),
         ["game.nonsense"] = ("Comentarios disparatados", "Silly comments"),
         ["game.feedback"] = ("Mensajes por frase al cantar", "Phrase messages while singing"),
+        ["game.dialect"] = ("Frases en español", "Spanish phrases"),
+        ["game.dialect.neutral"] = ("Español neutro", "Neutral Spanish"),
+        ["game.dialect.argentine"] = ("Español argentino", "Argentine Spanish"),
         ["game.preview"] = ("Vista previa en la lista", "Preview in the song list"),
         ["game.autoadvance"] = ("Avance automático de la cola", "Queue auto-advance"),
         ["game.autoadvance.help"] = (

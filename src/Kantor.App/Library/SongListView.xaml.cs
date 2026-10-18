@@ -84,11 +84,23 @@ public partial class SongListView : UserControl
             ApplyFilter();
         };
         PreviewKeyDown += OnKeyDown;
+        _videoTimer.Tick += (_, _) => PreviewVideo.Sync(_videoStart + _videoClock.Elapsed, true, _videoGap);
+        PreviewVideo.FirstFrame += (_, _) =>
+        {
+            if (_videoActive)
+            {
+                PreviewVideo.Visibility = Visibility.Visible; // recién ahora hay algo que ver: hasta entonces, la carátula
+            }
+        };
         IsVisibleChanged += (_, _) =>
         {
             if (IsVisible)
             {
                 Dispatcher.BeginInvoke(() => SearchBox.Focus(), DispatcherPriority.Input);
+            }
+            else
+            {
+                HidePreviewVideo();
             }
         };
     }
@@ -127,9 +139,47 @@ public partial class SongListView : UserControl
     /// <summary>Entrega la biblioteca completa (la búsqueda actual se vuelve a aplicar).</summary>
     public void SetSongs(IReadOnlyList<SongEntry> songs)
     {
-        _all = songs;
         _scanned = -1;
+        if (ReferenceEquals(songs, _all) && _results.Count > 0 && SearchBox.Text == _appliedSearch)
+        {
+            // La misma biblioteca de antes (p. ej. al volver de cantar): no se toca nada, así el desplazamiento
+            // y la selección quedan exactamente donde estaban.
+            RefreshStatus();
+            return;
+        }
+
+        var keepPath = Current?.Path;
+        var scroller = FindScroller(_grid ? GridRows : Songs);
+        var offset = scroller?.VerticalOffset ?? 0;
+        _all = songs;
         ApplyFilter();
+        if (keepPath is not null && _results.FindIndex(s => s.Path == keepPath) is >= 0 and var index)
+        {
+            // La biblioteca cambió (se terminó de escanear): se vuelve a la misma canción y a la misma altura.
+            Select(index);
+            Dispatcher.BeginInvoke(DispatcherPriority.Loaded, () => FindScroller(_grid ? GridRows : Songs)?.ScrollToVerticalOffset(offset));
+        }
+    }
+
+    private string _appliedSearch = string.Empty;
+
+    private static ScrollViewer? FindScroller(DependencyObject root)
+    {
+        for (var i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(root); i++)
+        {
+            var child = System.Windows.Media.VisualTreeHelper.GetChild(root, i);
+            if (child is ScrollViewer viewer)
+            {
+                return viewer;
+            }
+
+            if (FindScroller(child) is { } inner)
+            {
+                return inner;
+            }
+        }
+
+        return null;
     }
 
     /// <summary>Muestra el avance de la búsqueda de canciones (<c>null</c> = terminada).</summary>
@@ -141,6 +191,7 @@ public partial class SongListView : UserControl
 
     private void ApplyFilter()
     {
+        _appliedSearch = SearchBox.Text;
         _results = SongSearch.Filter(_all, SearchBox.Text);
         Songs.ItemsSource = _results;
         _cells = _results.Select((s, i) => new GridCell(s) { Index = i }).ToList();
@@ -234,6 +285,46 @@ public partial class SongListView : UserControl
             }
         });
 
+    // ---- Vista previa en video (en el lugar de la carátula grande) ----------------------------------------------
+
+    private readonly DispatcherTimer _videoTimer = new(DispatcherPriority.Render) { Interval = TimeSpan.FromMilliseconds(33) };
+    private readonly System.Diagnostics.Stopwatch _videoClock = new();
+    private TimeSpan _videoStart;
+    private double _videoGap;
+    private bool _videoActive;
+
+    /// <summary>Muestra el video de la canción resaltada desde <paramref name="startSeconds"/> (siguiendo el reloj local).</summary>
+    public void ShowPreviewVideo(string path, double gapSeconds, double startSeconds)
+    {
+        HidePreviewVideo();
+        _videoActive = true;
+        _videoGap = gapSeconds;
+        _videoStart = TimeSpan.FromSeconds(startSeconds);
+        PreviewVideo.Load(path);
+        if (PreviewVideo.HasVideo)
+        {
+            _videoClock.Restart();
+            _videoTimer.Start();
+        }
+        else
+        {
+            _videoActive = false;
+        }
+    }
+
+    /// <summary>Quita el video y vuelve a mostrarse solo la carátula.</summary>
+    public void HidePreviewVideo()
+    {
+        _videoActive = false;
+        _videoTimer.Stop();
+        _videoClock.Reset();
+        PreviewVideo.Visibility = Visibility.Collapsed;
+        PreviewVideo.Unload();
+    }
+
+    /// <summary>Libera el reproductor de video al cerrar la aplicación.</summary>
+    public void DisposePreviewVideo() => PreviewVideo.Dispose();
+
     private SongEntry? Current => _selected >= 0 && _selected < _results.Count ? _results[_selected] : null;
 
     /// <summary>La canción resaltada cambió (por teclado, mouse o filtro); <c>null</c> si no hay ninguna.</summary>
@@ -241,6 +332,7 @@ public partial class SongListView : UserControl
 
     private void UpdateDetail()
     {
+        HidePreviewVideo();
         HighlightChanged?.Invoke(this, Current);
         if (Current is not { } entry)
         {

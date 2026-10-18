@@ -23,7 +23,11 @@ public sealed class VideoBackground : FrameworkElement, IDisposable
     private const uint MaxVideoWidth = 960;
     private static readonly TimeSpan SeekCooldown = TimeSpan.FromSeconds(1);
 
-    private LibVLC? _vlc;
+    // El motor libVLC es uno solo para toda la aplicación (fondo de la canción y vista previa de la lista): cada
+    // instancia tiene su propio reproductor y el motor se libera con la última.
+    private static LibVLC? s_vlc;
+    private static int s_users;
+
     private MediaPlayer? _player;
     private Media? _media;
     private string? _path;
@@ -39,6 +43,7 @@ public sealed class VideoBackground : FrameworkElement, IDisposable
     private readonly object _sync = new();
     private DateTime _lastSeek = DateTime.MinValue;
     private bool _wantPlaying;
+    private bool _firstFrameRaised;
 
     // los delegados deben vivir mientras VLC los use
     private MediaPlayer.LibVLCVideoFormatCb? _formatCb;
@@ -54,6 +59,12 @@ public sealed class VideoBackground : FrameworkElement, IDisposable
 
     /// <summary>Hay un video cargado y mostrándose (o listo para mostrarse).</summary>
     public bool HasVideo => _path is not null && Failure is null;
+
+    /// <summary>Ya llegó al menos un cuadro del video cargado.</summary>
+    public bool HasFrame => _bitmap is not null;
+
+    /// <summary>Llegó el primer cuadro del video cargado (para mostrar el video recién cuando hay algo que ver).</summary>
+    public event EventHandler? FirstFrame;
 
     public VideoBackground()
     {
@@ -71,13 +82,13 @@ public sealed class VideoBackground : FrameworkElement, IDisposable
             return;
         }
 
-        if (_player is null && _warm is { IsCompleted: false })
+        if (_player is null && s_warm is { IsCompleted: false })
         {
             // libVLC todavía se está preparando: no se bloquea la interfaz esperándolo. El video se abre cuando
             // esté listo (si mientras tanto se pidió otro o se descartó, no se hace nada).
             _path = path;
             Diag.Mark("video: libVLC todavía no está listo, se abrirá cuando termine");
-            _warm.ContinueWith(_ =>
+            s_warm.ContinueWith(_ =>
             {
                 if (_path == path && _media is null)
                 {
@@ -103,7 +114,7 @@ public sealed class VideoBackground : FrameworkElement, IDisposable
             _path = path;
             using (Diag.Time("libVLC: abrir medio", 50))
             {
-                _media = new Media(_vlc!, path, FromType.FromPath);
+                _media = new Media(s_vlc!, path, FromType.FromPath);
                 _media.AddOption(":no-audio");
                 _media.AddOption(":no-sub-autodetect-file");
                 _player!.Media = _media;
@@ -140,6 +151,7 @@ public sealed class VideoBackground : FrameworkElement, IDisposable
         }
 
         _bitmap = null;
+        _firstFrameRaised = false;
         InvalidateVisual();
     }
 
@@ -215,7 +227,7 @@ public sealed class VideoBackground : FrameworkElement, IDisposable
 
     // ---- libVLC -------------------------------------------------------------------------------------------
 
-    private Task<LibVLC>? _warm;
+    private static Task<LibVLC>? s_warm;
 
     private static LibVLC CreateEngine()
     {
@@ -224,7 +236,7 @@ public sealed class VideoBackground : FrameworkElement, IDisposable
     }
 
     /// <summary>Inicia en segundo plano la creación de libVLC, que es lo más lento de abrir el primer video.</summary>
-    public void WarmUp() => _warm ??= Task.Run(CreateEngine);
+    public void WarmUp() => s_warm ??= Task.Run(CreateEngine);
 
     private bool EnsureEngine()
     {
@@ -244,10 +256,11 @@ public sealed class VideoBackground : FrameworkElement, IDisposable
             // adelanta en segundo plano al abrir la aplicación (WarmUp) y acá solo se espera si todavía no terminó.
             using (Diag.Time("libVLC: motor", 50))
             {
-                _vlc = (_warm ?? Task.Run(CreateEngine)).GetAwaiter().GetResult();
+                s_vlc ??= (s_warm ??= Task.Run(CreateEngine)).GetAwaiter().GetResult();
             }
 
-            _player = new MediaPlayer(_vlc);
+            _player = new MediaPlayer(s_vlc);
+            s_users++;
             _formatCb = OnFormat;
             _cleanupCb = OnCleanup;
             _lockCb = OnLock;
@@ -358,6 +371,11 @@ public sealed class VideoBackground : FrameworkElement, IDisposable
         // se copia bajo el lock: VLC no escribe en este búfer hasta el próximo cuadro (doble búfer)
         _bitmap.WritePixels(new Int32Rect(0, 0, (int)width, (int)height), buffer, (int)(pitch * height), (int)pitch);
         InvalidateVisual();
+        if (!_firstFrameRaised)
+        {
+            _firstFrameRaised = true;
+            FirstFrame?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     protected override void OnRender(DrawingContext dc)
@@ -391,10 +409,18 @@ public sealed class VideoBackground : FrameworkElement, IDisposable
     public void Dispose()
     {
         Unload();
-        _player?.Dispose();
-        _player = null;
-        _vlc?.Dispose();
-        _vlc = null;
+        if (_player is not null)
+        {
+            _player.Dispose();
+            _player = null;
+            if (--s_users == 0)
+            {
+                s_vlc?.Dispose();
+                s_vlc = null;
+                s_warm = null;
+            }
+        }
+
         lock (_sync)
         {
             FreeBuffers();

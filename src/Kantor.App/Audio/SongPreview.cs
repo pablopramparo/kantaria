@@ -23,7 +23,8 @@ public sealed class SongPreview : IDisposable
     private AudioFileReader? _reader;
 
     /// <param name="startSeconds">Desde dónde; sin dato, un cuarto de la canción.</param>
-    public void Play(string audioPath, double? startSeconds)
+    /// <param name="started">Se llama (desde un hilo de fondo) cuando el audio arranca, con el segundo real de inicio.</param>
+    public void Play(string audioPath, double? startSeconds, Action<double>? started = null)
     {
         Stop();
         var cancel = new CancellationTokenSource();
@@ -63,6 +64,7 @@ public sealed class SongPreview : IDisposable
                     _reader = reader;
                     _output = output;
                     output.Play();
+                    started?.Invoke(start);
                 }
             }
             catch (Exception e) when (e is IOException or UnauthorizedAccessException or InvalidOperationException

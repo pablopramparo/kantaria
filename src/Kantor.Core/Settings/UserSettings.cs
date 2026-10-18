@@ -76,6 +76,9 @@ public sealed record UserSettings
     /// <summary>Durante el canto, al cerrar cada frase se muestra una valoración breve (PERFECTO, UPS…).</summary>
     public bool PhraseFeedback { get; init; } = true;
 
+    /// <summary>Los mensajes por frase en español usan la variante argentina (<c>true</c>) o la neutra (<c>false</c>).</summary>
+    public bool ArgentinePhrases { get; init; } = true;
+
     /// <summary>La aplicación arranca en pantalla completa.</summary>
     public bool StartFullscreen { get; init; }
 

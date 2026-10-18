@@ -362,7 +362,7 @@ durante la canción **no se toca** hasta el video de fondo. Video y dos jugadore
   - **Rangos** (límite inferior incluido): Perfecto ≥ 98 · Excelente ≥ 90 · Muy bueno ≥ 80 · Bueno ≥ 65 ·
     Aceptable ≥ 50 · Flojo ≥ 30 · Malo ≥ 10 · Desastre < 10 (`PhraseRatings`).
   - **Selección**: aleatoria dentro del nivel, sin repetir los últimos 4 mensajes de ese jugador (historial por
-    jugador). Catálogo separado (`PhraseFeedbackCatalog`, máx. 3 palabras). Hay dos catálogos **independientes**
+    jugador). Catálogo separado (`PhraseFeedbackCatalog`; ~200 frases por nivel en español y ~190 en inglés, hasta 8 palabras y 48 caracteres: la tipografía se encoge para entrar en la franja; ~64 especiales por tipo en los dos idiomas). Fuente de las frases nuevas: `design-assets/phrase_rating_es.txt` y `phrase_rating_en.txt`. Hay dos catálogos **independientes**
     (español e inglés, cada uno con su humor; no son traducción uno del otro). Se elige por el idioma de la
     interfaz (`CommentLanguage`, no el de la canción) con `PhraseFeedbackCatalog.For`; sin catálogo para ese
     idioma, español. Inglés: 96 valoraciones (12 × 8) + 8 racha + 8 recuperación + 8 duelo.
@@ -1077,3 +1077,39 @@ Guía de uso y seguridad: **`docs/INVITADOS.md`**. Aquí, lo que hay que saber p
   solo lo que cambie después de la 0.2.0. Hay que subir `<Version>` en `Kantor.App.csproj` antes de armar el paquete
   (`scripts/publish.ps1 -Edition Store -Msix`) y volver a enviar desde «Crear nuevo envío».
 - La edición Store sigue sin README en el paquete (enlaza a donaciones) y excluye los avatares de `store-excluded.txt`.
+
+## Ajustes de las pruebas manuales (18 de octubre de 2026)
+
+- **Volver desde resultados** → lista de canciones, no menú (`ShowMenu(toLibrary)`; sin biblioteca, menú). `SongListView.SetSongs`
+  con la misma lista de antes no toca nada (selección y desplazamiento intactos); si la biblioteca cambió, vuelve a la misma
+  canción y altura.
+- **Escape durante el canto** pausa y abre `PauseMenuView` (SEGUIR / TERMINAR / SALIR) sin salir de pantalla completa (se sale con
+  F11). Esc en el menú = seguir; TERMINAR pasa por el aviso de guardado y, si se elige "seguir cantando", vuelve al menú de pausa;
+  SALIR va a la lista. Sin canción en curso, Esc sigue yendo al menú.
+- **Teclado en los botones del escenario**: Tab los muestra y enfoca PAUSA/SEGUIR; Tab, Mayús+Tab y ← → los recorren; Enter/Espacio
+  activan (Espacio no pausa mientras el foco está ahí).
+- **Letras freestyle**: sílabas en lila y cursiva (blanco/dorado/tenue propios) en `StageControl.MarkFreestyle`.
+- **Vista previa en video** en el lugar de la carátula grande: tras el audio de la vista previa y desde el mismo segundo
+  (`SongPreview.Play(..., started)`), con `#VIDEO`/`#VIDEOGAP` de `SongPreviewInfo`. Aparece al llegar el primer cuadro; la
+  carátula queda debajo hasta entonces. `VideoBackground` comparte un único motor libVLC (estático, con cuenta de usuarios).
+- **Sin comprobar a mano** (compila y 897 tests pasan; la app arranca): todo lo anterior con la interfaz real; en especial el
+  video de la lista (formatos, CPU al navegar rápido) y el foco con teclado en pantalla completa.
+
+### Mensajes por frase: español neutro y argentino (18 de octubre de 2026)
+
+- Base: la segunda pasada de revisión hecha con Codex (`PhraseFeedbackCatalog.second-pass.cs`): ~1870 frases en español, ~1750 en inglés,
+  tono variado (los niveles bajos cierran con punto en vez de signos de exclamación). Copia previa en el historial local, no en git.
+- `PhraseFeedbackCatalog.Spanish` es **neutro** (tuteo). `ArgentineSpanish` se arma al iniciar sobre el neutro con un diccionario de
+  sustituciones (voseo, "bondi", "mate", "che"…); si una clave no coincide con una frase del neutro o queda un duplicado, lanza al iniciar
+  (lo cubren los tests). `For("es-AR")` devuelve el argentino; `For("es")` y cualquier otro código no inglés, el neutro.
+- Opción nueva en OPCIONES › Juego: "Frases en español" (Neutro / Argentino), `UserSettings.ArgentinePhrases`, **argentino por
+  omisión**. Solo cambia los mensajes por frase; los textos de menús y comentarios de resultados siguen igual. Con la interfaz en inglés
+  no tiene efecto.
+- Reglas de los tests: hasta 12 palabras y 56 caracteres por frase (la tipografía se encoge para entrar en la franja); inglés sin
+  signos españoles ni apóstrofo tipográfico (se reemplazaron 41 por `'`).
+
+### Versión 0.3.0 (18 de octubre de 2026)
+
+Sube `<Version>` a 0.3.0 con todo lo de «Ajustes de las pruebas manuales» y «Mensajes por frase» de arriba (volver a la lista, menú de
+pausa con Esc, teclado en los botones del escenario, freestyle en lila, video de vista previa, catálogos de frases neutro/argentino/inglés).
+Novedades para la Store: solo esto, sin repetir lo de la 0.2.0.

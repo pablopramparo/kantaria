@@ -56,6 +56,19 @@ public sealed class SongPreviewTests : IDisposable
     }
 
     [Fact]
+    public void Reads_the_video_and_its_gap_only_when_the_file_exists_inside_the_folder()
+    {
+        File.WriteAllBytes(Path.Combine(_dir, "v.mp4"), [0]);
+
+        var info = SongHeaderReader.ReadPreview(Song("#MP3:a.mp3\n#BPM:120\n#VIDEO:v.mp4\n#VIDEOGAP:-1,5"));
+        Assert.Equal(Path.Combine(_dir, "v.mp4"), info!.VideoPath);
+        Assert.Equal(-1.5, info.VideoGapSeconds);
+
+        Assert.Null(SongHeaderReader.ReadPreview(Song("#MP3:a.mp3\n#BPM:120\n#VIDEO:no.mp4"))!.VideoPath);
+        Assert.Null(SongHeaderReader.ReadPreview(Song("#MP3:a.mp3\n#BPM:120"))!.VideoPath);
+    }
+
+    [Fact]
     public void Missing_audio_or_audio_outside_the_folder_gives_no_preview()
     {
         Assert.Null(SongHeaderReader.ReadPreview(Song("#MP3:a.mp3\n#BPM:120", createAudio: false)));

@@ -24,7 +24,7 @@ public sealed record SongEntry(
 }
 
 /// <summary>Con qué audio y desde dónde (segundos) sonar la vista previa de una canción.</summary>
-public sealed record SongPreviewInfo(string AudioPath, double? StartSeconds);
+public sealed record SongPreviewInfo(string AudioPath, double? StartSeconds, string? VideoPath = null, double VideoGapSeconds = 0);
 
 /// <summary>Lee solo la cabecera (#ETIQUETAS) de un TXT UltraStar: rápido incluso con miles de archivos.</summary>
 public static class SongHeaderReader
@@ -99,7 +99,22 @@ public static class SongHeaderReader
             start = seconds;
         }
 
-        return new SongPreviewInfo(resolved, start);
+        // video (opcional) con su #VIDEOGAP, para mostrarlo junto a la vista previa de audio
+        string? videoPath = null;
+        if (tags.TryGetValue("VIDEO", out var video) && video.Length > 0
+            && SongMedia.ResolveInside(directory, video) is { } resolvedVideo && File.Exists(resolvedVideo))
+        {
+            videoPath = resolvedVideo;
+        }
+
+        var gap = 0.0;
+        if (tags.TryGetValue("VIDEOGAP", out var rawGap))
+        {
+            double.TryParse(rawGap.Replace(',', '.'), System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture, out gap);
+        }
+
+        return new SongPreviewInfo(resolved, start, videoPath, gap);
     }
 
     /// <summary>Devuelve la entrada, o <c>null</c> si el archivo no parece una canción utilizable.</summary>
