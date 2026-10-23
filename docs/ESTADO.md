@@ -1073,6 +1073,7 @@ Guía de uso y seguridad: **`docs/INVITADOS.md`**. Aquí, lo que hay que saber p
   `avatar_025`, `029`, `030` y no se incluye `031`, y se agregan los 032–045), el botón TERMINAR siempre disponible, Esc en pausa →
   resultados con la pregunta de guardar y la tecla Fin. Un jugador creado en la 0.1.0 con uno de los avatares retirados se ve con el
   genérico (no pierde datos).
+- **Estado actual (23/10/2026): la 0.3.0 está publicada y la 0.4.1 está enviada a certificación** (ver «Versión 0.4.1» más abajo).
 - **La próxima versión (> 0.2.0.0, por ejemplo 0.2.1 o 0.3.0) NO debe volver a informar esos cambios** en «Novedades de esta versión»:
   solo lo que cambie después de la 0.2.0. Hay que subir `<Version>` en `Kantor.App.csproj` antes de armar el paquete
   (`scripts/publish.ps1 -Edition Store -Msix`) y volver a enviar desde «Crear nuevo envío».
@@ -1114,9 +1115,10 @@ pausa con Esc, teclado en los botones del escenario, freestyle en lila, video de
 Novedades para la Store: solo esto, sin repetir lo de la 0.2.0. **La 0.3.0 ya está publicada** (18/10/2026): nada de lo anterior
 se repite en «Novedades» de las versiones siguientes.
 
-### Versión 0.4.1 (en curso; `<Version>` ya subida)
+### Versión 0.4.1 (enviada a certificación el 23/10/2026)
 
-Solo lo posterior a la 0.3.0 publicada:
+**Ya enviada**: nada de lo que sigue se repite en «Novedades de esta versión» de las versiones siguientes (> 0.4.1); hay que subir
+`<Version>` antes de armar el próximo paquete. Contenido, solo lo posterior a la 0.3.0 publicada:
 - **Duetos marcados** en la lista de canciones: etiqueta «DÚO»/«DUET» (según el idioma de la interfaz) en filas, celdas de la grilla y
   ficha. `SongEntry.IsDuet` se detecta en `SongHeaderReader` buscando una línea `P2` o `P 2` en el cuerpo (el formato con espacio es el
   que usan los TXT de la biblioteca real); el índice (`SongIndexStore.Version = 3`) se reconstruye una vez. La ficha puso «DÚO» y «CON
@@ -1127,7 +1129,7 @@ Solo lo posterior a la 0.3.0 publicada:
 - **Cambio de marca a Kantaria** (nombre visible, logo, instalador, ficha); lo interno sigue «Kantor». Ver `CLAUDE.md`.
 - **Novedades para la Store** (0.4.1, sin repetir lo de la 0.3.0): marca nueva, idioma en tres variantes, etiqueta DÚO, Esc en la lista →
   menú. Los textos están en `docs/STORE_LISTING.md`. El modo demo (`KANTARIA_DEMO`) es solo de desarrollo y no se informa.
-- Paquete armado: `dist\Kantaria-0.4.1-store.msix` (147 MB, 962 tests), sin enviar todavía. La 0.4.0 se había subido dos veces con contenido distinto y la Store la rechazó (mismo nombre de paquete): se borró de la Store y se pasó a 0.4.1. **No reutilizar un número de versión ya cargado.** Sin probar instalado ni firmado.
+- Paquete enviado: `dist\Kantaria-0.4.1-store.msix` (147 MB, 962 tests). La 0.4.0 se había subido dos veces con contenido distinto y la Store la rechazó (mismo nombre de paquete): se borró de la Store y se pasó a 0.4.1. **No reutilizar un número de versión ya cargado.** Sin probar instalado ni firmado.
 - Sin comprobar a mano: el aspecto de la ficha con el QR abierto y la detección de duetos en la biblioteca completa.
 
 ## Modo demo (capturas y certificación)
