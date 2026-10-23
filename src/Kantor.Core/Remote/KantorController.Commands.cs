@@ -840,7 +840,7 @@ public sealed partial class KantorController
 
     private string Language(Call c)
     {
-        var requested = c.Payload.Choice("lang", ["es", "en"]);
+        var requested = c.Payload.Choice("lang", ["es", "es-AR", "en"]);
         return requested ?? _host.Capture().Language;
     }
 

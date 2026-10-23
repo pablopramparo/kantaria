@@ -4,7 +4,7 @@
   'use strict';
 
   var TEXTS = {
-    es: {
+    'es-AR': {
       find: 'BUSCAR CANCIÓN', placeholder: 'Artista o título…', more: 'MÁS', back: 'VOLVER',
       whoSings: '¿QUIÉN CANTA?', add: 'AGREGAR A LA COLA', adding: 'AGREGANDO…', queued: '¡EN COLA!',
       alreadyQueued: 'YA ESTABA EN COLA', retry: 'REINTENTAR', loading: 'CARGANDO…', noResults: 'SIN RESULTADOS',
@@ -78,6 +78,35 @@
     }
   };
 
+  // El español se escribe una sola vez, en voseo ('es-AR'); el neutro ('es') se deriva con las mismas formas que
+  // Kantor.Core/Localization/Neutralizer.cs (un test comprueba que no falte ninguna).
+  var VOSEO = {
+    'probá': 'prueba', 'elegí': 'elige', 'escaneá': 'escanea', 'abrí': 'abre', 'revisá': 'revisa', 'creá': 'crea',
+    'buscalo': 'búscalo', 'escribí': 'escribe', 'esperá': 'espera', 'actualizá': 'actualiza'
+  };
+  function matchCase(from, to) {
+    if (from.length > 1 && from === from.toUpperCase()) { return to.toUpperCase(); }
+    if (from.charAt(0) !== from.charAt(0).toLowerCase()) { return to.charAt(0).toUpperCase() + to.slice(1); }
+    return to;
+  }
+  function neutralize(s) {
+    return s.replace(/[A-Za-zÁÉÍÓÚáéíóúñÑ]+/g, function (w) {
+      var to = VOSEO[w.toLowerCase()];
+      return to ? matchCase(w, to) : w;
+    });
+  }
+  function neutralTexts(src) {
+    var out = {};
+    Object.keys(src).forEach(function (k) {
+      var v = src[k];
+      out[k] = typeof v === 'string' ? neutralize(v)
+        : typeof v === 'function' ? (function (f) { return function () { return neutralize(f.apply(null, arguments)); }; })(v)
+        : neutralTexts(v);
+    });
+    return out;
+  }
+  TEXTS.es = neutralTexts(TEXTS['es-AR']);
+
   var SLOT_COLORS = ['#19D3FF', '#FF3DB8', '#5BE56B', '#A06BFF'];   // PlayerColors de Kantaria (J1–J4)
   var PAGE = 30;
 
@@ -93,7 +122,8 @@
   };
 
   var state = {
-    lang: (navigator.language || 'es').slice(0, 2) === 'en' ? 'en' : 'es',
+    lang: /^en/i.test(navigator.language || '') ? 'en' : /^es[-_]ar$/i.test(navigator.language || '') ? 'es-AR' : 'es',
+    spanish: /^es[-_]ar$/i.test(navigator.language || '') ? 'es-AR' : 'es',
     token: null, query: '', nextOffset: 0, total: 0, loading: false, seq: 0, abort: null,
     song: null, max: 0, players: [], selected: [], requestId: null, adding: false, closed: false, libraryScroll: 0,
     maxName: 24, avatarList: null, avatar: null, createId: null, creating: false, pendingSelect: null, afterBack: null
@@ -194,7 +224,7 @@
     el.search.placeholder = t().placeholder;
     el.nameInput.placeholder = t().namePlaceholder;
     el.clear.setAttribute('aria-label', t().clear);
-    el.lang.textContent = state.lang === 'es' ? 'EN' : 'ES';
+    el.lang.textContent = state.lang === 'en' ? 'ES' : 'EN';
     if (!state.adding) { el.add.textContent = t().add; }
     if (state.total || state.loadedOnce) { el.count.textContent = t().songs(state.total); }
     if (!el.singers.hidden) { renderHint(); }
@@ -538,7 +568,7 @@
 
   // ---- Idioma (solo de esta visita: no se guarda) --------------------------------------------------------------
 
-  el.lang.addEventListener('click', function () { state.lang = state.lang === 'es' ? 'en' : 'es'; applyTexts(); });
+  el.lang.addEventListener('click', function () { state.lang = state.lang === 'en' ? state.spanish : 'en'; applyTexts(); });
 
   // ---- Fondo: cielo en bandas, piso con perspectiva y estrellas (PixelBackdrop), dibujado una vez ----------------------
 
@@ -594,7 +624,8 @@
   applyTexts();
   if (!state.token) { showNoToken(); return; }
   api('/api/config').then(function (cfg) {
-    state.lang = cfg.language === 'en' ? 'en' : 'es';   // el idioma de Kantaria como valor inicial
+    state.spanish = cfg.language === 'es-AR' ? 'es-AR' : 'es';
+    state.lang = cfg.language === 'en' ? 'en' : state.spanish;   // el idioma de Kantaria como valor inicial
     applyTexts();
     loadSongs(true);
   }).catch(function (e) {

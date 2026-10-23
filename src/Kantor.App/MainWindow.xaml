@@ -108,15 +108,16 @@
             <TextBlock Text="Voz" VerticalAlignment="Center" Foreground="#8A919E" Margin="16,0,6,0" />
             <ComboBox x:Name="DisplayBox" Width="90" SelectedIndex="0" VerticalContentAlignment="Center"
                       SelectionChanged="OnDisplayChanged"
-                      ToolTip="Por beat: como UltraStar (barras sobre la nota si acertás). Cruda: cada análisis del detector.">
+                      ToolTip="Por beat: como UltraStar (barras sobre la nota si se acierta). Cruda: cada análisis del detector.">
                 <ComboBoxItem Content="Por beat" />
                 <ComboBoxItem Content="Cruda" />
             </ComboBox>
             <TextBlock Text="Comentarios" VerticalAlignment="Center" Foreground="#8A919E" Margin="16,0,6,0" />
-            <ComboBox x:Name="LanguageBox" Width="90" SelectedIndex="0" VerticalContentAlignment="Center"
+            <ComboBox x:Name="LanguageBox" Width="150" SelectedIndex="0" VerticalContentAlignment="Center"
                       SelectionChanged="OnLanguageChanged"
                       ToolTip="Idioma de los comentarios del resultado.">
                 <ComboBoxItem Content="Español" Tag="es" />
+                <ComboBoxItem Content="Español (Argentina)" Tag="es-AR" />
                 <ComboBoxItem Content="English" Tag="en" />
             </ComboBox>
             <TextBlock x:Name="ScoreText" DockPanel.Dock="Right" FontSize="24" FontWeight="SemiBold"

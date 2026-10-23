@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Pablo Pramparo
 using Kantor.Core.Humor;
+using Kantor.Core.Localization;
 
 namespace Kantor.Core.Menu;
 
@@ -49,6 +50,5 @@ public static class GuestTexts
         Pick(l, "El acceso de invitados escucha solo en esa red local. Si cambiás de red con el acceso activo, se reabre en la nueva.",
             "Guest access listens only on that local network. Changing it while access is on reopens it on the new one.");
 
-    private static string Pick(string language, string es, string en) =>
-        HumorBank.NormalizeLanguage(language) == "en" ? en : es;
+    private static string Pick(string language, string es, string en) => Localize.Pick(language, es, en);
 }

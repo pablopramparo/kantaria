@@ -104,7 +104,7 @@ public static class CalibrationRunner
         if (clockReadings.Count == 0 || map.Count == 0)
         {
             return new CalibrationResult(false, 0, 0, 0, CalibrationSignal.Repetitions, 0,
-                "No se pudo leer el reloj de audio o la entrada. Revisá el dispositivo y repetí la prueba.");
+                "No se pudo leer el reloj de audio o la entrada. Conviene revisar el dispositivo y repetir la prueba.");
         }
 
         var peaks = MatchedFilter.FindPeaks(captured, template, CalibrationSignal.Repetitions, input.SampleRate / 2);

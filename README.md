@@ -41,7 +41,7 @@ Kantaria can't teach you to sing. But it can document the attempt.
 - **Up to four microphones at once**, each with its own player, lane and on-screen input level.
   Four microphones, four chances to question your confidence.
 - **Duets**, one voice per player.
-- **Per-phrase messages** while you sing ("PERFECT!", "OOPS!"…), in Spanish and English, with variable wording.
+- **Per-phrase messages** while you sing ("PERFECT!", "OOPS!"…), in Spanish (neutral and Argentine) and English, with variable wording.
 - **Players, games, history and rankings** stored locally in SQLite. Your memory is selective. The database isn't.
 - **Results with comments and characters**: each performance gets a verdict and a full-body character on stage.
 - **Avatars**: pick one from the gallery or load your own, with face cropping.

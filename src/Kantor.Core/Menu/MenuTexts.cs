@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 using Kantor.Core.Humor;
+using Kantor.Core.Localization;
 
 namespace Kantor.Core.Menu;
 
@@ -29,6 +30,5 @@ public static class MenuTexts
     public static string BackToMenu(string language) => Pick(language, "MENÚ", "MENU");
     public static string Hint(string language) => Pick(language, "↑ ↓ ELEGIR  ·  ENTER ACEPTAR", "↑ ↓ SELECT  ·  ENTER CONFIRM");
 
-    private static string Pick(string language, string es, string en) =>
-        HumorBank.NormalizeLanguage(language) == "en" ? en : es;
+    private static string Pick(string language, string es, string en) => Localize.Pick(language, es, en);
 }

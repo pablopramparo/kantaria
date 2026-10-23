@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 using System.Reflection;
 using System.Text.Json;
+using Kantor.Core.Localization;
 
 namespace Kantor.Core.Humor;
 
@@ -36,8 +37,8 @@ public static class HumorRanges
 /// </summary>
 public sealed class HumorBank
 {
-    public const string DefaultLanguage = "es";
-    public static readonly string[] Languages = { "es", "en" };
+    public const string DefaultLanguage = AppLanguage.Spanish;
+    public static readonly IReadOnlyList<string> Languages = AppLanguage.All;
 
     private readonly Dictionary<string, string> _texts;
     private readonly Dictionary<HumorCategory, string[]> _ids;
@@ -66,16 +67,25 @@ public sealed class HumorBank
 
     public string Text(string id) => _texts[id];
 
+    /// <summary>
+    /// Carga el banco del idioma pedido. Hay un archivo por idioma base (español en voseo, inglés): el español
+    /// argentino lo usa tal cual y el neutro lo pasa por <see cref="Neutralizer"/>.
+    /// </summary>
     public static HumorBank Load(string language)
     {
-        var name = $"Kantor.Core.Humor.Texts.humor.{language}.json";
+        language = AppLanguage.Normalize(language);
+        var name = $"Kantor.Core.Humor.Texts.humor.{AppLanguage.Base(language)}.json";
         using var s = typeof(HumorBank).Assembly.GetManifestResourceStream(name)
             ?? throw new InvalidOperationException($"Falta el recurso de frases '{name}'.");
         var dict = JsonSerializer.Deserialize<Dictionary<string, string>>(s)
             ?? throw new InvalidOperationException($"Recurso de frases '{name}' vacío.");
+        if (language == AppLanguage.Spanish)
+        {
+            dict = dict.ToDictionary(kv => kv.Key, kv => Neutralizer.ToNeutral(kv.Value), StringComparer.Ordinal);
+        }
+
         return new HumorBank(language, dict);
     }
 
-    public static string NormalizeLanguage(string? language) =>
-        Languages.Contains(language) ? language! : DefaultLanguage;
+    public static string NormalizeLanguage(string? language) => AppLanguage.Normalize(language);
 }

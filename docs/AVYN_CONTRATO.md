@@ -121,7 +121,7 @@ Convención: el concepto es `session`; en pantalla, en español, es **"Partida"*
                         { "slot": 2, "playerId": null } ] },
   "queue": { "queueRev": 31, "persistent": true, "pendingCount": 3, "items": [ /* pendientes + en ejecución */ ] },
   "lastResult": { "performanceId": "…", "finishedAt": "…", "saved": true },
-  "settings": { "autoAdvance": false, "language": "es", "remoteControl": true },
+  "settings": { "autoAdvance": false, "language": "es", "locale": "es-AR", "remoteControl": true },
   "autoAdvanceCountdown": null,
   "library": { "libraryRev": 14, "scan": "idle", "entryCount": 1068, "folderCount": 2 },
   "display": { "fullscreen": true, "processId": 14212, "windowHandle": "0x00040A1C",

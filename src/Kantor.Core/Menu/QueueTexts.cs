@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Pablo Pramparo
 using Kantor.Core.Humor;
+using Kantor.Core.Localization;
 
 namespace Kantor.Core.Menu;
 
@@ -40,6 +41,5 @@ public static class QueueTexts
         : Pick(language, "Sin partida abierta: la cola vale solo mientras Kantaria está abierto.",
             "No open session: the queue only lasts while Kantaria stays open.");
 
-    private static string Pick(string language, string es, string en) =>
-        HumorBank.NormalizeLanguage(language) == "en" ? en : es;
+    private static string Pick(string language, string es, string en) => Localize.Pick(language, es, en);
 }

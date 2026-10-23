@@ -57,8 +57,11 @@ public static partial class GuestNetwork
     public static bool LooksVirtual(string name, string description) =>
         VirtualName().IsMatch(name) || VirtualName().IsMatch(description);
 
-    /// <summary>Interfaces candidatas, con puerta de enlace primero.</summary>
-    public static IReadOnlyList<GuestInterface> Candidates()
+    /// <summary>
+    /// Interfaces candidatas, con puerta de enlace primero. <paramref name="allowHyperVExternal"/> (solo el modo demo) admite
+    /// el conmutador externo de Hyper-V, que en una PC con Hyper-V es la propia placa de red y por eso parece virtual.
+    /// </summary>
+    public static IReadOnlyList<GuestInterface> Candidates(bool allowHyperVExternal = false)
     {
         var result = new List<GuestInterface>();
         try
@@ -67,7 +70,8 @@ public static partial class GuestNetwork
             {
                 if (nic.OperationalStatus != OperationalStatus.Up
                     || nic.NetworkInterfaceType is NetworkInterfaceType.Loopback or NetworkInterfaceType.Tunnel
-                    || LooksVirtual(nic.Name, nic.Description))
+                    || (LooksVirtual(nic.Name, nic.Description)
+                        && !(allowHyperVExternal && nic.Name.Contains("External", StringComparison.OrdinalIgnoreCase))))
                 {
                     continue;
                 }

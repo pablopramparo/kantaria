@@ -11,5 +11,9 @@ namespace Kantor.App;
 /// </summary>
 public partial class App : Application
 {
+    public App()
+    {
+        Demo.DemoMode.Prepare();
+    }
 }
 

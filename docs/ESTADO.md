@@ -1102,9 +1102,8 @@ Guía de uso y seguridad: **`docs/INVITADOS.md`**. Aquí, lo que hay que saber p
 - `PhraseFeedbackCatalog.Spanish` es **neutro** (tuteo). `ArgentineSpanish` se arma al iniciar sobre el neutro con un diccionario de
   sustituciones (voseo, "bondi", "mate", "che"…); si una clave no coincide con una frase del neutro o queda un duplicado, lanza al iniciar
   (lo cubren los tests). `For("es-AR")` devuelve el argentino; `For("es")` y cualquier otro código no inglés, el neutro.
-- Opción nueva en OPCIONES › Juego: "Frases en español" (Neutro / Argentino), `UserSettings.ArgentinePhrases`, **argentino por
-  omisión**. Solo cambia los mensajes por frase; los textos de menús y comentarios de resultados siguen igual. Con la interfaz en inglés
-  no tiene efecto.
+- ~~Opción OPCIONES › Juego "Frases en español" (`ArgentinePhrases`)~~ reemplazada por el idioma único de la aplicación (ver
+  "Idioma de la aplicación" al final).
 - Reglas de los tests: hasta 12 palabras y 56 caracteres por frase (la tipografía se encoge para entrar en la franja); inglés sin
   signos españoles ni apóstrofo tipográfico (se reemplazaron 41 por `'`).
 
@@ -1115,7 +1114,7 @@ pausa con Esc, teclado en los botones del escenario, freestyle en lila, video de
 Novedades para la Store: solo esto, sin repetir lo de la 0.2.0. **La 0.3.0 ya está publicada** (18/10/2026): nada de lo anterior
 se repite en «Novedades» de las versiones siguientes.
 
-### Versión 0.4.0 (en curso; `<Version>` ya subida)
+### Versión 0.4.1 (en curso; `<Version>` ya subida)
 
 Solo lo posterior a la 0.3.0 publicada:
 - **Duetos marcados** en la lista de canciones: etiqueta «DÚO»/«DUET» (según el idioma de la interfaz) en filas, celdas de la grilla y
@@ -1124,6 +1123,44 @@ Solo lo posterior a la 0.3.0 publicada:
   VIDEO» en una línea y achicó la carátula grande a 180 px para que entren con el QR abierto.
 - **Esc en la lista de canciones siempre va al menú** (antes, tras volver desde resultados, dejaba ver la canción anterior:
   `OnSongListBack` solo ocultaba la lista; ahora llama a `ShowMenu()`).
-- **Frases en español**: `UserSettings.ArgentinePhrases` por omisión es argentina solo si la región de Windows es AR (neutra en el
-  resto); quien ya tenga la opción guardada la conserva.
+- **Idioma único** (español neutro / argentino / inglés): ver «Idioma de la aplicación» al final. Reemplaza a `ArgentinePhrases`.
+- **Cambio de marca a Kantaria** (nombre visible, logo, instalador, ficha); lo interno sigue «Kantor». Ver `CLAUDE.md`.
+- **Novedades para la Store** (0.4.1, sin repetir lo de la 0.3.0): marca nueva, idioma en tres variantes, etiqueta DÚO, Esc en la lista →
+  menú. Los textos están en `docs/STORE_LISTING.md`. El modo demo (`KANTARIA_DEMO`) es solo de desarrollo y no se informa.
+- Paquete armado: `dist\Kantaria-0.4.1-store.msix` (147 MB, 962 tests), sin enviar todavía. La 0.4.0 se había subido dos veces con contenido distinto y la Store la rechazó (mismo nombre de paquete): se borró de la Store y se pasó a 0.4.1. **No reutilizar un número de versión ya cargado.** Sin probar instalado ni firmado.
 - Sin comprobar a mano: el aspecto de la ficha con el QR abierto y la detección de duetos en la biblioteca completa.
+
+## Modo demo (capturas y certificación)
+
+- Se activa con la variable de entorno `KANTARIA_DEMO=1` (no hay opción en la interfaz). Código: `Kantor.App/Demo/DemoMode.cs`
+  (motor, sesión de captura y preparación del perfil) y `Kantor.Core/Demo/DemoSinger.cs` (el cantante, con tests).
+- **Perfil aparte**: sin `KANTOR_DATA_DIR`, usa `%TEMP%\Kantaria-demo` (no toca `%APPDATA%\Kantor`). Si está vacío crea los
+  jugadores Ana y Leo, abre dos micrófonos simulados (puestos 1 y 2) y agrega `samples\kantor-demo-songs` a la biblioteca
+  (o la carpeta de `KANTARIA_DEMO_SONGS`). Borrar esa carpeta lo deja como nuevo.
+- **Voces simuladas** (`DemoEngine` envuelve al motor real: el audio de la canción es real y solo la entrada es simulada):
+  cada puesto canta la voz que le toca con el retardo de 175 ms y una precisión fija (puesto 1: 96 %, 2: 72 %, 3: 85 %, 4: 60 %).
+  Es determinista: la misma canción da el mismo resultado. La calibración no está disponible en este modo.
+- **Comprobado**: compila, 5 tests nuevos (un cantante perfecto puntúa ≥ 9000, uno que siempre falla ≤ 1500), la app arranca en modo
+  demo, crea el perfil aparte y escanea las canciones. **Sin comprobar a mano**: cantar una canción completa por la interfaz
+  con las voces simuladas (puntaje, barras y resultados).
+- Uso: `$env:KANTARIA_DEMO='1'; src\Kantor.App\bin\Debug\net10.0-windows\Kantor.App.exe` (o la edición publicada).
+
+## Idioma de la aplicación: español neutro, español argentino e inglés
+
+- **Un solo ajuste** (OPCIONES › Juego › Idioma, `UserSettings.CommentLanguage`) con tres valores: `es` (español neutro, tuteo),
+  `es-AR` (español argentino, voseo) y `en`. Decide la interfaz, la página de invitados, los comentarios del resultado y los mensajes
+  por frase. Reemplaza al par idioma + `ArgentinePhrases`: al leer ajustes viejos `es` con `ArgentinePhrases: true` pasa a `es-AR`
+  (y la clave vieja no se vuelve a guardar). Primer arranque: según Windows (`AppLanguage.FromSystem`: `es-AR` con región Argentina,
+  `es` con otro español, `en` con el resto).
+- **Los textos en español se escriben una sola vez, en voseo.** El neutro sale de `Kantor.Core/Localization/Neutralizer.cs`: lista
+  cerrada de formas verbales (elegí → elige, podés → puedes, volvé → vuelve, hacé → haz, sumate → súmate…) y reglas para "vos"
+  (con vos → contigo, a/de/en… vos → ti, entre/según… vos → tú, vos → tú, sos → eres). `Localize.Pick(idioma, español, inglés)` elige
+  el texto; todos los `*Texts` pasan por ahí. Los comentarios (`humor.es.json`) se cargan una vez y se convierten (`HumorBank.Load("es")`).
+  Los mensajes por frase siguen con sus dos catálogos propios (neutro y argentino).
+- **Agregar una forma de voseo nueva**: sumarla a `Neutralizer.Verbs` (y, si aparece en la página de invitados, a `VOSEO` de
+  `guest.js`; un test lo comprueba). Un test revisa que ningún texto en neutro conserve voseo ni "vos".
+- **Textos que no pasan por `Localize`** (consejos de calibración, tooltips, mensajes de la barra técnica) están escritos sin voseo
+  (infinitivo o impersonal) para que sirvan en los dos dialectos.
+- **Avyn**: `settings.language` sigue siendo `"es"` o `"en"` (sin variante); se agregó `settings.locale` (`"es"`, `"es-AR"`, `"en"`).
+  Los comandos con `lang` aceptan también `es-AR`.
+- Las capturas de `docs/screenshots/es` son de antes del cambio: están en español argentino.

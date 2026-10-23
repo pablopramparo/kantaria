@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Pablo Pramparo
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Kantor.Core.Scoring;
 
 namespace Kantor.Core.Settings;
@@ -77,23 +78,11 @@ public sealed record UserSettings
     public bool PhraseFeedback { get; init; } = true;
 
     /// <summary>
-    /// Los mensajes por frase en español usan la variante argentina (<c>true</c>) o la neutra (<c>false</c>).
-    /// Por omisión, argentina solo si la región de Windows es Argentina; neutra en cualquier otro caso.
+    /// Ajuste de versiones anteriores (frases en español argentino o neutro, aparte del idioma). Solo se lee para
+    /// migrar: <see cref="Normalized"/> lo pasa a <see cref="CommentLanguage"/> (<c>es-AR</c>) y no se vuelve a guardar.
     /// </summary>
-    public bool ArgentinePhrases { get; init; } = DefaultArgentinePhrases();
-
-    private static bool DefaultArgentinePhrases()
-    {
-        try
-        {
-            return System.Globalization.RegionInfo.CurrentRegion.TwoLetterISORegionName
-                .Equals("AR", StringComparison.OrdinalIgnoreCase);
-        }
-        catch (ArgumentException)
-        {
-            return false;
-        }
-    }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? ArgentinePhrases { get; init; }
 
     /// <summary>La aplicación arranca en pantalla completa.</summary>
     public bool StartFullscreen { get; init; }
@@ -122,8 +111,11 @@ public sealed record UserSettings
     /// </summary>
     public bool AutoAdvance { get; init; }
 
-    /// <summary>Idioma de la interfaz (menú, resultados y comentarios): "es" o "en".</summary>
-    public string CommentLanguage { get; init; } = Humor.HumorBank.DefaultLanguage;
+    /// <summary>
+    /// Idioma de la aplicación (interfaz, comentarios del resultado y frases por frase): "es" (español neutro),
+    /// "es-AR" (español argentino) o "en". El nombre viene de cuando solo regía los comentarios.
+    /// </summary>
+    public string CommentLanguage { get; init; } = Localization.AppLanguage.Spanish;
 
     /// <summary>Probabilidad (0–1) del comentario sin sentido en resultados de 0 a 9999.</summary>
     public double NonsenseProbability { get; init; } = Humor.CommentSelector.DefaultNonsenseProbability;
@@ -206,7 +198,11 @@ public sealed record UserSettings
                 .Select(p => p.Trim())
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList() is { Count: > 0 } paths ? paths : null,
-            CommentLanguage = Humor.HumorBank.NormalizeLanguage(CommentLanguage),
+            CommentLanguage = Localization.AppLanguage.Normalize(CommentLanguage) is Localization.AppLanguage.Spanish
+                              && ArgentinePhrases == true
+                ? Localization.AppLanguage.ArgentineSpanish
+                : Localization.AppLanguage.Normalize(CommentLanguage),
+            ArgentinePhrases = null,
             NonsenseProbability = double.IsFinite(NonsenseProbability)
                 ? Math.Clamp(NonsenseProbability, 0.0, 1.0)
                 : Humor.CommentSelector.DefaultNonsenseProbability,
@@ -240,7 +236,8 @@ public static class UserSettingsStore
             // Archivo ilegible o con formato inválido: se arranca con los valores por omisión.
         }
 
-        return new UserSettings();
+        // Primer arranque (o archivo inservible): el idioma de Windows.
+        return new UserSettings { CommentLanguage = Localization.AppLanguage.FromSystem() };
     }
 
     /// <summary>Guarda de forma atómica (archivo temporal y reemplazo). Devuelve false si no pudo.</summary>

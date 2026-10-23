@@ -50,9 +50,10 @@ public sealed class UserSettingsTests : IDisposable
     }
 
     [Fact]
-    public void A_missing_file_gives_defaults()
+    public void A_missing_file_gives_defaults_with_the_system_language()
     {
-        Assert.Equal(new UserSettings(), UserSettingsStore.Load(FilePath));
+        Assert.Equal(new UserSettings { CommentLanguage = Kantor.Core.Localization.AppLanguage.FromSystem() },
+            UserSettingsStore.Load(FilePath));
     }
 
     [Theory]
@@ -65,7 +66,8 @@ public sealed class UserSettingsTests : IDisposable
         Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);
         File.WriteAllText(FilePath, content);
 
-        Assert.Equal(new UserSettings(), UserSettingsStore.Load(FilePath));
+        Assert.Equal(new UserSettings { CommentLanguage = Kantor.Core.Localization.AppLanguage.FromSystem() },
+            UserSettingsStore.Load(FilePath));
     }
 
     [Theory]

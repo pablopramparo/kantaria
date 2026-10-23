@@ -251,7 +251,7 @@ public sealed class StageControl : FrameworkElement
 
         if (_song is null || _clock is null || width < 50 || height < 50)
         {
-            DrawCentered(dc, "Abrí una canción con Ctrl+O", width, height / 2 - 14, 28, Dim);
+            DrawCentered(dc, "Abrir una canción con Ctrl+O", width, height / 2 - 14, 28, Dim);
             return;
         }
 

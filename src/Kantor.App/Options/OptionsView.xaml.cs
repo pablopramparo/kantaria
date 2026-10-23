@@ -10,6 +10,7 @@ using Kantor.App.Audio;
 using Kantor.App.Pixel;
 using Kantor.App.Results;
 using Kantor.Core.Audio;
+using Kantor.Core.Localization;
 using Kantor.Core.Menu;
 using Kantor.Core.Pitch;
 using Kantor.Core.Settings;
@@ -86,7 +87,6 @@ public partial class OptionsView : UserControl
     public event Action<bool>? PhraseFeedbackChanged;
 
     /// <summary>Variante de los mensajes por frase en español: <c>true</c> = argentina, <c>false</c> = neutra.</summary>
-    public event Action<bool>? PhraseDialectChanged;
 
     public event Action<bool>? StartFullscreenChanged;
 
@@ -532,7 +532,7 @@ public partial class OptionsView : UserControl
         if (m.Requested == AudioEngineKind.Asio)
         {
             return "Se pidió ASIO pero no se pudo usar; funciona Windows (compartido). " +
-                   (m.EngineNote ?? m.Asio.UnavailableReason ?? "Revisá el controlador ASIO y volvé a elegirlo.");
+                   (m.EngineNote ?? m.Asio.UnavailableReason ?? "Revisar el controlador ASIO y volver a elegirlo.");
         }
 
         return m.Asio.IsAvailable
@@ -912,8 +912,9 @@ public partial class OptionsView : UserControl
             Choice("voice", [T("game.voice.beat"), T("game.voice.raw")], m.VoiceDisplay,
                 i => VoiceDisplayChanged?.Invoke(i))));
         ContentPanel.Children.Add(Row(T("game.language"),
-            Choice("language", ["Español", "English"], m.Language == "en" ? 1 : 0,
-                i => LanguageChanged?.Invoke(i == 1 ? "en" : "es"))));
+            Choice("language", ["Español", "Español (Argentina)", "English"],
+                AppLanguage.All.ToList().IndexOf(AppLanguage.Normalize(m.Language)),
+                i => LanguageChanged?.Invoke(AppLanguage.All[i]))));
 
         var nearest = 0;
         for (var i = 1; i < NonsenseSteps.Length; i++)
@@ -931,9 +932,6 @@ public partial class OptionsView : UserControl
             Choice("preview", [T("no"), T("yes")], m.SongPreview ? 1 : 0, i => SongPreviewChanged?.Invoke(i == 1))));
         ContentPanel.Children.Add(Row(T("game.feedback"),
             Choice("feedback", [T("no"), T("yes")], m.PhraseFeedback ? 1 : 0, i => PhraseFeedbackChanged?.Invoke(i == 1))));
-        ContentPanel.Children.Add(Row(T("game.dialect"),
-            Choice("dialect", [T("game.dialect.neutral"), T("game.dialect.argentine")], m.ArgentinePhrases ? 1 : 0,
-                i => PhraseDialectChanged?.Invoke(i == 1))));
         ContentPanel.Children.Add(Row(T("game.autoadvance"),
             Choice("autoadvance", [T("no"), T("yes")], m.AutoAdvance ? 1 : 0, i => AutoAdvanceChanged?.Invoke(i == 1))));
         ContentPanel.Children.Add(PixelUi.Note(T("game.autoadvance.help"), 18));

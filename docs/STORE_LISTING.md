@@ -1,13 +1,13 @@
 # Ficha de Microsoft Store — textos listos para copiar
 
-Idiomas del paquete: **Español**, **Español (Argentina)** y **Inglés (Estados Unidos)**. El texto en español usa voseo;
-pegalo igual en "Español" y en "Español (Argentina)".
+Idiomas del paquete: **Español**, **Español (Argentina)** y **Inglés (Estados Unidos)**. La aplicación también tiene esos tres idiomas
+(neutro, argentino e inglés). Pegá la sección "ESPAÑOL (NEUTRO)" (tuteo) en "Español" y "ESPAÑOL (ARGENTINA)" (voseo) en "Español (Argentina)".
 Producto: Id. de Store `9P8ZKZBJ4RHB` · Categoría Entretenimiento · Clasificación: todas las edades.
 Nombre reservado en la Store: **Kantaria** y **Kantaria: Karaoke Sing & Score** (el `DisplayName` del manifiesto es "Kantaria"). Identity `PabloPramparo.Kantor` sin cambios.
 
 ---
 
-## ESPAÑOL / ESPAÑOL (ARGENTINA)
+## ESPAÑOL (ARGENTINA)
 
 ### Descripción
 
@@ -34,7 +34,7 @@ MICRÓFONOS Y AUDIO
 • Para puntuar necesitás al menos un micrófono. Kantaria analiza el tono de tu voz en el momento: no graba ni guarda el audio.
 
 IDIOMAS
-• Español e inglés.
+• Español (neutro y argentino) e inglés.
 
 Kantaria es software libre (GPL-3.0-or-later). El código está disponible en https://github.com/pablopramparo/kantaria
 
@@ -51,7 +51,7 @@ Karaoke local para Windows, compatible con canciones UltraStar: puntaje, hasta 4
 5. Cola de canciones con avance automático.
 6. Acceso opcional de invitados por QR: buscan y se anotan desde el celular, en tu red Wi-Fi.
 7. Audio de Windows o ASIO, con calibración del retardo de voz.
-8. Funciona sin internet y no envía datos. Español e inglés.
+8. Funciona sin internet y no envía datos. Español (neutro y argentino) e inglés.
 
 ### Palabras de búsqueda (máx. 7)
 
@@ -59,7 +59,79 @@ karaoke · cantar · canto · micrófono · fiesta · puntaje · letras
 
 ### Novedades de esta versión
 
-Primera versión en Microsoft Store.
+Versión 0.4.1
+• Ahora se llama Kantaria.
+• Elegí el idioma en Opciones: español, español (Argentina) o inglés. Cambia la interfaz, la página de invitados del celular, los comentarios y los mensajes por frase.
+• La lista de canciones marca los duetos con la etiqueta «DÚO».
+• Esc en la lista de canciones vuelve siempre al menú.
+
+### Información de copyright y marca registrada
+
+© 2026 Pablo Pramparo. El nombre Kantaria, su logo y los personajes son propiedad del autor, todos los derechos reservados.
+
+### Términos de licencia adicionales
+
+El código de Kantaria se distribuye bajo GPL-3.0-or-later (https://github.com/pablopramparo/kantaria). El nombre, el logo y los personajes no están bajo la GPL: ver LICENSE-ASSETS.md.
+
+---
+
+## ESPAÑOL (NEUTRO)
+
+### Descripción
+
+Kantaria es un karaoke para tu PC con Windows: cargas tus canciones UltraStar y cantas con puntaje, letras sincronizadas y video de fondo, con un estilo arcade de 16 bits.
+
+Todo funciona sin internet y tus datos quedan en tu equipo.
+
+CANTA COMO EN LA SALA DE ESTAR
+• Compatible con canciones en formato UltraStar (.txt con audio, y video y portada si las traen). Kantaria no incluye canciones: las pones tú.
+• Notas, letra y barras de voz en pantalla, con puntaje por nota y bonus por línea.
+• Hasta cuatro micrófonos a la vez, duetos y varias voces por canción.
+• Mensajes por frase mientras cantas, y resultados con veredictos y personajes.
+
+ORGANIZÁ LA FIESTA
+• Jugadores con avatar, partidas, historial y rankings guardados en tu PC.
+• Cola de canciones: deja armada la lista y sigue con la siguiente sola.
+• Buscador de canciones por artista, título, género, año o idioma, con vista previa.
+
+SUMA A TUS INVITADOS (OPCIONAL)
+• Mostrá un QR y que cada invitado, desde su celular y en tu misma red Wi-Fi, busque una canción, cree su jugador con nombre y personaje, y se anote para cantar. Sin instalar nada en el celular y sin cuentas. Está apagado hasta que lo actives.
+
+MICRÓFONOS Y AUDIO
+• Funciona con el audio de Windows o con interfaces ASIO, con calibración del retardo de la voz.
+• Para puntuar necesitás al menos un micrófono. Kantaria analiza el tono de tu voz en el momento: no graba ni guarda el audio.
+
+IDIOMAS
+• Español (neutro y argentino) e inglés.
+
+Kantaria es software libre (GPL-3.0-or-later). El código está disponible en https://github.com/pablopramparo/kantaria
+
+### Descripción corta (si la pide)
+
+Karaoke local para Windows, compatible con canciones UltraStar: puntaje, hasta 4 micrófonos, duetos, video de fondo y estilo arcade. Sin internet.
+
+### Características del producto (una por renglón, máx. 200 caracteres)
+
+1. Compatible con canciones UltraStar: letra sincronizada, notas en pantalla y video de fondo.
+2. Puntaje por nota con bonus por línea y tres dificultades.
+3. Hasta 4 micrófonos a la vez, duetos y canciones con varias voces.
+4. Jugadores con avatar, partidas, historial y rankings guardados en tu PC.
+5. Cola de canciones con avance automático.
+6. Acceso opcional de invitados por QR: buscan y se anotan desde el celular, en tu red Wi-Fi.
+7. Audio de Windows o ASIO, con calibración del retardo de voz.
+8. Funciona sin internet y no envía datos. Español (neutro y argentino) e inglés.
+
+### Palabras de búsqueda (máx. 7)
+
+karaoke · cantar · canto · micrófono · fiesta · puntaje · letras
+
+### Novedades de esta versión
+
+Versión 0.4.1
+• Ahora se llama Kantaria.
+• Elige el idioma en Opciones: español, español (Argentina) o inglés. Cambia la interfaz, la página de invitados del celular, los comentarios y los mensajes por frase.
+• La lista de canciones marca los duetos con la etiqueta «DÚO».
+• Esc en la lista de canciones vuelve siempre al menú.
 
 ### Información de copyright y marca registrada
 
@@ -115,7 +187,7 @@ Local karaoke for Windows, compatible with UltraStar songs: scoring, up to 4 mic
 5. Song queue with automatic advance.
 6. Optional QR guest access: guests search and sign up from their phones on your Wi-Fi.
 7. Windows audio or ASIO, with voice-delay calibration.
-8. Works offline and sends no data. Spanish and English.
+8. Works offline and sends no data. Spanish (neutral and Argentine) and English.
 
 ### Search terms (max 7)
 
@@ -123,7 +195,11 @@ karaoke · singing · sing · microphone · party · score · lyrics
 
 ### What's new in this version
 
-First release on Microsoft Store.
+Version 0.4.1
+• Now called Kantaria.
+• Pick the language in Options: Spanish, Spanish (Argentina) or English. It changes the interface, the guest page on phones, the result comments and the per-phrase messages.
+• The song list tags duets with a "DUET" label.
+• Esc in the song list now always goes back to the menu.
 
 ### Copyright and trademark info
 

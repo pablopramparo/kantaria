@@ -367,7 +367,8 @@ public sealed partial class KantorController
         sections["settings"] = Plain(new JsonObject
         {
             ["autoAdvance"] = host.AutoAdvance,
-            ["language"] = host.Language,
+            ["language"] = Localization.AppLanguage.Base(host.Language),
+            ["locale"] = Localization.AppLanguage.Normalize(host.Language),
             ["remoteControl"] = true,
         });
         sections["autoAdvanceCountdown"] = BuildCountdown();

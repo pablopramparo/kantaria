@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Pablo Pramparo
 using Kantor.Core.Humor;
+using Kantor.Core.Localization;
 
 namespace Kantor.Core.Menu;
 
@@ -163,7 +164,7 @@ public static class PlayersTexts
             return key;
         }
 
-        return HumorBank.NormalizeLanguage(language) == "en" ? pair.En : pair.Es;
+        return Localize.Pick(language, pair.Es, pair.En);
     }
 
     public static string Format(string language, string key, params object[] args) =>

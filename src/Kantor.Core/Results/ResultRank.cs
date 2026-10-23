@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 using Kantor.Core.Humor;
+using Kantor.Core.Localization;
 
 namespace Kantor.Core.Results;
 
@@ -28,7 +29,7 @@ public static class ResultRanks
 
     /// <summary>Texto del sello en el idioma pedido ("es" o "en"; cualquier otro cae al predeterminado).</summary>
     public static string Label(ResultRank rank, string language) =>
-        HumorBank.NormalizeLanguage(language) == "en" ? English[rank] : Spanish[rank];
+        AppLanguage.IsEnglish(language) ? English[rank] : Localize.Spanish(language, Spanish[rank]);
 
     private static readonly Dictionary<ResultRank, string> English = new()
     {
@@ -68,6 +69,5 @@ public static class ResultTexts
     public static string Standings(string language) => Pick(language, "CLASIFICACIÓN", "STANDINGS");
     public static string Accuracy(string language) => Pick(language, "PRECISIÓN", "ACCURACY");
 
-    private static string Pick(string language, string es, string en) =>
-        HumorBank.NormalizeLanguage(language) == "en" ? en : es;
+    private static string Pick(string language, string es, string en) => Localize.Pick(language, es, en);
 }

@@ -277,8 +277,8 @@ public static class LatencyEvaluation
         if (good.Count < MinAccepted)
         {
             return new CalibrationResult(false, 0, 0, good.Count, expected, 0,
-                "No se oyó la señal con claridad. Subí el volumen de los parlantes, acercá el micrófono a ellos " +
-                "(con auriculares no funciona por el aire) o usá un cable de la salida a la entrada.");
+                "No se oyó la señal con claridad. Subir el volumen de los parlantes, acercar el micrófono a ellos " +
+                "(con auriculares no funciona por el aire) o usar un cable de la salida a la entrada.");
         }
 
         var median = good[good.Count / 2];
@@ -287,13 +287,13 @@ public static class LatencyEvaluation
         if (median < 0 || median > 700)
         {
             return new CalibrationResult(false, median, spread, good.Count, expected, 0,
-                $"La latencia medida ({median:0} ms) no es plausible. Repetí la prueba en un lugar más silencioso.");
+                $"La latencia medida ({median:0} ms) no es plausible. Conviene repetir la prueba en un lugar más silencioso.");
         }
 
         if (spread > MaxSpreadMs)
         {
             return new CalibrationResult(false, median, spread, good.Count, expected, 0,
-                $"Las repeticiones no coinciden (dispersión de {spread:0.#} ms). Hay ruido o eco: repetí la prueba.");
+                $"Las repeticiones no coinciden (dispersión de {spread:0.#} ms). Hay ruido o eco: conviene repetir la prueba.");
         }
 
         var step = Settings.UserSettings.VoiceDelayStepMs;

@@ -55,6 +55,7 @@ public class HumorBankTests
 
     [Theory]
     [InlineData("es")]
+    [InlineData("es-AR")]
     [InlineData("en")]
     public void BankHasExpectedCountsAndNoEmptyTexts(string language)
     {
@@ -78,6 +79,7 @@ public class HumorBankTests
 
     [Theory]
     [InlineData("es")]
+    [InlineData("es-AR")]
     [InlineData("en")]
     public void NoDuplicateTextInsideACategory(string language)
     {

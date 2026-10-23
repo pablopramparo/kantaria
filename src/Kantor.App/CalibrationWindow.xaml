@@ -20,7 +20,7 @@
         </TextBlock>
 
         <TextBlock Grid.Row="1" Margin="0,12,0,0" TextWrapping="Wrap" Foreground="#8A919E" LineHeight="20">
-            • Los parlantes deben sonar con volumen normal (no auriculares) y el micrófono estar donde cantás.
+            • Los parlantes deben sonar con volumen normal (no auriculares) y el micrófono estar donde se canta.
             • Durará unos 8 segundos. Silencio en la sala durante la prueba.
             • También sirve con un cable de la salida de la placa a la entrada elegida.
         </TextBlock>

@@ -20,6 +20,7 @@ using Kantor.Core.Menu;
 using Kantor.Core.Humor;
 using Kantor.Core.Guest;
 using Kantor.Core.Library;
+using Kantor.Core.Localization;
 using Kantor.Core.Remote;
 using Kantor.Core.Results;
 using Kantor.Core.Scoring;
@@ -116,11 +117,21 @@ public partial class MainWindow : Window
         using (Diag.Time("inicio: ajustes", 30))
         {
             _prefs = UserSettingsStore.Load(_settingsPath);
+            if (Demo.DemoMode.Enabled)
+            {
+                _prefs = Demo.DemoMode.Seed(_prefs);
+            }
         }
 
         using (Diag.Time("inicio: base de datos", 30))
         {
             OpenStore();
+            if (Demo.DemoMode.Enabled && _store is not null)
+            {
+                Demo.DemoMode.SeedPlayers(_store);
+                RefreshPlayerCache();
+            }
+
             _queue = new QueueService(_store, () => QueueSession()?.Id);
             _queue.RecoverInterrupted(); // un elemento "en ejecución" de la vez anterior quedó colgado
         }
@@ -135,7 +146,7 @@ public partial class MainWindow : Window
         {
             DifficultyBox.SelectedIndex = (int)_prefs.Difficulty;
             DisplayBox.SelectedIndex = _prefs.VoiceDisplay;
-            LanguageBox.SelectedIndex = _prefs.CommentLanguage == "en" ? 1 : 0;
+            LanguageBox.SelectedIndex = AppLanguage.All.ToList().IndexOf(AppLanguage.Normalize(_prefs.CommentLanguage));
         }
         finally
         {
@@ -238,6 +249,11 @@ public partial class MainWindow : Window
         DisposeAudio();
 
         _engine = AudioEngineFactory.Create(requested, _prefs.AsioDriver, _prefs.AsioOutputPair, out _engineNote);
+        if (Demo.DemoMode.Enabled)
+        {
+            _engine = new Demo.DemoEngine(_engine, () => _song);
+        }
+
         _player = _engine.CreatePlayer();
         _input = new ActiveInput(_player, _engine.CreateCapture);
         _input.Changed += OnInputChanged;
@@ -969,7 +985,7 @@ public partial class MainWindow : Window
             _abandonSeq++;
             ResetScorers();
             BuildAudio(AudioEngineKind.Windows);
-            _engineNote = $"{message} Se pasó a Windows (compartido); elegí ASIO de nuevo en Opciones.";
+            _engineNote = $"{message} Se pasó a Windows (compartido); se puede volver a elegir ASIO en Opciones.";
             StatusText.Text = _engineNote;
             UpdateInputStatus();
             RestoreInput();
@@ -1152,7 +1168,7 @@ public partial class MainWindow : Window
     {
         if (_input.DeviceOf(slot) is not { } calibrationDevice || _input.Map[slot] is not { } calibrationSource)
         {
-            StatusText.Text = "Elegí primero una entrada (Opciones o Ctrl+I) para calibrar con ella.";
+            StatusText.Text = "Primero hay que elegir una entrada (Opciones o Ctrl+I) para calibrar con ella.";
             return;
         }
 
@@ -1789,7 +1805,7 @@ public partial class MainWindow : Window
         Options.VoiceDisplayChanged += index => DisplayBox.SelectedIndex = index;
         Options.LanguageChanged += language =>
         {
-            LanguageBox.SelectedIndex = language == "en" ? 1 : 0;
+            LanguageBox.SelectedIndex = AppLanguage.All.ToList().IndexOf(AppLanguage.Normalize(language));
             RefreshOptions();
             RefreshGuest();
         };
@@ -1808,11 +1824,6 @@ public partial class MainWindow : Window
                 Stage.ClearFeedback();
             }
 
-            SaveSettings();
-        };
-        Options.PhraseDialectChanged += argentine =>
-        {
-            _prefs = _prefs with { ArgentinePhrases = argentine };
             SaveSettings();
         };
         Options.StartFullscreenChanged += on =>
@@ -1845,7 +1856,6 @@ public partial class MainWindow : Window
         Nonsense = _prefs.NonsenseProbability,
         SongPreview = _prefs.SongPreview,
         PhraseFeedback = _prefs.PhraseFeedback,
-        ArgentinePhrases = _prefs.ArgentinePhrases,
         StartFullscreen = _prefs.StartFullscreen,
         TechnicalBar = StatusBar.Visibility == Visibility.Visible,
         AutoAdvance = _prefs.AutoAdvance,
@@ -2132,8 +2142,8 @@ public partial class MainWindow : Window
 
         if (_prefs.PhraseFeedback)
         {
-            // idioma de la interfaz, no el de la canción; en español, neutro o argentino según la opción
-            _feedback.SetLanguage(_prefs.CommentLanguage == "es" && _prefs.ArgentinePhrases ? "es-AR" : _prefs.CommentLanguage);
+            // idioma de la interfaz (neutro, argentino o inglés), no el de la canción
+            _feedback.SetLanguage(_prefs.CommentLanguage);
             Stage.ShowFeedback(_feedback.Poll(position));
         }
 

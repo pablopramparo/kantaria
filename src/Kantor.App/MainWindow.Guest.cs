@@ -120,7 +120,7 @@ public partial class MainWindow
                 return;
             }
 
-            var choice = GuestNetwork.Choose(GuestNetwork.Candidates(), _prefs.GuestInterface);
+            var choice = GuestNetwork.Choose(GuestNetwork.Candidates(Demo.DemoMode.Enabled), _prefs.GuestInterface);
             if (choice is null)
             {
                 _guestMessage = GuestTexts.NoNetwork(language);
@@ -135,6 +135,11 @@ public partial class MainWindow
             {
                 await started.StartAsync();
                 _guestQr = GuestQr.Modules(started.JoinUrl!);
+                if (Demo.DemoMode.Enabled)
+                {
+                    Diag.Mark("demo: enlace de invitados " + started.JoinUrl); // solo en demo: el enlace lleva la clave
+                }
+
                 _guestServer = started;
                 _guestMessage = null;
             }

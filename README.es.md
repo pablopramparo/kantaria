@@ -42,7 +42,7 @@ Kantaria no puede enseñarte a cantar. Pero puede documentar el intento.
 - **Hasta cuatro micrófonos simultáneos**, cada uno con su jugador, su carril y su señal de entrada en pantalla.
   Cuatro micrófonos, cuatro oportunidades de poner a prueba la autoestima.
 - **Duetos** con una voz por jugador.
-- **Mensajes variables por frase** mientras cantás ("¡PERFECTO!", "¡UPS!"…), en español e inglés.
+- **Mensajes variables por frase** mientras cantás ("¡PERFECTO!", "¡UPS!"…), en español (neutro y argentino) e inglés.
 - **Jugadores, partidas, historial y rankings** guardados localmente (SQLite). La memoria es selectiva, pero la
   base de datos no.
 - **Resultados con comentarios y personajes**: cada actuación recibe su veredicto y un personaje de cuerpo entero

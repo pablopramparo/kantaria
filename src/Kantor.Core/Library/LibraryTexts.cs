@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 using Kantor.Core.Humor;
+using Kantor.Core.Localization;
 
 namespace Kantor.Core.Library;
 
@@ -28,6 +29,5 @@ public static class LibraryTexts
     public static string ChooseFolder(string language) => Pick(language, "ELEGIR CARPETA", "CHOOSE FOLDER");
     public static string GridView(string language) => Pick(language, "GRILLA", "GRID");
 
-    private static string Pick(string language, string es, string en) =>
-        HumorBank.NormalizeLanguage(language) == "en" ? en : es;
+    private static string Pick(string language, string es, string en) => Localize.Pick(language, es, en);
 }

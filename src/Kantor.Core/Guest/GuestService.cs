@@ -90,8 +90,8 @@ public sealed class GuestService
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
     }
 
-    /// <summary>Idioma de Kantaria ("es" o "en"): el valor inicial de la página.</summary>
-    public string Language => _language() == "en" ? "en" : "es";
+    /// <summary>Idioma de Kantaria ("es", "es-AR" o "en"): el valor inicial de la página.</summary>
+    public string Language => Localization.AppLanguage.Normalize(_language());
 
     // ---- Biblioteca -------------------------------------------------------------------------------------------
 

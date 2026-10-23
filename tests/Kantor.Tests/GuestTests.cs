@@ -1187,7 +1187,7 @@ public class GuestTextsTests
     [Fact]
     public void Every_guest_text_exists_in_both_languages()
     {
-        foreach (var language in new[] { "es", "en" })
+        foreach (var language in new[] { "es", "es-AR", "en" })
         {
             var all = new[]
             {
@@ -1207,6 +1207,7 @@ public class GuestTextsTests
         }
 
         Assert.Equal("JOIN THE PARTY", Kantor.Core.Menu.GuestTexts.Title("en"));
-        Assert.Equal("SUMATE AL KARAOKE", Kantor.Core.Menu.GuestTexts.Title("es"));
+        Assert.Equal("SUMATE AL KARAOKE", Kantor.Core.Menu.GuestTexts.Title("es-AR"));
+        Assert.Equal("SÚMATE AL KARAOKE", Kantor.Core.Menu.GuestTexts.Title("es"));
     }
 }
