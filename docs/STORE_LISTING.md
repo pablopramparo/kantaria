@@ -3,6 +3,7 @@
 Idiomas del paquete: **Español**, **Español (Argentina)** y **Inglés (Estados Unidos)**. El texto en español usa voseo;
 pegalo igual en "Español" y en "Español (Argentina)".
 Producto: Id. de Store `9P8ZKZBJ4RHB` · Categoría Entretenimiento · Clasificación: todas las edades.
+Nombre reservado en la Store: **Kantaria** y **Kantaria: Karaoke Sing & Score** (el `DisplayName` del manifiesto es "Kantaria"). Identity `PabloPramparo.Kantor` sin cambios.
 
 ---
 
@@ -10,12 +11,12 @@ Producto: Id. de Store `9P8ZKZBJ4RHB` · Categoría Entretenimiento · Clasifica
 
 ### Descripción
 
-Kantor es un karaoke para tu PC con Windows: cargás tus canciones UltraStar y cantás con puntaje, letras sincronizadas y video de fondo, con un estilo arcade de 16 bits.
+Kantaria es un karaoke para tu PC con Windows: cargás tus canciones UltraStar y cantás con puntaje, letras sincronizadas y video de fondo, con un estilo arcade de 16 bits.
 
 Todo funciona sin internet y tus datos quedan en tu equipo.
 
 CANTÁ COMO EN LA SALA DE ESTAR
-• Compatible con canciones en formato UltraStar (.txt con audio, y video y portada si las traen). Kantor no incluye canciones: las ponés vos.
+• Compatible con canciones en formato UltraStar (.txt con audio, y video y portada si las traen). Kantaria no incluye canciones: las ponés vos.
 • Notas, letra y barras de voz en pantalla, con puntaje por nota y bonus por línea.
 • Hasta cuatro micrófonos a la vez, duetos y varias voces por canción.
 • Mensajes por frase mientras cantás, y resultados con veredictos y personajes.
@@ -30,12 +31,12 @@ SUMÁ A TUS INVITADOS (OPCIONAL)
 
 MICRÓFONOS Y AUDIO
 • Funciona con el audio de Windows o con interfaces ASIO, con calibración del retardo de la voz.
-• Para puntuar necesitás al menos un micrófono. Kantor analiza el tono de tu voz en el momento: no graba ni guarda el audio.
+• Para puntuar necesitás al menos un micrófono. Kantaria analiza el tono de tu voz en el momento: no graba ni guarda el audio.
 
 IDIOMAS
 • Español e inglés.
 
-Kantor es software libre (GPL-3.0-or-later). El código está disponible en https://github.com/pablopramparo/kantor
+Kantaria es software libre (GPL-3.0-or-later). El código está disponible en https://github.com/pablopramparo/kantaria
 
 ### Descripción corta (si la pide)
 
@@ -62,11 +63,11 @@ Primera versión en Microsoft Store.
 
 ### Información de copyright y marca registrada
 
-© 2026 Pablo Pramparo. El nombre Kantor, su logo y los personajes son propiedad del autor, todos los derechos reservados.
+© 2026 Pablo Pramparo. El nombre Kantaria, su logo y los personajes son propiedad del autor, todos los derechos reservados.
 
 ### Términos de licencia adicionales
 
-El código de Kantor se distribuye bajo GPL-3.0-or-later (https://github.com/pablopramparo/kantor). El nombre, el logo y los personajes no están bajo la GPL: ver LICENSE-ASSETS.md.
+El código de Kantaria se distribuye bajo GPL-3.0-or-later (https://github.com/pablopramparo/kantaria). El nombre, el logo y los personajes no están bajo la GPL: ver LICENSE-ASSETS.md.
 
 ---
 
@@ -74,12 +75,12 @@ El código de Kantor se distribuye bajo GPL-3.0-or-later (https://github.com/pab
 
 ### Description
 
-Kantor is a karaoke app for your Windows PC: load your UltraStar songs and sing with scoring, synchronized lyrics and background video, in a 16-bit arcade style.
+Kantaria is a karaoke app for your Windows PC: load your UltraStar songs and sing with scoring, synchronized lyrics and background video, in a 16-bit arcade style.
 
 Everything works offline and your data stays on your computer.
 
 SING LIKE IT'S THE LIVING ROOM
-• Works with songs in the UltraStar format (.txt with audio, plus video and cover when included). Kantor ships no songs: you bring your own.
+• Works with songs in the UltraStar format (.txt with audio, plus video and cover when included). Kantaria ships no songs: you bring your own.
 • Notes, lyrics and voice bars on screen, with per-note scoring and a line bonus.
 • Up to four microphones at once, duets and multi-voice songs.
 • Per-phrase messages while you sing, and results with verdicts and characters.
@@ -94,12 +95,12 @@ BRING YOUR GUESTS IN (OPTIONAL)
 
 MICROPHONES AND AUDIO
 • Works with Windows audio or ASIO interfaces, with voice-delay calibration.
-• You need at least one microphone to be scored. Kantor analyzes the pitch of your voice live: it does not record or save audio.
+• You need at least one microphone to be scored. Kantaria analyzes the pitch of your voice live: it does not record or save audio.
 
 LANGUAGES
 • Spanish and English.
 
-Kantor is free software (GPL-3.0-or-later). Source code: https://github.com/pablopramparo/kantor
+Kantaria is free software (GPL-3.0-or-later). Source code: https://github.com/pablopramparo/kantaria
 
 ### Short description (if requested)
 
@@ -126,17 +127,17 @@ First release on Microsoft Store.
 
 ### Copyright and trademark info
 
-© 2026 Pablo Pramparo. The Kantor name, its logo and the characters belong to the author, all rights reserved.
+© 2026 Pablo Pramparo. The Kantaria name, its logo and the characters belong to the author, all rights reserved.
 
 ### Additional license terms
 
-Kantor's code is distributed under GPL-3.0-or-later (https://github.com/pablopramparo/kantor). The name, logo and characters are not under the GPL: see LICENSE-ASSETS.md.
+Kantaria's code is distributed under GPL-3.0-or-later (https://github.com/pablopramparo/kantaria). The name, logo and characters are not under the GPL: see LICENSE-ASSETS.md.
 
 ---
 
 ## Notas para certificación (Notes for certification), en inglés
 
-Kantor is an offline karaoke app. It ships no songs, so the library is empty on first run. To test it, download this small pack of three original synthetic demo songs (a scale, an arpeggio and a duet, CC0, no third-party music): https://github.com/pablopramparo/kantor/raw/main/samples/Kantor-demo-songs.zip — unzip it, then in the app open OPTIONS › LIBRARY › "Add folder…" and pick the unzipped folder. Then choose SING from the main menu, pick a song and choose "SING WITHOUT SESSION". A microphone (or any audio input) is needed to be scored; without one the app still opens and plays the song. No account or sign-in is needed.
+Kantaria is an offline karaoke app. It ships no songs, so the library is empty on first run. To test it, download this small pack of three original synthetic demo songs (a scale, an arpeggio and a duet, CC0, no third-party music): https://github.com/pablopramparo/kantaria/raw/main/samples/Kantor-demo-songs.zip — unzip it, then in the app open OPTIONS › LIBRARY › "Add folder…" and pick the unzipped folder. Then choose SING from the main menu, pick a song and choose "SING WITHOUT SESSION". A microphone (or any audio input) is needed to be scored; without one the app still opens and plays the song. No account or sign-in is needed.
 
 The app declares the microphone capability because it analyzes the user's voice pitch to score while singing. Audio is not recorded, stored or transmitted. Without a microphone the app still starts and can be navigated.
 

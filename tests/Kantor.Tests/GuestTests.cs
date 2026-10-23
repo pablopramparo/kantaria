@@ -21,7 +21,7 @@ internal sealed class ThrowingCovers : ICoverProvider
         throw new InvalidOperationException(@"secreto en C:\Songs\interno");
 }
 
-/// <summary>Kantor "real" sin ventana + el servidor de invitados de verdad (Kestrel) en el loopback.</summary>
+/// <summary>Kantaria "real" sin ventana + el servidor de invitados de verdad (Kestrel) en el loopback.</summary>
 internal sealed class GuestHarness : IDisposable
 {
     public RemoteHarness Remote { get; }

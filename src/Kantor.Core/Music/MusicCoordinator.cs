@@ -12,7 +12,7 @@ public enum MusicTrack
     Results,
 }
 
-/// <summary>Qué está pasando en Kantor, a efectos de la música de la interfaz.</summary>
+/// <summary>Qué está pasando en Kantaria, a efectos de la música de la interfaz.</summary>
 public enum MusicScene
 {
     /// <summary>Sin música: antes de que la interfaz esté lista, o ya cerrada.</summary>

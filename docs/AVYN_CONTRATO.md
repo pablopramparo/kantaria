@@ -1,6 +1,6 @@
-# Contrato Kantor ↔ Avyn — v3 (cerrada e implementada)
+# Contrato Kantaria ↔ Avyn — v3 (cerrada e implementada)
 
-Pipe `Kantor.ControlPlane.v1`, mismo patrón que Auren. Sustituye a la v2 y a los borradores anteriores.
+Pipe `Kantaria.ControlPlane.v1`, mismo patrón que Auren. Sustituye a la v2 y a los borradores anteriores.
 Implementado en `Kantor.Core/Remote` (servidor, controlador y protocolo) y `Kantor.App` (ventana y pantallas). Los
 esquemas JSON los mantiene cada repo a mano (sin código compartido).
 Convención: el concepto es `session`; en pantalla, en español, es **"Partida"** (y "cantar suelto" = `solo`).
@@ -18,17 +18,17 @@ Convención: el concepto es `session`; en pantalla, en español, es **"Partida"*
 
 ## 1. Transporte
 
-- Kantor es servidor; el Agent es cliente y reintenta cada 3 s. `maxInstances = 1`, ACL solo al SID del usuario
+- Kantaria es servidor; el Agent es cliente y reintenta cada 3 s. `maxInstances = 1`, ACL solo al SID del usuario
   actual, sin puertos de red. Apagado por omisión: se habilita en Opciones › Control remoto (Avyn).
 - **Marco**: 4 bytes little-endian con el largo del JSON UTF-8 que sigue. **Máximo 1 048 576 bytes** (1 MiB exacto,
   sin contar el prefijo; 1 048 577 es inválido). Prefijo 0 o mayor al máximo ⇒ error de protocolo: no se puede
-  resincronizar, **se cierra el pipe**. Kantor nunca emite un marco mayor: pagina antes.
+  resincronizar, **se cierra el pipe**. Kantaria nunca emite un marco mayor: pagina antes.
 - Mensajes: `{id, type, commandId?, origin?, payload}` → `{id, ok, rev, payload | error}`; eventos `{type, rev?, payload}`.
 
 ### 1.1 Presencia: `kantor.ping`
 
-- El Agent envía `kantor.ping` cada **5 s**; Kantor responde `ok`. Es una solicitud normal (`id`, sin `commandId`).
-- Kantor considera muerta una conexión si pasan **15 s sin ningún marco entrante** y, además, **un ciclo de gracia de
+- El Agent envía `kantor.ping` cada **5 s**; Kantaria responde `ok`. Es una solicitud normal (`id`, sin `commandId`).
+- Kantaria considera muerta una conexión si pasan **15 s sin ningún marco entrante** y, además, **un ciclo de gracia de
   5 s** más (peor caso 20 s). Con la conexión muerta cierra el pipe y el próximo reintento del Agent entra.
 - Garantías para no expulsar clientes vivos:
   1. La lectura del pipe corre en un hilo/tarea de E/S propio. **Se registra actividad al recibir el marco, antes
@@ -45,18 +45,18 @@ Convención: el concepto es `session`; en pantalla, en español, es **"Partida"*
 ### 1.2 `origin` y `commandId`
 
 - `origin = { clientId (≤ 64), name (≤ 48) }` lo construye el Agent con `ClientDeviceId` y `ClientDeviceName`
-  autenticados (nombre normalizado a 48). Android no puede definirlo. Kantor confía en el Agent (el pipe es el límite
+  autenticados (nombre normalizado a 48). Android no puede definirlo. Kantaria confía en el Agent (el pipe es el límite
   de confianza) y lo usa para auditoría y para informar conflictos (`details.by`). Obligatorio en mutaciones; si
   falta o excede los límites → `INVALID_PAYLOAD`.
 - `commandId` (8–64 car., `[A-Za-z0-9_-]`) obligatorio en las mutaciones de 3.9; se ignora en lecturas. El Agent
   lo transforma como `SHA-256(deviceId + ":" + commandId)` en hexadecimal (64 car.), de modo que la deduplicación es
   **por dispositivo** y un `COMMAND_ID_REUSED` solo puede ocurrir dentro de un mismo dispositivo.
-- Kantor guarda hasta 1024 entradas o 15 min: `commandId → (huella, respuesta)`. Huella = SHA-256 de `type` +
+- Kantaria guarda hasta 1024 entradas o 15 min: `commandId → (huella, respuesta)`. Huella = SHA-256 de `type` +
   `payload` canónico (claves ordenadas; sin `id`, `origin`, `commandId`).
   - mismo `commandId` y misma huella ⇒ **misma respuesta**, sin volver a ejecutar (si el original sigue en curso,
     espera y responde igual);
   - mismo `commandId` y huella distinta ⇒ `COMMAND_ID_REUSED`; no se ejecuta ninguno.
-- El caché vive en memoria: **se pierde al reiniciar Kantor** (ver 1.4).
+- El caché vive en memoria: **se pierde al reiniciar Kantaria** (ver 1.4).
 
 ### 1.3 Revisiones y orden de eventos
 
@@ -70,12 +70,12 @@ Convención: el concepto es `session`; en pantalla, en español, es **"Partida"*
 - Concurrencia de edición, aparte de `rev`: `queueRev` (cola) y `selectionRev` (puestos); contadores en memoria,
   válidos solo dentro de un `instanceId`.
 
-### 1.4 Arranque, reconexión y reinicio de Kantor
+### 1.4 Arranque, reconexión y reinicio de Kantaria
 
 1. Conexión nueva ⇒ `kantor.hello` y enseguida `kantor.state` completo. **Siempre**: el Agent reemplaza el espejo.
 2. `hello.instanceId` cambia en cada arranque. Si cambió, `rev`, `queueRev`, `selectionRev`, el caché de `commandId`
    y toda mutación en vuelo **dejaron de valer**.
-3. **Las mutaciones no se reintentan tras un reinicio de Kantor**: las que no tuvieron respuesta quedan como
+3. **Las mutaciones no se reintentan tras un reinicio de Kantaria**: las que no tuvieron respuesta quedan como
    resultado **desconocido** (1.5) y el usuario decide.
 4. Misma `instanceId` (reinició el Agent): se puede reenviar la mutación sin respuesta con el mismo `commandId`.
 
@@ -84,11 +84,11 @@ Convención: el concepto es `session`; en pantalla, en español, es **"Partida"*
 | Salto | Límite |
 |---|---|
 | Android → Agent | lo decide Avyn; debe ser **mayor** que el siguiente |
-| Agent → Kantor | 8 s |
-| Kantor, espera en cola | un comando que lleva > 3 s sin empezar responde `TIMEOUT` **sin ejecutarse** |
-| Kantor, ejecución | ≤ 5 s (lecturas pesadas 3 s); no hay trabajo mayor en el dispatcher |
+| Agent → Kantaria | 8 s |
+| Kantaria, espera en cola | un comando que lleva > 3 s sin empezar responde `TIMEOUT` **sin ejecutarse** |
+| Kantaria, ejecución | ≤ 5 s (lecturas pesadas 3 s); no hay trabajo mayor en el dispatcher |
 
-- **Rechazada** = `ok:false` con código de Kantor: **no se aplicó nada** (`details.applied:false`), incluido
+- **Rechazada** = `ok:false` con código de Kantaria: **no se aplicó nada** (`details.applied:false`), incluido
   `TIMEOUT`. Única excepción: `INTERNAL_ERROR` (`details.applied:"unknown"` ⇒ refrescar estado).
 - **Aplicada** = `ok:true`.
 - **Desconocida** = el Agent no recibió respuesta. Con la misma `instanceId` se resuelve reenviando el mismo
@@ -98,7 +98,7 @@ Convención: el concepto es `session`; en pantalla, en español, es **"Partida"*
 
 - **Aditivo**: campos opcionales, eventos, comandos (bajo una capacidad anunciada) y valores de enumeraciones nuevos.
   El receptor **ignora campos desconocidos** y trata un enum desconocido como "otro".
-- **Incompatible ⇒ otro pipe** (`Kantor.ControlPlane.v2`); no hay negociación.
+- **Incompatible ⇒ otro pipe** (`Kantaria.ControlPlane.v2`); no hay negociación.
 - `hello.protocolVersion` = 1 (fijo mientras el pipe sea `v1`); `hello.contractRevision` = 3 (informativo).
   Cada capacidad anuncia una versión entera; si el Agent no la soporta, no la usa.
 - Errores: comando inexistente ⇒ `UNKNOWN_COMMAND`; capacidad no anunciada ⇒ `CAPABILITY_UNAVAILABLE`;
@@ -133,7 +133,7 @@ Convención: el concepto es `session`; en pantalla, en español, es **"Partida"*
 - `screen`: `menu | library | queue | options | players | session-gate | who-plays | who-sings | loading | stage | results`.
 - `playback.status`: `idle | preparing | playing | paused | finished`. `preparing` cubre la carga y las decisiones
   locales (`screen` dice cuál); `finished` = resultados en pantalla. Sin canción, los campos de canción van `null`.
-- **Posición**: sin hora absoluta. `positionSeconds` es la posición **en el instante en que Kantor serializa** y `rate`
+- **Posición**: sin hora absoluta. `positionSeconds` es la posición **en el instante en que Kantaria serializa** y `rate`
   vale 1 mientras `playing`, 0 en el resto. El Agent estampa con su reloj al recibir y extrapola
   `position + (ahora − recibido) × rate`. Se publica solo al cambiar de estado, saltar o reiniciar.
 - `durationSeconds` solo existe con una canción cargada (el índice no la tiene).
@@ -149,17 +149,17 @@ Convención: el concepto es `session`; en pantalla, en español, es **"Partida"*
 ### 2.1 `display` y monitores
 
 - `monitor.deviceName` = nombre GDI (`\\.\DISPLAYn`, `MONITORINFOEX.szDevice`). El Agent lo relaciona con el `id`
-  estable (EDID) de su `monitors.list`; **Kantor no genera ni conoce ese ID**.
-- `bounds` en **píxeles físicos** del escritorio virtual. Para que lo sean, Kantor se declara **PerMonitorV2**
+  estable (EDID) de su `monitors.list`; **Kantaria no genera ni conoce ese ID**.
+- `bounds` en **píxeles físicos** del escritorio virtual. Para que lo sean, Kantaria se declara **PerMonitorV2**
   (`app.manifest`). `dpiScale` = DPI del monitor / 96.
-- `windowHandle`: HWND en hexadecimal con `0x`; `processId`: PID de Kantor. El Agent los valida entre sí.
-- **Título de ventana**: `Kantor`, siempre no vacío (también en pantalla completa y maximizada).
+- `windowHandle`: HWND en hexadecimal con `0x`; `processId`: PID de Kantaria. El Agent los valida entre sí.
+- **Título de ventana**: `Kantaria`, siempre no vacío (también en pantalla completa y maximizada).
 - **Se republica `display`** (con un retardo de calma de 250 ms, para no emitir una publicación por cada píxel
   arrastrado) al cambiar de monitor, de tamaño, de DPI, de pantalla completa o la configuración de pantallas
   (`DisplaySettingsChanged`).
 - **Cómo es la pantalla completa**: ventana sin borde, `Topmost`, **no** `WindowState.Maximized`, dimensionada al
   rectángulo completo del monitor donde está; al salir restaura posición, tamaño, estilo y estado previos.
-- **Qué pasa al mover** (por `windows.move`, `SetWindowPos`): en pantalla completa, Kantor reajusta la ventana al
+- **Qué pasa al mover** (por `windows.move`, `SetWindowPos`): en pantalla completa, Kantaria reajusta la ventana al
   monitor que contiene su centro y republica; maximizada, la vuelve a maximizar en el monitor de destino; normal,
   solo republica. **Recomendación al Agent**: mover con la ventana en estado normal (no maximizada) y volver a
   aplicar fullscreen/maximizar con `kantor.screen.setFullscreen` o `windows.*`. Reajustes y DPI mixto **sin probar
@@ -200,7 +200,7 @@ Sin duración (el índice no la tiene).
 
 ### 3.1.1 `libraryEntryId` (estabilidad)
 
-- Opaco, ≤ 64 car. Lo **asigna y persiste Kantor** en `kantor.db` (tabla `library_entry`: id, ruta normalizada,
+- Opaco, ≤ 64 car. Lo **asigna y persiste Kantaria** en `kantor.db` (tabla `library_entry`: id, ruta normalizada,
   hash del contenido del TXT, primera y última vez vista); sobrevive a reinicios, a reconstruir
   `library-index.json` y a restaurar un respaldo de la base.
 - **Mismo archivo ⇒ mismo id**: la clave primaria de coincidencia es la ruta completa normalizada (sin distinguir
@@ -247,7 +247,7 @@ entrada ya no exista. `available:false` = la entrada no está en el índice vige
 
 #### 3.2.1 Entre partidas y reinicios
 
-- Con partida abierta la cola es de la partida y **sobrevive al cierre de Kantor** (un `running` que quedó
+- Con partida abierta la cola es de la partida y **sobrevive al cierre de Kantaria** (un `running` que quedó
   colgado pasa a `cancelled` al reabrir).
 - Cerrar la partida conserva la cola en solo lectura; **una partida nueva empieza con la cola vacía**.
 - Cantando suelto, la cola es solo de memoria y se pierde al cerrar.
@@ -285,7 +285,7 @@ entrada ya no exista. `available:false` = la entrada no está en el índice vige
 | `kantor.session.addPlayer` / `removePlayer` | `{ sessionId, playerId }` |
 | `kantor.session.history` | `{ sessionId, offset, limit ≤ 50, lang? }` → `[PerformanceSummary]` |
 
-- Una sola abierta. Cerrar Kantor no la cierra. `start` con otra abierta: `SESSION_OPEN` o la cierra
+- Una sola abierta. Cerrar Kantaria no la cierra. `start` con otra abierta: `SESSION_OPEN` o la cierra
   (`closeAndStart`, en una transacción), sin heredar jugadores.
 - Archivar un jugador lo quita de la selección de la partida abierta; no borra historial.
 
@@ -308,7 +308,7 @@ entrada ya no exista. `available:false` = la entrada no está en el índice vige
 - **`sessionPolicy`**: `current` | `new` | `solo`. Omitido: `current` si hay partida abierta; **sin partida es
   obligatorio** (si no, `SESSION_REQUIRED`). `current` sin partida ⇒ `SESSION_REQUIRED`; `new` con una abierta ⇒
   `SESSION_OPEN` (usar antes `session.start closeAndStart`); `solo` no guarda resultado y avisa `SOLO_NOT_SAVED`.
-- `start` responde cuando Kantor **aceptó**; el resto se ve por estado. Faltando decisiones locales queda en
+- `start` responde cuando Kantaria **aceptó**; el resto se ve por estado. Faltando decisiones locales queda en
   `preparing` con `screen: who-sings` (o `who-plays`, `session-gate`). Entrada `available:false` ⇒
   `ENTRY_UNAVAILABLE`.
 - **`confirmSingers`**: exige ≥ 1 puesto asignado, cada `playerId` activo y de la partida, cada `slot` ≤ `maxSlots`
@@ -328,7 +328,7 @@ entrada ya no exista. `available:false` = la entrada no está en el índice vige
   `settings.setAutoAdvance`. Se publica en `settings.autoAdvance`.
 - **Se arma** cuando la pantalla de resultados termina de animar; si la animación se omite (Enter/Espacio local o
   `results.skipAnimation`), **en ese momento**. La pulsación que omite la animación solo omite: no cancela.
-  La cuenta dura **10 s**, se muestra en la pantalla de resultados de Kantor y se publica en
+  La cuenta dura **10 s**, se muestra en la pantalla de resultados de Kantaria y se publica en
   `autoAdvanceCountdown`.
 - **Cancelan** la cuenta (solo si son *aceptados*; uno rechazado no cambia nada): cualquier tecla o clic local en
   resultados posterior a la animación (el movimiento del mouse no), `results.close`, `navigate.menu`, cualquier
@@ -336,7 +336,7 @@ entrada ya no exista. `available:false` = la entrada no está en el índice vige
 - **No** la cancelan: `queue.*`, `library.*`, `players.*`, `selection.set`, consultas ni otros ajustes.
 - Cancelada, **no se vuelve a armar** para esos resultados; activar el ajuste con los resultados ya en pantalla
   tampoco los arma.
-- **Al llegar a 0** Kantor inicia el primer pendiente como el flujo local ("SIGUIENTE") saltando las pantallas de
+- **Al llegar a 0** Kantaria inicia el primer pendiente como el flujo local ("SIGUIENTE") saltando las pantallas de
   decisión: partida actual, con los `slots` del elemento o, si no tiene, la selección vigente de la partida.
 - **Nunca avanza sin** un pendiente `available`, una partida abierta (no `solo`) y cantantes válidos (jugadores
   activos y de la partida, `slot ≤ maxSlots`, micrófono creado). Se valida **al armar y otra vez al disparar**; si
@@ -359,7 +359,7 @@ competitionPoints, seal: {rankId, text}, commentId?, comment? }] }`
   instantánea de artista y título, **no la edición concreta**. En esas interpretaciones `libraryEntryId` y `edition`
   son `null`. Las interpretaciones **nuevas** guardan el `libraryEntryId` (columna nueva, opcional) y la edición
   como instantánea. Las estadísticas siguen agrupando por `songIdentity`. Nunca se infiere la edición de lo viejo.
-- `lang` (`es`|`en`): idioma de `seal.text` y `comment`; por omisión, el configurado en Kantor. Los IDs no dependen
+- `lang` (`es`|`en`): idioma de `seal.text` y `comment`; por omisión, el configurado en Kantaria. Los IDs no dependen
   del idioma.
 - `position` con empates compartidos (1, 1, 3); `competitionPoints` y `seal` son **derivados** de las reglas
   vigentes (`rankingVersion`, `ResultRank`); `name` es el nombre actual del jugador.
@@ -415,7 +415,7 @@ regresiva son secciones, no eventos aparte. Nunca por temporizador, salvo `score
 | `ENTRY_UNAVAILABLE` | la entrada de biblioteca no está disponible (`libraryEntryId` en `details`) |
 | `NEEDS_LOCAL_ACTION` | requiere una persona en la PC (`details.screen`) |
 | `UNKNOWN_COMMAND` / `CAPABILITY_UNAVAILABLE` / `PROTOCOL_ERROR` | ver 1.6 |
-| `TIMEOUT` | venció la espera en cola de Kantor; no se ejecutó |
+| `TIMEOUT` | venció la espera en cola de Kantaria; no se ejecutó |
 | `INTERNAL_ERROR` | excepción; `applied: "unknown"` |
 
 ### 5.2 Códigos de atención
@@ -443,7 +443,7 @@ Todo argumento se valida **antes** de tocar el estado: un comando inválido no c
   historial. `KantorStore` usa **una** conexión con un candado global (seguro entre hilos); las lecturas pesadas se
   paginan para no demorar el guardado de una interpretación.
 
-## 8. Qué incluye la implementación en Kantor
+## 8. Qué incluye la implementación en Kantaria
 
 - Esquema SQLite **v3**: `library_entry`; `queue_item` con `item_id`, `library_entry_id`, instantánea
   (`song_identity`, artista, título, edición), `state`, `added_by`, `added_at`, `finished_at`, `performance_id` y
@@ -489,7 +489,7 @@ códigos de atención, posición sin hora absoluta, `display`, lecturas fuera de
 - **`BUSY` mientras se canta** también para `session.start` (con `closeAndStart`), `session.close`,
   `players.archive`, `session.removePlayer` de alguien que canta y `selection.set`: cambiarían una interpretación en
   curso. Con `INVALID_STATE` (`details.reason = "session-closed"`) se rechaza modificar una partida cerrada.
-- **`playback.stop`** en `preparing` cancela la carga o la decisión local y deja a Kantor en el menú; en
+- **`playback.stop`** en `preparing` cancela la carga o la decisión local y deja a Kantaria en el menú; en
   `playing`/`paused` deja la canción cargada (como "Detener"). En ambos casos el elemento en ejecución pasa a
   `cancelled` y no se guarda nada.
 - **Códigos de atención emitidos hoy**: `AUDIO_ENGINE_FALLBACK`, `DATABASE_UNAVAILABLE`, `NO_LIBRARY_FOLDERS`,
@@ -497,7 +497,7 @@ códigos de atención, posición sin hora absoluta, `display`, lecturas fuera de
   `AUTO_ADVANCE_BLOCKED {reason}` con `reason` ∈ `queue-empty`, `entry-unavailable`, `no-session`, `no-singers`,
   `invalid-singer`, `no-microphone`. `AUDIO_DEVICE_LOST` y `LIBRARY_SCAN_FAILED` quedan reservados (no hay hoy
   un punto que los detecte).
-- **Pipe**: `PipeOptions.CurrentUserOnly` (ACL al usuario actual). Si otra instancia de Kantor ya tiene el pipe, el
+- **Pipe**: `PipeOptions.CurrentUserOnly` (ACL al usuario actual). Si otra instancia de Kantaria ya tiene el pipe, el
   servidor reintenta cada 3 s y lo deja en el log (Opciones › Juego muestra "No se pudo abrir el canal local").
 - **Monitores**: `display.monitor.deviceName` sale de `MONITORINFOEX.szDevice` y `bounds` de `GetMonitorInfo` con la
   aplicación en PerMonitorV2 (píxeles físicos).

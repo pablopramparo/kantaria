@@ -4,7 +4,7 @@ using Kantor.Core.Data;
 
 namespace Kantor.Core.Remote;
 
-/// <summary>Pantallas de Kantor tal como las publica el contrato.</summary>
+/// <summary>Pantallas de Kantaria tal como las publica el contrato.</summary>
 public static class Screens
 {
     public const string Menu = "menu";
@@ -134,7 +134,7 @@ public sealed record HostStartRequest(
     bool AutoConfirmSingers);
 
 /// <summary>
-/// La ventana de Kantor vista por el control remoto. Todos los métodos se llaman en el hilo de la interfaz. Las
+/// La ventana de Kantaria vista por el control remoto. Todos los métodos se llaman en el hilo de la interfaz. Las
 /// acciones lanzan <see cref="RemoteException"/> cuando el estado no las permite (la misma regla que la interfaz).
 /// </summary>
 public interface IKantorHost

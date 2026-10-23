@@ -88,7 +88,7 @@ public partial class MainWindow
             Diag.Mark("control remoto: " + message);
             if (message.StartsWith("No se pudo crear el pipe", StringComparison.Ordinal))
             {
-                _remoteFailure = message; // otra instancia de Kantor ya lo tiene, o el sistema lo negó
+                _remoteFailure = message; // otra instancia de Kantaria ya lo tiene, o el sistema lo negó
                 Dispatcher.BeginInvoke(RefreshOptions);
             }
         };

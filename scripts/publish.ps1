@@ -2,11 +2,11 @@
 # Copyright (C) 2026 Pablo Pramparo
 <#
 .SYNOPSIS
-  Arma la distribución de Kantor para Windows x64: carpeta autocontenida (no requiere instalar .NET) y .zip.
+  Arma la distribución de Kantaria para Windows x64: carpeta autocontenida (no requiere instalar .NET) y .zip.
 
 .DESCRIPTION
-  Salida: dist\Kantor-<versión>-win-x64\ y dist\Kantor-<versión>-win-x64.zip.
-  Con -Installer también arma dist\Kantor-Setup-<versión>.exe (requiere Inno Setup 6:
+  Salida: dist\Kantaria-<versión>-win-x64\ y dist\Kantaria-<versión>-win-x64.zip.
+  Con -Installer también arma dist\Kantaria-Setup-<versión>.exe (requiere Inno Setup 6:
   winget install JRSoftware.InnoSetup).
   El SDK de .NET 10 no está en el PATH global: se toma de $env:DOTNET_ROOT, de $env:USERPROFILE\.dotnet o del PATH.
 #>
@@ -16,11 +16,11 @@ param(
     [switch]$NoZip,
     [switch]$Installer,
 
-    # Solo con -Edition Store: además arma dist\Kantor-<v>-store.msix (sin firmar; la Store lo firma) con makeappx.
+    # Solo con -Edition Store: además arma dist\Kantaria-<v>-store.msix (sin firmar; la Store lo firma) con makeappx.
     [switch]$Msix,
 
     # Local: instalador y zip, con todos los avatares. Store: paquete para Microsoft Store, sin los avatares listados
-    # en src\Kantor.Core\Characters\store-excluded.txt (ni siquiera se embeben). Sale en dist\Kantor-<v>-store-win-x64.
+    # en src\Kantor.Core\Characters\store-excluded.txt (ni siquiera se embeben). Sale en dist\Kantaria-<v>-store-win-x64.
     [ValidateSet('Local', 'Store')]
     [string]$Edition = 'Local'
 )
@@ -41,7 +41,7 @@ if (-not $version) { throw 'No se encontró <Version> en Kantor.App.csproj.' }
 if ($Msix -and $Edition -ne 'Store') { throw '-Msix solo existe para -Edition Store.' }
 if ($Edition -eq 'Store' -and $Installer) { throw 'La edición Store no usa el instalador Inno Setup (va como MSIX).' }
 $suffix = if ($Edition -eq 'Store') { '-store' } else { '' }
-$name = "Kantor-$version$suffix-win-x64"
+$name = "Kantaria-$version$suffix-win-x64"
 $out = Join-Path $root "dist\$name"
 $zip = Join-Path $root "dist\$name.zip"
 
@@ -109,7 +109,7 @@ if ($Msix) {
     Copy-Item (Join-Path $root 'installer\store\Assets\*') (Join-Path $staging 'Assets') -Recurse -Force
     $manifest = (Get-Content (Join-Path $root 'installer\store\AppxManifest.xml') -Raw -Encoding UTF8).Replace('{{VERSION}}', "$version.0")
     [System.IO.File]::WriteAllText((Join-Path $staging 'AppxManifest.xml'), $manifest, (New-Object System.Text.UTF8Encoding($false)))
-    $msixFile = Join-Path $root "dist\Kantor-$version-store.msix"
+    $msixFile = Join-Path $root "dist\Kantaria-$version-store.msix"
     if (Test-Path $msixFile) { Remove-Item $msixFile -Force }
     & $tool.FullName pack /d $staging /p $msixFile /o
     if ($LASTEXITCODE -ne 0) { throw 'makeappx falló.' }
@@ -129,6 +129,6 @@ if ($Installer) {
     Write-Host '== Instalador ==' -ForegroundColor Cyan
     & ($candidates | Select-Object -First 1) "/DAppVersion=$version" "/DSourceDir=$out" "/DOutputDir=$(Join-Path $root 'dist')" "/DRepoDir=$root" (Join-Path $root 'installer\kantor.iss')
     if ($LASTEXITCODE -ne 0) { throw 'Inno Setup falló.' }
-    $setup = Join-Path $root "dist\Kantor-Setup-$version.exe"
+    $setup = Join-Path $root "dist\Kantaria-Setup-$version.exe"
     Write-Host ("Instalador: {0}  ({1:N0} MB)" -f $setup, ((Get-Item $setup).Length / 1MB)) -ForegroundColor Green
 }

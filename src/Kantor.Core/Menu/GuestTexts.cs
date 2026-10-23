@@ -23,8 +23,8 @@ public static class GuestTexts
     public static string TurnOff(string l) => Pick(l, "APAGAR", "TURN OFF");
     public static string Address(string l, string url) => Pick(l, $"Dirección: {url}", $"Address: {url}");
     public static string OffNote(string l) =>
-        Pick(l, "Está apagado: nadie puede entrar hasta que lo actives. Se apaga solo al cerrar Kantor.",
-            "It is off: nobody can join until you turn it on. It switches off when Kantor closes.");
+        Pick(l, "Está apagado: nadie puede entrar hasta que lo actives. Se apaga solo al cerrar Kantaria.",
+            "It is off: nobody can join until you turn it on. It switches off when Kantaria closes.");
     public static string OnNote(string l) =>
         Pick(l, "El QR incluye la clave de acceso: quien lo escanee puede sumar canciones hasta que apagues el acceso.",
             "The QR carries the access key: anyone who scans it can add songs until you turn access off.");

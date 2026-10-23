@@ -22,7 +22,7 @@
     ProcessorArchitecture="x64" />
 
   <Properties>
-    <DisplayName>Kantor</DisplayName>
+    <DisplayName>Kantaria</DisplayName>
     <PublisherDisplayName>Pablo Pramparo</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
@@ -40,7 +40,7 @@
   <Applications>
     <Application Id="Kantor" Executable="Kantor.App.exe" EntryPoint="Windows.FullTrustApplication">
       <uap:VisualElements
-        DisplayName="Kantor"
+        DisplayName="Kantaria"
         Description="Karaoke local para Windows, compatible con canciones UltraStar."
         BackgroundColor="#070A24"
         Square150x150Logo="Assets\Square150x150Logo.png"

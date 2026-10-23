@@ -4,7 +4,7 @@ namespace Kantor.Core.Data;
 
 /// <summary>
 /// La cola de canciones: una sola implementación que usan la interfaz local y el control remoto. Con partida
-/// abierta vive en SQLite (sobrevive al cierre de Kantor); sin partida (cantar suelto) vive en memoria. Todas las
+/// abierta vive en SQLite (sobrevive al cierre de Kantaria); sin partida (cantar suelto) vive en memoria. Todas las
 /// operaciones corren de a una (las serializa un candado) y cada cambio incrementa <see cref="Rev"/>.
 /// </summary>
 public sealed class QueueService
@@ -41,7 +41,7 @@ public sealed class QueueService
         }
     }
 
-    /// <summary>La cola de la partida actual se guarda en disco (sobrevive al cierre de Kantor).</summary>
+    /// <summary>La cola de la partida actual se guarda en disco (sobrevive al cierre de Kantaria).</summary>
     public bool Persistent => _store is not null && _sessionId() is not null;
 
     /// <summary>Hubo un cambio (también el de otra pantalla u origen). Se dispara fuera del candado.</summary>
@@ -309,7 +309,7 @@ public sealed class QueueService
     }
 
     /// <summary>
-    /// Al abrir Kantor: un elemento "en ejecución" de una sesión anterior quedó colgado (la aplicación se cerró cantando)
+    /// Al abrir Kantaria: un elemento "en ejecución" de una sesión anterior quedó colgado (la aplicación se cerró cantando)
     /// y pasa a cancelado.
     /// </summary>
     public void RecoverInterrupted()

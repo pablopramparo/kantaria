@@ -91,6 +91,26 @@ public class SongHeaderReaderTests
         }
     }
 
+    [Theory]
+    [InlineData("P1", "P2", true)]
+    [InlineData("P 1", "P 2", true)]
+    [InlineData("P1", "P1", false)]
+    public void DetectsDuetsByTheSecondVoiceMarker(string first, string second, bool duet)
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "kantor-lib-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(dir);
+        try
+        {
+            var path = Write(dir, "song.txt",
+                $"#TITLE:x\n#MP3:s.mp3\n#BPM:120\n{first}\n: 0 4 0 la\n- 8\n{second}\n: 8 4 0 la\nE\n");
+            Assert.Equal(duet, SongHeaderReader.Read(path)!.IsDuet);
+        }
+        finally
+        {
+            Directory.Delete(dir, true);
+        }
+    }
+
     [Fact]
     public void FilesWithoutBpmOrAudioAreNotSongs()
     {

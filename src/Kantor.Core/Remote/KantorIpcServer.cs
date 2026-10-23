@@ -129,7 +129,7 @@ public sealed class KantorIpcServer : IAsyncDisposable
             }
             catch (IOException e)
             {
-                // otra instancia de Kantor ya tiene el pipe (o no se pudo crear): se reintenta sin ruido
+                // otra instancia de Kantaria ya tiene el pipe (o no se pudo crear): se reintenta sin ruido
                 Log?.Invoke("No se pudo crear el pipe: " + e.Message);
                 await DelayAsync(TimeSpan.FromSeconds(3), stop).ConfigureAwait(false);
                 continue;

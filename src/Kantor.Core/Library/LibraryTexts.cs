@@ -23,6 +23,7 @@ public static class LibraryTexts
     public static string Session(string language) => Pick(language, "PARTIDA", "SESSION");
     public static string Back(string language) => Pick(language, "VOLVER", "BACK");
     public static string Video(string language) => Pick(language, "CON VIDEO", "VIDEO");
+    public static string Duet(string language) => Pick(language, "DÚO", "DUET");
     public static string ListView(string language) => Pick(language, "LISTA", "LIST");
     public static string ChooseFolder(string language) => Pick(language, "ELEGIR CARPETA", "CHOOSE FOLDER");
     public static string GridView(string language) => Pick(language, "GRILLA", "GRID");

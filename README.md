@@ -1,7 +1,7 @@
 <p align="center"><b>English</b> | <a href="README.es.md">Español</a></p>
 
 <p align="center">
-  <img src="src/Kantor.App/Assets/Branding/kantor-logo.png" alt="Kantor" width="520">
+  <img src="src/Kantor.App/Assets/Branding/kantaria-logo.png" alt="Kantaria" width="520">
 </p>
 
 <p align="center">
@@ -24,14 +24,14 @@
 
 ## What is it?
 
-Kantor is a desktop karaoke app built with C# / .NET 10 / WPF for singing at home with friends. It reads songs in
+Kantaria is a desktop karaoke app built with C# / .NET 10 / WPF for singing at home with friends. It reads songs in
 **UltraStar** format (`.txt` + audio and, optionally, video), scores what you sing in real time and keeps each
 player's history. Everything runs on your PC: no accounts, no cloud, no internet. No excuses.
 
 It has its own 16-bit arcade-style interface, designed to look good on a big screen and to be driven with
 keyboard, mouse or the optional remote control.
 
-Kantor can't teach you to sing. But it can document the attempt.
+Kantaria can't teach you to sing. But it can document the attempt.
 
 ## Features
 
@@ -57,7 +57,7 @@ Kantor can't teach you to sing. But it can document the attempt.
 
 ## Why does this exist?
 
-Kantor started because its author wanted a karaoke that worked properly with their own microphones.
+Kantaria started because its author wanted a karaoke that worked properly with their own microphones.
 
 Then came the scoring, the synchronization, the players, the rankings, the characters, the avatars, the
 statistics and the remote control. At some point a fairly simple tool started turning into an arcade game.
@@ -68,7 +68,7 @@ There was no meeting where anyone approved this expansion. It just happened.
 
 - Windows 10 or 11, 64-bit.
 - One or more microphones to sing with (you can browse the library and look around without them).
-- Your own songs in UltraStar format. Kantor **does not include songs**. Musical talent is optional; a microphone helps.
+- Your own songs in UltraStar format. Kantaria **does not include songs**. Musical talent is optional; a microphone helps.
 
 ## Screenshots
 
@@ -103,10 +103,10 @@ There was no meeting where anyone approved this expansion. It just happened.
 
 Other packages are published on [Releases](../../releases). You don't need to install .NET:
 
-- **Installer** (`Kantor-Setup-<version>.exe`): installs for the current user, no administrator rights, adds a
-  Start menu entry and uninstalls from *Installed apps*. Running a newer installer over it updates Kantor and keeps
+- **Installer** (`Kantaria-Setup-<version>.exe`): installs for the current user, no administrator rights, adds a
+  Start menu entry and uninstalls from *Installed apps*. Running a newer installer over it updates Kantaria and keeps
   your data.
-- **Portable** (`Kantor-<version>-win-x64.zip`): extract it anywhere and run `Kantor.App.exe`.
+- **Portable** (`Kantaria-<version>-win-x64.zip`): extract it anywhere and run `Kantor.App.exe`.
 
 > There is no published release yet; the Releases page will list it once there is one.
 >
@@ -140,30 +140,30 @@ The technical documentation is written in Spanish.
 | Document | Contents |
 |---|---|
 | [docs/ESTADO.md](docs/ESTADO.md) | Project status, decisions, measurements, pending items and known pitfalls |
-| [docs/PUNTUACION_WORLDPARTY.md](docs/PUNTUACION_WORLDPARTY.md) | How WorldParty scores and what Kantor follows |
+| [docs/PUNTUACION_WORLDPARTY.md](docs/PUNTUACION_WORLDPARTY.md) | How WorldParty scores and what Kantaria follows |
 | [docs/DISTRIBUCION.md](docs/DISTRIBUCION.md) | How the package is built and the path to the Microsoft Store |
 | [docs/AVYN_CONTRATO.md](docs/AVYN_CONTRATO.md) | Avyn remote control protocol |
 | [docs/INVITADOS.en.md](docs/INVITADOS.en.md) | Guest access over the LAN: use, allowed actions, security and limits (English; Spanish: [INVITADOS.md](docs/INVITADOS.md)) |
 
 ## Support the project
 
-Kantor is free software made in spare time. If it brings you good karaoke nights and you want to help it keep growing, you can
-sponsor the author on GitHub: <https://github.com/sponsors/pablopramparo>. It is entirely optional; everything in Kantor works the same
+Kantaria is free software made in spare time. If it brings you good karaoke nights and you want to help it keep growing, you can
+sponsor the author on GitHub: <https://github.com/sponsors/pablopramparo>. It is entirely optional; everything in Kantaria works the same
 without it.
 
 ## License and branding
 
 Copyright (C) 2026 Pablo Pramparo
 
-Kantor's **code** is free software: you can redistribute it and/or modify it under the terms of the GNU General
+Kantaria's **code** is free software: you can redistribute it and/or modify it under the terms of the GNU General
 Public License, version 3 or (at your option) any later version. It is distributed without any warranty.
 See [LICENSE](LICENSE).
 
-The **Kantor name, its logo and its characters** are not covered by the GPL: they belong to the author and have no
+The **Kantaria name, its logo and its characters** are not covered by the GPL: they belong to the author and have no
 reuse license. If you publish a fork, use a different name and replace those assets. Details in
 [src/Kantor.App/Assets/LICENSE-ASSETS.md](src/Kantor.App/Assets/LICENSE-ASSETS.md).
 
-Songs and media you use with Kantor have their own licenses and are not included.
+Songs and media you use with Kantaria have their own licenses and are not included.
 
 ### Third-party components
 
@@ -173,5 +173,5 @@ The full list, with licenses, is in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES
 - **LibVLC / LibVLCSharp** (background video): LGPL-2.1-or-later, as dynamic libraries.
 - **NAudio**, **Microsoft.Data.Sqlite**: MIT. **SQLitePCLRaw**: Apache-2.0.
 
-Kantor is an independent project, inspired by UltraStar Deluxe and UltraStar WorldParty, with which it has no
+Kantaria is an independent project, inspired by UltraStar Deluxe and UltraStar WorldParty, with which it has no
 official relationship.

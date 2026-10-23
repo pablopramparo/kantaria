@@ -2,7 +2,7 @@
 
 Guests use their phones to **find a song, pick who sings it (or create their own player with a name and character)
 and add it to the queue**. Nothing else.
-Kantor works exactly the same without this: the server is **off by default** and switches itself off when Kantor
+Kantaria works exactly the same without this: the server is **off by default** and switches itself off when Kantaria
 closes. (Spanish version: [INVITADOS.md](INVITADOS.md).)
 
 ## How to use it
@@ -15,9 +15,9 @@ closes. (Spanish version: [INVITADOS.md](INVITADOS.md).)
    A guest with no player yet taps **+ NEW PLAYER**, types a name, picks a character from the gallery and taps
    **CREATE & SELECT**: they land back on "Who's singing?" with the new player already picked (the song is only added
    when they tap ADD TO QUEUE).
-4. To close: **TURN OFF** on the QR screen (or close Kantor). The token is revoked and the port is closed.
+4. To close: **TURN OFF** on the QR screen (or close Kantaria). The token is revoked and the port is closed.
 
-If the PC has several networks, Kantor picks the one with a gateway; you can choose another under
+If the PC has several networks, Kantaria picks the one with a gateway; you can choose another under
 **Options › Game › Guest network**. If it changes while access is on, it reopens on the new one (with a new QR).
 
 ## What guests can do
@@ -72,7 +72,7 @@ them is done only on the PC. When a queue item is sung from the PC
   song is legitimate.
 - **HTTP is not encrypted**: anyone who can observe the Wi-Fi can see the token and the traffic. Don't use it on
   networks you don't control. A private IP is not enough to isolate from the internet: a router port forward would
-  expose it, which is why Kantor opens no ports (no UPnP) and rejects public clients. Don't publish it on the router.
+  expose it, which is why Kantaria opens no ports (no UPnP) and rejects public clients. Don't publish it on the router.
 - **Windows Firewall** asks the first time: allow it on **private networks** only.
 - **Wi-Fi with client isolation** (guest networks, some routers, hotel or office networks) stops the phone from
   reaching the PC: use a network without isolation or another phone's hotspot.

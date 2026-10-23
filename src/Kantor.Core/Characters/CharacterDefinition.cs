@@ -14,7 +14,7 @@ public static class CharacterResources
 }
 
 /// <summary>
-/// Un personaje de Kantor: identidad estable y sus dos recursos gráficos, que comparten identidad.
+/// Un personaje de Kantaria: identidad estable y sus dos recursos gráficos, que comparten identidad.
 /// <list type="bullet">
 /// <item><b>Portrait</b>: retrato de cabeza y hombros (selección de jugadores, durante la canción); no es el
 /// cuerpo entero reducido.</item>

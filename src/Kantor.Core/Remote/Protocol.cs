@@ -69,7 +69,7 @@ public static class ErrorCodes
     public const string InternalError = "INTERNAL_ERROR";
 }
 
-/// <summary>Un comando que Kantor rechaza con un error estructurado. Nunca cambió nada (salvo <c>INTERNAL_ERROR</c>).</summary>
+/// <summary>Un comando que Kantaria rechaza con un error estructurado. Nunca cambió nada (salvo <c>INTERNAL_ERROR</c>).</summary>
 public sealed class RemoteException : Exception
 {
     public RemoteException(string code, string message, JsonObject? details = null)

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <ApplicationIcon>Assets\Branding\kantor.ico</ApplicationIcon>
+    <ApplicationIcon>Assets\Branding\kantaria.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
@@ -35,8 +35,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
-    <Version>0.3.0</Version>
-    <Product>Kantor</Product>
+    <Version>0.4.0</Version>
+    <Product>Kantaria</Product>
     <Copyright>Copyright (C) 2026 Pablo Pramparo</Copyright>
     <!-- Solo las cadenas de la propia aplicación: sin las carpetas de idiomas de las bibliotecas de WPF. -->
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>

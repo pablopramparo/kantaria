@@ -35,10 +35,10 @@ public static class QueueTexts
         "↑ ↓ ← → ELEGIR  ·  ENTER ACEPTAR  ·  ESC VOLVER",
         "↑ ↓ ← → SELECT  ·  ENTER CONFIRM  ·  ESC BACK");
     public static string Scope(string language, bool session) => session
-        ? Pick(language, "La cola es de la partida abierta y se conserva si cerrás Kantor.",
-            "The queue belongs to the open session and survives closing Kantor.")
-        : Pick(language, "Sin partida abierta: la cola vale solo mientras Kantor está abierto.",
-            "No open session: the queue only lasts while Kantor stays open.");
+        ? Pick(language, "La cola es de la partida abierta y se conserva si cerrás Kantaria.",
+            "The queue belongs to the open session and survives closing Kantaria.")
+        : Pick(language, "Sin partida abierta: la cola vale solo mientras Kantaria está abierto.",
+            "No open session: the queue only lasts while Kantaria stays open.");
 
     private static string Pick(string language, string es, string en) =>
         HumorBank.NormalizeLanguage(language) == "en" ? en : es;

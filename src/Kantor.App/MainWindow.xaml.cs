@@ -223,7 +223,7 @@ public partial class MainWindow : Window
             SongList.DisposePreviewVideo();
             DisposeAudio();
             _preview.Dispose();
-            _store?.Dispose(); // la sesión abierta NO se cierra: se retoma al volver a abrir Kantor
+            _store?.Dispose(); // la sesión abierta NO se cierra: se retoma al volver a abrir Kantaria
         };
     }
 
@@ -871,8 +871,9 @@ public partial class MainWindow : Window
 
     private void OnSongListBack(object? sender, EventArgs e)
     {
-        SongList.Visibility = Visibility.Collapsed;
-        Menu.Show(_prefs.CommentLanguage); // vuelve al menú con el primer botón enfocado
+        // ShowMenu y no solo ocultar la lista: si se llegó desde los resultados o la pausa, el menú estaba oculto
+        // y debajo quedaba el escenario de la canción anterior.
+        ShowMenu();
     }
 
     private void OnSongListViewMode(object? sender, EventArgs e)
@@ -2576,7 +2577,7 @@ public partial class MainWindow : Window
             CreateScorers();
             Diag.Mark("completar: listo");
             TitleText.Text = $"{song.Artist} — {song.Title}";
-            Title = $"Kantor — {song.Artist} — {song.Title}";
+            Title = $"Kantaria — {song.Artist} — {song.Title}";
 
             var voices = song.Voices.Count == 1 ? "1 voz" : $"{song.Voices.Count} voces";
             StatusText.Text = song.Warnings.Count == 0

@@ -76,14 +76,30 @@ public sealed record UserSettings
     /// <summary>Durante el canto, al cerrar cada frase se muestra una valoración breve (PERFECTO, UPS…).</summary>
     public bool PhraseFeedback { get; init; } = true;
 
-    /// <summary>Los mensajes por frase en español usan la variante argentina (<c>true</c>) o la neutra (<c>false</c>).</summary>
-    public bool ArgentinePhrases { get; init; } = true;
+    /// <summary>
+    /// Los mensajes por frase en español usan la variante argentina (<c>true</c>) o la neutra (<c>false</c>).
+    /// Por omisión, argentina solo si la región de Windows es Argentina; neutra en cualquier otro caso.
+    /// </summary>
+    public bool ArgentinePhrases { get; init; } = DefaultArgentinePhrases();
+
+    private static bool DefaultArgentinePhrases()
+    {
+        try
+        {
+            return System.Globalization.RegionInfo.CurrentRegion.TwoLetterISORegionName
+                .Equals("AR", StringComparison.OrdinalIgnoreCase);
+        }
+        catch (ArgumentException)
+        {
+            return false;
+        }
+    }
 
     /// <summary>La aplicación arranca en pantalla completa.</summary>
     public bool StartFullscreen { get; init; }
 
     /// <summary>
-    /// Control remoto (Avyn) habilitado: Kantor abre el pipe local <c>Kantor.ControlPlane.v1</c>. Apagado por
+    /// Control remoto (Avyn) habilitado: Kantaria abre el pipe local <c>Kantor.ControlPlane.v1</c>. Apagado por
     /// omisión: no se abre nada sin que el usuario lo quiera.
     /// </summary>
     public bool RemoteControl { get; init; }

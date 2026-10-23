@@ -53,7 +53,7 @@ public interface IGuestAvatars
 
 /// <summary>
 /// Lo que un invitado puede hacer: buscar en la biblioteca, ver los jugadores elegibles y agregar una canción a la
-/// cola. Todo pasa por la biblioteca, el almacén y la cola que ya usa Kantor (no hay copias): la búsqueda lee la
+/// cola. Todo pasa por la biblioteca, el almacén y la cola que ya usa Kantaria (no hay copias): la búsqueda lee la
 /// foto inmutable del catálogo y el agregado corre en el hilo de la interfaz por
 /// <see cref="KantorController.GuestEnqueue"/>, igual que cualquier otra mutación.
 /// </summary>
@@ -90,7 +90,7 @@ public sealed class GuestService
         _clock = clock ?? (() => DateTimeOffset.UtcNow);
     }
 
-    /// <summary>Idioma de Kantor ("es" o "en"): el valor inicial de la página.</summary>
+    /// <summary>Idioma de Kantaria ("es" o "en"): el valor inicial de la página.</summary>
     public string Language => _language() == "en" ? "en" : "es";
 
     // ---- Biblioteca -------------------------------------------------------------------------------------------
@@ -130,7 +130,7 @@ public sealed class GuestService
 
     public Task<GuestRoster> RosterAsync() => _ui.InvokeAsync(_controller.GuestRosterSnapshot);
 
-    /// <summary>Retrato del personaje por su identificador (solo los del catálogo de Kantor).</summary>
+    /// <summary>Retrato del personaje por su identificador (solo los del catálogo de Kantaria).</summary>
     public byte[]? Avatar(string characterId) =>
         _avatars is not null && CharacterCatalog.Default.TryGet(characterId, out var found)
             ? _avatars.GetPortraitPng(found.Id)
@@ -140,14 +140,14 @@ public sealed class GuestService
     public static string AvatarIdOf(string? characterId) => CharacterCatalog.Default.GetOrDefault(characterId).Id;
 
     /// <summary>
-    /// La galería de personajes de fábrica de Kantor (la misma de la PC, en su orden). Los cargados por el usuario no
+    /// La galería de personajes de fábrica de Kantaria (la misma de la PC, en su orden). Los cargados por el usuario no
     /// se ofrecen. Si no hubiera ninguno, la lista queda vacía y el jugador se crea con el personaje genérico.
     /// </summary>
     public static IReadOnlyList<string> FactoryAvatars() =>
         [.. CharacterCatalog.Default.All.Where(c => !c.IsUser).Select(c => c.Id)];
 
     /// <summary>
-    /// Crea un jugador normal de Kantor con ese nombre y avatar (<c>null</c> = el genérico). Idempotente por
+    /// Crea un jugador normal de Kantaria con ese nombre y avatar (<c>null</c> = el genérico). Idempotente por
     /// <paramref name="requestId"/> (reintento o doble toque devuelve el mismo jugador); dos pedidos independientes
     /// siguen las reglas normales: el segundo con un nombre ya usado se rechaza (<c>NAME_TAKEN</c>).
     /// </summary>

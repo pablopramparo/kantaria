@@ -98,7 +98,7 @@ public class RealLibraryTests(ITestOutputHelper output)
             }
 
             // Con notas solapadas de distinto tono, un solo cantante no puede acertar los dos beats a la vez
-            // (WorldParty puntúa cada nota por separado, igual que Kantor): el máximo no es alcanzable.
+            // (WorldParty puntúa cada nota por separado, igual que Kantaria): el máximo no es alcanzable.
             if (HasOverlappingNotes(song.Voices[0]))
             {
                 overlapping++;

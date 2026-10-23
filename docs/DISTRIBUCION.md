@@ -1,4 +1,4 @@
-# Distribución de Kantor
+# Distribución de Kantaria
 
 ## Hoy: carpeta autocontenida + zip (sin instalador)
 
@@ -9,8 +9,8 @@ powershell -ExecutionPolicy Bypass -File scripts\publish.ps1 -SkipTests
 
 Salida en `dist\` (ignorado por git):
 
-- `Kantor-<versión>-win-x64\` — `Kantor.App.exe` + runtime .NET 10 incluido (no hace falta instalar .NET).
-- `Kantor-<versión>-win-x64.zip` — lo mismo comprimido (~113 MB; la carpeta pesa ~262 MB).
+- `Kantaria-<versión>-win-x64\` — `Kantor.App.exe` + runtime .NET 10 incluido (no hace falta instalar .NET).
+- `Kantaria-<versión>-win-x64.zip` — lo mismo comprimido (~113 MB; la carpeta pesa ~262 MB).
 
 ### Instalador (Inno Setup)
 
@@ -19,13 +19,13 @@ winget install JRSoftware.InnoSetup                                   # una sola
 powershell -ExecutionPolicy Bypass -File scripts\publish.ps1 -Installer
 ```
 
-Genera además `dist\Kantor-Setup-<versión>.exe` (~84 MB), a partir de `installer\kantor.iss`:
+Genera además `dist\Kantaria-Setup-<versión>.exe` (~84 MB), a partir de `installer\kantor.iss`:
 
-- Instala por usuario, **sin administrador**, en `%LOCALAPPDATA%\Programs\Kantor`; crea el acceso del menú Inicio
+- Instala por usuario, **sin administrador**, en `%LOCALAPPDATA%\Programs\Kantaria`; crea el acceso del menú Inicio
   (y el del escritorio, opcional) y se desinstala desde "Aplicaciones instaladas".
 - Para actualizar se ejecuta el instalador nuevo encima: reemplaza los archivos (borra antes `libvlc` y las `.dll`
-  viejas) y conserva los datos de `%APPDATA%\Kantor`. Si Kantor está abierto, lo cierra.
-- Instalación silenciosa: `Kantor-Setup-<versión>.exe /SILENT`.
+  viejas) y conserva los datos de `%APPDATA%\Kantor`. Si Kantaria está abierto, lo cierra.
+- Instalación silenciosa: `Kantaria-Setup-<versión>.exe /SILENT`.
 - Sin firmar: SmartScreen puede avisar la primera vez.
 
 La versión sale de `<Version>` en `src/Kantor.App/Kantor.App.csproj` (hoy 0.2.0). Subirla antes de cada entrega.
@@ -49,19 +49,19 @@ Limitaciones actuales:
 
 Lo que hay que resolver (nada de esto está hecho):
 
-1. **Cuenta de desarrollador** en Partner Center (pago único para particulares) y **reservar el nombre** "Kantor".
+1. **Cuenta de desarrollador** en Partner Center (pago único para particulares) y **reservar el nombre** "Kantaria".
    De ahí salen `Identity Name`, `Publisher` y `PublisherDisplayName` del manifiesto.
 2. **Paquete MSIX**: `Package.appxmanifest` con tipo de aplicación de escritorio (`runFullTrust`) y capacidad de
    micrófono. La Store firma el paquete al publicarlo, así que no hace falta comprar un certificado para eso.
    Para probar el MSIX localmente sí hace falta un certificado de prueba.
 3. **Imágenes de la Store**: logos cuadrados (44, 150, 310, 50 px y variantes de escala), capturas (mínimo 1) y, si
-   se quiere, ícono grande. Hoy solo hay `kantor-logo.png` y `kantor.ico`.
+   se quiere, ícono grande. Hoy solo hay `kantaria-logo.png` y `kantaria.ico`.
 4. **Política de privacidad** (URL pública): la app usa el micrófono; hay que declarar que no se envía nada.
 5. **Clasificación de edad** (cuestionario) y descripción en es/en.
 6. **Biblioteca de canciones**: el usuario las elige desde cualquier carpeta; con `runFullTrust` se pueden leer
    igual. Revisar que la virtualización de `%APPDATA%` del paquete no rompa "abrir la carpeta de datos" ni la
    copia de seguridad del historial.
-7. **Licencia**: Kantor es GPL-3.0-or-later. Los términos de la Store añaden condiciones al uso del paquete que
+7. **Licencia**: Kantaria es GPL-3.0-or-later. Los términos de la Store añaden condiciones al uso del paquete que
    pueden chocar con la GPL (restricciones de redistribución). Conviene decidirlo antes de publicar: por ejemplo,
    ofrecer el código fuente y el zip libre en paralelo, y dejar claro en la ficha que la Store es una vía de
    conveniencia. Es una decisión del titular del copyright.
@@ -73,7 +73,7 @@ Conviene hacer primero la prueba en PC limpia con el zip actual: es la misma ver
 ## Ediciones: local y Store
 
 `scripts\publish.ps1` arma la edición **Local** por omisión (instalador, zip, todos los avatares). Con
-`-Edition Store` arma `dist\Kantor-<versión>-store-win-x64\` (y su zip) **sin** los avatares de
+`-Edition Store` arma `dist\Kantaria-<versión>-store-win-x64\` (y su zip) **sin** los avatares de
 `src\Kantor.Core\Characters\store-excluded.txt` (por licencias): ni se muestran ni se embeben. La Store es siempre
 un subconjunto de la local. No hay instalador Inno Setup para la Store (va como MSIX). El script limpia `obj`
 antes de publicar porque los recursos de WPF no se regeneran solos al cambiar de edición; compilar a mano con
@@ -81,7 +81,7 @@ antes de publicar porque los recursos de WPF no se regeneran solos al cambiar de
 
 ## Paquete MSIX de la Store
 
-`scripts\publish.ps1 -Edition Store -Msix` arma `dist\Kantor-<versión>-store.msix` (sin firmar: la Store lo firma al
+`scripts\publish.ps1 -Edition Store -Msix` arma `dist\Kantaria-<versión>-store.msix` (sin firmar: la Store lo firma al
 publicarlo) con `makeappx` del Windows SDK. Usa `installer\store\AppxManifest.xml`, con la identidad reservada en
 Partner Center (Name `PabloPramparo.Kantor`, Publisher `CN=A1B8C5FA-571D-4C85-8594-85319C35543A`, PublisherDisplayName
 `Pablo Pramparo`, Id. de Store `9P8ZKZBJ4RHB`, PFN `PabloPramparo.Kantor_zz18sectgfr1r`), `runFullTrust` y micrófono, y los

@@ -739,7 +739,7 @@ public sealed class KantorStore : IDisposable
 
     /// <summary>
     /// Copia consistente de toda la base en <paramref name="path"/> (un archivo nuevo; si existe, falla). Es un
-    /// archivo SQLite completo: para restaurar, con Kantor cerrado, reemplazá <c>kantor.db</c> por la copia.
+    /// archivo SQLite completo: para restaurar, con Kantaria cerrado, reemplazá <c>kantor.db</c> por la copia.
     /// </summary>
     public void BackupTo(string path)
     {

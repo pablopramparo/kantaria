@@ -47,6 +47,16 @@ public partial class SongListView : UserControl
     /// <summary>Celdas por fila de la grilla (con el panel de detalle a la derecha).</summary>
     public const int GridColumns = 5;
 
+    /// <summary>Texto de la etiqueta de dueto de filas y celdas ("DÚO" / "DUET"), según el idioma.</summary>
+    public static readonly DependencyProperty DuetLabelProperty =
+        DependencyProperty.Register(nameof(DuetLabel), typeof(string), typeof(SongListView), new PropertyMetadata("DÚO"));
+
+    public string DuetLabel
+    {
+        get => (string)GetValue(DuetLabelProperty);
+        set => SetValue(DuetLabelProperty, value);
+    }
+
     private static readonly CoverConverter BigCover = new() { DecodeWidth = 640 };
     private readonly DispatcherTimer _debounce = new() { Interval = TimeSpan.FromMilliseconds(120) };
     private IReadOnlyList<SongEntry> _all = [];
@@ -124,6 +134,7 @@ public partial class SongListView : UserControl
     public void Show(string language)
     {
         _language = language;
+        DuetLabel = LibraryTexts.Duet(language);
         TitleText.Text = LibraryTexts.Title(language);
         Placeholder.Text = LibraryTexts.SearchPlaceholder(language);
         HintText.Text = LibraryTexts.Hint(language);
@@ -347,6 +358,7 @@ public partial class SongListView : UserControl
             System.Globalization.CultureInfo.CurrentCulture) as System.Windows.Media.ImageSource;
         DetailMeta.Text = string.Join(" · ", new[] { entry.Genre, entry.Year, entry.Language, entry.Edition }
             .Where(s => !string.IsNullOrWhiteSpace(s)));
+        DuetBadge.Text = entry.IsDuet ? "♪♪ " + LibraryTexts.Duet(_language) : string.Empty;
         VideoBadge.Text = entry.HasVideo ? "▶ " + LibraryTexts.Video(_language) : string.Empty;
     }
 

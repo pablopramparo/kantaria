@@ -1,7 +1,7 @@
 <p align="center"><a href="README.md">English</a> | <b>Español</b></p>
 
 <p align="center">
-  <img src="src/Kantor.App/Assets/Branding/kantor-logo.png" alt="Kantor" width="520">
+  <img src="src/Kantor.App/Assets/Branding/kantaria-logo.png" alt="Kantaria" width="520">
 </p>
 
 <p align="center">
@@ -24,14 +24,14 @@
 
 ## Qué es
 
-Kantor es un karaoke de escritorio hecho en C# / .NET 10 / WPF para cantar en casa con amigos. Lee las
+Kantaria es un karaoke de escritorio hecho en C# / .NET 10 / WPF para cantar en casa con amigos. Lee las
 canciones en formato **UltraStar** (`.txt` + audio y, si existe, video), puntúa lo que cantás en tiempo real y
 guarda el historial de cada jugador. Todo funciona en tu PC: sin cuentas, sin nube, sin internet. Sin excusas.
 
 Tiene una interfaz propia de estilo arcade de 16 bits, pensada para verse bien en una pantalla grande y manejarse
 con teclado, mouse o el control remoto opcional.
 
-Kantor no puede enseñarte a cantar. Pero puede documentar el intento.
+Kantaria no puede enseñarte a cantar. Pero puede documentar el intento.
 
 ## Características
 
@@ -60,7 +60,7 @@ Kantor no puede enseñarte a cantar. Pero puede documentar el intento.
 
 ## ¿Por qué existe esto?
 
-Kantor empezó porque su autor quería un karaoke que funcionara bien con sus micrófonos.
+Kantaria empezó porque su autor quería un karaoke que funcionara bien con sus micrófonos.
 
 Después aparecieron el scoring, la sincronización, los jugadores, los rankings, los personajes, los avatares, las
 estadísticas y el control remoto. En algún momento, una herramienta bastante sencilla empezó a convertirse en un
@@ -72,7 +72,7 @@ No hubo ninguna reunión en la que se aprobara semejante crecimiento. Simplement
 
 - Windows 10 u 11, 64 bits.
 - Uno o más micrófonos para cantar (se puede explorar la biblioteca y mirar sin ellos).
-- Tus propias canciones en formato UltraStar. Kantor **no incluye canciones**. El talento musical es opcional.
+- Tus propias canciones en formato UltraStar. Kantaria **no incluye canciones**. El talento musical es opcional.
 
 ## Capturas de pantalla
 
@@ -107,10 +107,10 @@ No hubo ninguna reunión en la que se aprobara semejante crecimiento. Simplement
 
 Los demás paquetes se publican en [Releases](../../releases). No hace falta instalar .NET:
 
-- **Instalador** (`Kantor-Setup-<versión>.exe`): instala para el usuario actual, sin permisos de administrador,
+- **Instalador** (`Kantaria-Setup-<versión>.exe`): instala para el usuario actual, sin permisos de administrador,
   crea el acceso en el menú Inicio y se desinstala desde *Aplicaciones instaladas*. Ejecutar un instalador más
-  nuevo encima actualiza Kantor y conserva tus datos.
-- **Portable** (`Kantor-<versión>-win-x64.zip`): descomprimí en cualquier carpeta y ejecutá `Kantor.App.exe`.
+  nuevo encima actualiza Kantaria y conserva tus datos.
+- **Portable** (`Kantaria-<versión>-win-x64.zip`): descomprimí en cualquier carpeta y ejecutá `Kantor.App.exe`.
 
 > Todavía no hay una versión publicada; la página de Releases la va a listar cuando exista.
 >
@@ -142,30 +142,30 @@ avatar genérico. Más detalle en [docs/DISTRIBUCION.md](docs/DISTRIBUCION.md).
 | Documento | Contenido |
 |---|---|
 | [docs/ESTADO.md](docs/ESTADO.md) | Estado del proyecto, decisiones, mediciones, pendientes y trampas |
-| [docs/PUNTUACION_WORLDPARTY.md](docs/PUNTUACION_WORLDPARTY.md) | Cómo puntúa WorldParty y qué sigue Kantor |
+| [docs/PUNTUACION_WORLDPARTY.md](docs/PUNTUACION_WORLDPARTY.md) | Cómo puntúa WorldParty y qué sigue Kantaria |
 | [docs/DISTRIBUCION.md](docs/DISTRIBUCION.md) | Cómo se arma el paquete y el camino a la Microsoft Store |
 | [docs/AVYN_CONTRATO.md](docs/AVYN_CONTRATO.md) | Protocolo del control remoto Avyn |
 | [docs/INVITADOS.md](docs/INVITADOS.md) | Acceso de invitados por LAN: uso, qué se permite, seguridad y límites |
 
 ## Apoyar el proyecto
 
-Kantor es software libre hecho en ratos libres. Si te dio buenas noches de karaoke y querés ayudar a que siga creciendo, podés
-apoyar al autor en GitHub Sponsors: <https://github.com/sponsors/pablopramparo>. Es totalmente opcional: todo en Kantor funciona igual
+Kantaria es software libre hecho en ratos libres. Si te dio buenas noches de karaoke y querés ayudar a que siga creciendo, podés
+apoyar al autor en GitHub Sponsors: <https://github.com/sponsors/pablopramparo>. Es totalmente opcional: todo en Kantaria funciona igual
 sin eso.
 
 ## Licencia y marca
 
 Copyright (C) 2026 Pablo Pramparo
 
-El **código** de Kantor es software libre: podés redistribuirlo y/o modificarlo bajo los términos de la
+El **código** de Kantaria es software libre: podés redistribuirlo y/o modificarlo bajo los términos de la
 Licencia Pública General de GNU, versión 3 o (a tu elección) cualquier versión posterior. Se distribuye sin
 ninguna garantía. Ver [LICENSE](LICENSE).
 
-El **nombre Kantor, su logo y los personajes** no están bajo la GPL: son del autor y no tienen licencia de
+El **nombre Kantaria, su logo y los personajes** no están bajo la GPL: son del autor y no tienen licencia de
 reutilización. Si publicás un fork, usá otro nombre y reemplazá esos recursos. Detalle en
 [src/Kantor.App/Assets/LICENSE-ASSETS.md](src/Kantor.App/Assets/LICENSE-ASSETS.md).
 
-Las canciones y medios que uses con Kantor tienen sus propias licencias y no se incluyen.
+Las canciones y medios que uses con Kantaria tienen sus propias licencias y no se incluyen.
 
 ### Componentes de terceros
 
@@ -175,5 +175,5 @@ La lista completa, con sus licencias, está en [THIRD-PARTY-NOTICES.md](THIRD-PA
 - **LibVLC / LibVLCSharp** (video de fondo): LGPL-2.1-or-later, como bibliotecas dinámicas.
 - **NAudio**, **Microsoft.Data.Sqlite**: MIT. **SQLitePCLRaw**: Apache-2.0.
 
-Kantor es un proyecto independiente, inspirado en UltraStar Deluxe y UltraStar WorldParty, con los que no tiene
+Kantaria es un proyecto independiente, inspirado en UltraStar Deluxe y UltraStar WorldParty, con los que no tiene
 relación oficial.

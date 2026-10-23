@@ -1,9 +1,9 @@
 ; SPDX-License-Identifier: GPL-3.0-or-later
 ; Copyright (C) 2026 Pablo Pramparo
 ;
-; Instalador de Kantor (Inno Setup 6). Se invoca desde scripts\publish.ps1 -Installer, que pasa:
+; Instalador de Kantaria (Inno Setup 6). Se invoca desde scripts\publish.ps1 -Installer, que pasa:
 ;   /DAppVersion=<versión>  /DSourceDir=<carpeta publicada>  /DOutputDir=<carpeta de salida>  /DRepoDir=<raíz del repo>
-; Instala por usuario (sin administrador) en %LOCALAPPDATA%\Programs\Kantor. Los datos del usuario viven en
+; Instala por usuario (sin administrador) en %LOCALAPPDATA%\Programs\Kantaria. Los datos del usuario viven en
 ; %APPDATA%\Kantor y no se tocan al actualizar ni al desinstalar.
 
 #ifndef AppVersion
@@ -21,20 +21,20 @@
 
 [Setup]
 AppId={{6B8E5F52-3C1B-4D3A-9A57-2B6E0C4F7A11}
-AppName=Kantor
+AppName=Kantaria
 AppVersion={#AppVersion}
-AppVerName=Kantor {#AppVersion}
+AppVerName=Kantaria {#AppVersion}
 AppPublisher=Pablo Pramparo
 AppCopyright=Copyright (C) 2026 Pablo Pramparo
-DefaultDirName={autopf}\Kantor
-DefaultGroupName=Kantor
+DefaultDirName={autopf}\Kantaria
+DefaultGroupName=Kantaria
 DisableProgramGroupPage=yes
 PrivilegesRequired=lowest
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 OutputDir={#OutputDir}
-OutputBaseFilename=Kantor-Setup-{#AppVersion}
-SetupIconFile={#RepoDir}\src\Kantor.App\Assets\Branding\kantor.ico
+OutputBaseFilename=Kantaria-Setup-{#AppVersion}
+SetupIconFile={#RepoDir}\src\Kantor.App\Assets\Branding\kantaria.ico
 UninstallDisplayIcon={app}\Kantor.App.exe
 Compression=lzma2/max
 SolidCompression=yes
@@ -58,8 +58,8 @@ Type: files; Name: "{app}\*.dll"
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion
 
 [Icons]
-Name: "{autoprograms}\Kantor"; Filename: "{app}\Kantor.App.exe"
-Name: "{autodesktop}\Kantor"; Filename: "{app}\Kantor.App.exe"; Tasks: desktopicon
+Name: "{autoprograms}\Kantaria"; Filename: "{app}\Kantor.App.exe"
+Name: "{autodesktop}\Kantaria"; Filename: "{app}\Kantor.App.exe"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\Kantor.App.exe"; Description: "{cm:LaunchProgram,Kantor}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\Kantor.App.exe"; Description: "{cm:LaunchProgram,Kantaria}"; Flags: nowait postinstall skipifsilent

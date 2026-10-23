@@ -18,7 +18,7 @@ public static class OptionsTexts
         ["tab.help"] = ("GUÍA", "GUIDE"),
         ["tab.credits"] = ("CRÉDITOS", "CREDITS"),
 
-        ["credits.app.title"] = ("Kantor", "Kantor"),
+        ["credits.app.title"] = ("Kantaria", "Kantaria"),
         ["credits.app.body"] = (
             "Karaoke local para Windows, compatible con canciones UltraStar. Creado por Pablo Pramparo. Software libre bajo GPL-3.0-or-later.",
             "Local karaoke for Windows, compatible with UltraStar songs. Created by Pablo Pramparo. Free software under GPL-3.0-or-later."),
@@ -28,23 +28,23 @@ public static class OptionsTexts
             "Inspired by UltraStar Deluxe and UltraStar WorldParty: their behavior was used as a reference, without copying their code."),
         ["credits.art.title"] = ("Arte y marca", "Art and brand"),
         ["credits.art.body"] = (
-            "El nombre Kantor, su logo y los personajes son © 2026 Pablo Pramparo, todos los derechos reservados; no están bajo la GPL.",
-            "The Kantor name, its logo and the characters are © 2026 Pablo Pramparo, all rights reserved; they are not under the GPL."),
+            "El nombre Kantaria, su logo y los personajes son © 2026 Pablo Pramparo, todos los derechos reservados; no están bajo la GPL.",
+            "The Kantaria name, its logo and the characters are © 2026 Pablo Pramparo, all rights reserved; they are not under the GPL."),
         ["credits.libs.title"] = ("Tecnología de terceros", "Third-party technology"),
         ["credits.libs.body"] = (
             "Jersey 15 (SIL OFL 1.1) · .NET y WPF (MIT) · NAudio (MIT) · LibVLC y LibVLCSharp (LGPL-2.1+) · SQLite y Microsoft.Data.Sqlite (MIT) · ASP.NET Core Kestrel (MIT) · QRCoder (MIT). Los textos completos están en THIRD-PARTY-NOTICES.md.",
             "Jersey 15 (SIL OFL 1.1) · .NET and WPF (MIT) · NAudio (MIT) · LibVLC and LibVLCSharp (LGPL-2.1+) · SQLite and Microsoft.Data.Sqlite (MIT) · ASP.NET Core Kestrel (MIT) · QRCoder (MIT). Full texts are in THIRD-PARTY-NOTICES.md."),
         ["credits.songs.title"] = ("Canciones", "Songs"),
         ["credits.songs.body"] = (
-            "Kantor no incluye canciones: las aporta cada usuario y son responsabilidad de quien las posee.",
-            "Kantor includes no songs: each user brings their own, and they are the responsibility of whoever owns them."),
+            "Kantaria no incluye canciones: las aporta cada usuario y son responsabilidad de quien las posee.",
+            "Kantaria includes no songs: each user brings their own, and they are the responsibility of whoever owns them."),
         ["credits.version"] = ("Versión {0}", "Version {0}"),
         ["credits.edition.store"] = ("edición Microsoft Store", "Microsoft Store edition"),
 
         ["help.songs.title"] = ("1. Cargar las canciones", "1. Load your songs"),
         ["help.songs.body"] = (
-            "Kantor lee canciones en formato UltraStar: una carpeta por canción, con el archivo .txt, el audio y, si hay, el video y la tapa. En la pestaña BIBLIOTECA tocá «Agregar carpeta…» y elegí la carpeta que las contiene (se buscan también las subcarpetas). Se pueden agregar varias.",
-            "Kantor reads UltraStar songs: one folder per song, with the .txt file, the audio and, if present, the video and cover. In the LIBRARY tab choose “Add folder…” and pick the folder that contains them (subfolders are scanned too). You can add several."),
+            "Kantaria lee canciones en formato UltraStar: una carpeta por canción, con el archivo .txt, el audio y, si hay, el video y la tapa. En la pestaña BIBLIOTECA tocá «Agregar carpeta…» y elegí la carpeta que las contiene (se buscan también las subcarpetas). Se pueden agregar varias.",
+            "Kantaria reads UltraStar songs: one folder per song, with the .txt file, the audio and, if present, the video and cover. In the LIBRARY tab choose “Add folder…” and pick the folder that contains them (subfolders are scanned too). You can add several."),
         ["help.mics.title"] = ("2. Configurar los micrófonos", "2. Set up the microphones"),
         ["help.mics.body"] = (
             "En la pestaña AUDIO tocá «Crear micrófono» una vez por cada jugador (hasta 4) y elegí el dispositivo y el canal de cada uno. Hablá o cantá: el medidor y la nota detectada tienen que moverse. Si dice «Sin señal», revisá el canal o subí la ganancia de la interfaz. Con una interfaz de dos canales, cada micrófono va en un canal distinto.",
@@ -64,8 +64,8 @@ public static class OptionsTexts
 
         ["help.guest.title"] = ("6. Invitados con el celular (opcional)", "6. Guests with their phones (optional)"),
         ["help.guest.body"] = (
-            "Tocá «INVITADOS · QR» en el menú o en la lista de canciones: aparece un QR. Con la cámara del celular (en la misma red Wi-Fi) los invitados buscan una canción, eligen quién canta (o crean su jugador con nombre y personaje) y la suman a la cola; nada más. Se apaga desde la pantalla del QR o al cerrar Kantor. Es HTTP sin cifrar en tu red local: no lo uses en redes ajenas.",
-            "Click “GUESTS · QR” on the menu or in the song list: a QR appears. With their phone camera (on the same Wi-Fi) guests find a song, pick who sings (or create their own player with a name and character) and add it to the queue; nothing else. Turn it off from the QR screen or by closing Kantor. It is plain, unencrypted HTTP on your local network: don’t use it on networks you don’t control."),
+            "Tocá «INVITADOS · QR» en el menú o en la lista de canciones: aparece un QR. Con la cámara del celular (en la misma red Wi-Fi) los invitados buscan una canción, eligen quién canta (o crean su jugador con nombre y personaje) y la suman a la cola; nada más. Se apaga desde la pantalla del QR o al cerrar Kantaria. Es HTTP sin cifrar en tu red local: no lo uses en redes ajenas.",
+            "Click “GUESTS · QR” on the menu or in the song list: a QR appears. With their phone camera (on the same Wi-Fi) guests find a song, pick who sings (or create their own player with a name and character) and add it to the queue; nothing else. Turn it off from the QR screen or by closing Kantaria. It is plain, unencrypted HTTP on your local network: don’t use it on networks you don’t control."),
 
         ["hint"] = ("← → PESTAÑAS  ·  ↑ ↓ OPCIONES  ·  ENTER ENTRAR / ABRIR  ·  ESC VOLVER",
             "← → TABS  ·  ↑ ↓ OPTIONS  ·  ENTER ENTER / OPEN  ·  ESC BACK"),
@@ -127,8 +127,8 @@ public static class OptionsTexts
             "After the results, the next song in the queue starts by itself 10 s later (only with an open session and assigned players). Any key cancels the countdown."),
         ["game.remote"] = ("Control remoto (Avyn)", "Remote control (Avyn)"),
         ["game.remote.help"] = (
-            "Deja que el Agent de Avyn en esta PC controle Kantor por un canal local (sin red, solo este usuario).",
-            "Lets the Avyn Agent on this PC control Kantor through a local channel (no network, this user only)."),
+            "Deja que el Agent de Avyn en esta PC controle Kantaria por un canal local (sin red, solo este usuario).",
+            "Lets the Avyn Agent on this PC control Kantaria through a local channel (no network, this user only)."),
         ["game.remote.off"] = ("Apagado", "Off"),
         ["game.remote.waiting"] = ("Esperando al Agent de Avyn.", "Waiting for the Avyn Agent."),
         ["game.remote.connected"] = ("Agent de Avyn conectado.", "Avyn Agent connected."),

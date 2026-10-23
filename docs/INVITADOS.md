@@ -2,7 +2,7 @@
 
 Los invitados usan el celular para **buscar una canción, elegir quién la canta (o crear su propio jugador con nombre y
 personaje) y agregarla a la cola**. Nada más.
-Kantor sigue funcionando igual sin esto: el servidor está **apagado por omisión** y se apaga solo al cerrar Kantor.
+Kantaria sigue funcionando igual sin esto: el servidor está **apagado por omisión** y se apaga solo al cerrar Kantaria.
 
 ## Cómo se usa
 
@@ -15,9 +15,9 @@ Kantor sigue funcionando igual sin esto: el servidor está **apagado por omisió
    Si todavía no tiene jugador, toca **+ NUEVO JUGADOR**, escribe su nombre, elige un personaje de la galería y toca
    **CREAR Y SELECCIONAR**: vuelve a "¿Quién canta?" con el jugador nuevo ya elegido (la canción se agrega recién al
    tocar AGREGAR A LA COLA).
-4. Para cerrar: **APAGAR** en la pantalla del QR (o cerrar Kantor). Se revoca el token y se cierra el puerto.
+4. Para cerrar: **APAGAR** en la pantalla del QR (o cerrar Kantaria). Se revoca el token y se cierra el puerto.
 
-Si la PC tiene varias redes, Kantor elige la que tiene puerta de enlace; se puede fijar otra en
+Si la PC tiene varias redes, Kantaria elige la que tiene puerta de enlace; se puede fijar otra en
 **Opciones › Juego › Red para invitados**. Si cambia con el acceso activo, se reabre en la nueva (con otro QR).
 
 ## Qué pueden hacer los invitados
@@ -73,7 +73,7 @@ siendo válidos.
   cantantes: repetir una canción es legítimo.
 - **HTTP no está cifrado**: quien pueda observar el Wi-Fi puede ver el token y el tráfico. No lo uses en redes
   que no controles. Que la IP sea privada no basta para aislar de internet: un reenvío de puertos del router la
-  expondría, por eso Kantor no abre puertos (sin UPnP) y rechaza clientes públicos. No lo publiques en el router.
+  expondría, por eso Kantaria no abre puertos (sin UPnP) y rechaza clientes públicos. No lo publiques en el router.
 - El **Firewall de Windows** pregunta la primera vez: permitilo solo en **redes privadas**.
 - **Wi-Fi con aislamiento de clientes** (redes de invitados, algunos routers, redes de hoteles u oficinas) impide
   que el celular llegue a la PC: usá una red sin aislamiento o el hotspot de otro celular.

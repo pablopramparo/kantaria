@@ -29,7 +29,7 @@ public abstract record DedupeDecision
 /// <summary>
 /// Deduplicación de mutaciones por <c>commandId</c> (hasta 1024 entradas o 15 minutos). La huella es el SHA-256 del
 /// tipo y el payload canónico: un reintento idéntico devuelve la misma respuesta sin volver a ejecutar; otro
-/// contenido con el mismo id se rechaza. Vive en memoria: un reinicio de Kantor lo vacía.
+/// contenido con el mismo id se rechaza. Vive en memoria: un reinicio de Kantaria lo vacía.
 /// </summary>
 public sealed class CommandDeduplicator(Func<DateTimeOffset>? now = null, int capacity = 1024, TimeSpan? ttl = null)
 {

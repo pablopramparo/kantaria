@@ -57,6 +57,11 @@
                             <TextBlock Text="▶" Foreground="{StaticResource GoldBrush}" FontSize="20" Margin="6,4"
                                        HorizontalAlignment="Right" VerticalAlignment="Top"
                                        Visibility="{Binding Song.HasVideo, Converter={StaticResource VideoFlag}}" />
+                            <Border Background="#CC070A24" Padding="6,0" Margin="6,4" HorizontalAlignment="Left" VerticalAlignment="Top"
+                                    Visibility="{Binding Song.IsDuet, Converter={StaticResource VideoFlag}}">
+                                <TextBlock Text="{Binding DuetLabel, RelativeSource={RelativeSource AncestorType=lib:SongListView}}"
+                                           Foreground="{StaticResource P1Brush}" FontFamily="{StaticResource PixelFont}" FontSize="22" />
+                            </Border>
                         </Grid>
                     </Border>
                     <TextBlock Text="{Binding Song.Title}" Margin="0,6,0,0" FontFamily="{StaticResource PixelFont}"
@@ -155,10 +160,15 @@
                                     <TextBlock Text="{Binding Artist}" FontFamily="{StaticResource PixelFont}" FontSize="25"
                                                Foreground="#9AA3D6" TextTrimming="CharacterEllipsis" />
                                 </StackPanel>
-                                <TextBlock Grid.Column="2" Text="▶" Foreground="{StaticResource GoldBrush}" FontSize="20"
-                                           VerticalAlignment="Center"
-                                           Visibility="{Binding HasVideo, Converter={StaticResource VideoFlag}}"
-                                           ToolTip="Tiene video" />
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding DuetLabel, RelativeSource={RelativeSource AncestorType=lib:SongListView}}"
+                                               Foreground="{StaticResource P1Brush}" FontFamily="{StaticResource PixelFont}"
+                                               FontSize="24" Margin="0,0,12,0"
+                                               Visibility="{Binding IsDuet, Converter={StaticResource VideoFlag}}" />
+                                    <TextBlock Text="▶" Foreground="{StaticResource GoldBrush}" FontSize="20"
+                                               Visibility="{Binding HasVideo, Converter={StaticResource VideoFlag}}"
+                                               ToolTip="Tiene video" />
+                                </StackPanel>
                             </Grid>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
@@ -205,7 +215,7 @@
                                   Fill="{StaticResource PanelBrush}" BorderBrush="{StaticResource P2Brush}"
                                   Shadow="{StaticResource InkBrush}" NotchUnits="3" BorderUnits="1" Padding="16">
                     <StackPanel x:Name="Detail">
-                        <Border Background="#1B1040" Width="210" Height="210" HorizontalAlignment="Center">
+                        <Border Background="#1B1040" Width="180" Height="180" HorizontalAlignment="Center">
                             <Grid>
                                 <Image x:Name="BigCoverImage" Stretch="Uniform"
                                        RenderOptions.BitmapScalingMode="HighQuality" />
@@ -220,8 +230,12 @@
                                    Foreground="#9AA3D6" TextWrapping="Wrap" MaxHeight="64" TextTrimming="CharacterEllipsis" />
                         <TextBlock x:Name="DetailMeta" Margin="0,8,0,0" FontFamily="{StaticResource PixelFont}" FontSize="22"
                                    Foreground="{StaticResource DimBrush}" TextWrapping="Wrap" />
-                        <pixel:PixelText x:Name="VideoBadge" Margin="0,8,0,0" FontFamily="{StaticResource PixelFont}"
-                                         FontSize="26" Foreground="{StaticResource GoldBrush}" />
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                            <pixel:PixelText x:Name="DuetBadge" Margin="0,0,16,0" FontFamily="{StaticResource PixelFont}"
+                                             FontSize="24" Foreground="{StaticResource P1Brush}" />
+                            <pixel:PixelText x:Name="VideoBadge" FontFamily="{StaticResource PixelFont}"
+                                             FontSize="24" Foreground="{StaticResource GoldBrush}" />
+                        </StackPanel>
                     </StackPanel>
                 </pixel:PixelFrame>
 

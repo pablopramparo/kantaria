@@ -236,7 +236,7 @@ public sealed class QueueServiceTests : IDisposable
             AddSong(queue, "a");
             var b = AddSong(queue, "b");
             AddSong(queue, "c");
-            queue.MarkRunning(b.ItemId); // Kantor se cierra "cantando"
+            queue.MarkRunning(b.ItemId); // Kantaria se cierra "cantando"
             runningId = b.ItemId;
         }
 

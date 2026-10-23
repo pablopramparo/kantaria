@@ -1,4 +1,4 @@
-// Página de invitados de Kantor: buscar una canción, elegir quién la canta y agregarla a la cola.
+// Página de invitados de Kantaria: buscar una canción, elegir quién la canta y agregarla a la cola.
 // Sin librerías. El texto de las canciones y los jugadores siempre entra por textContent.
 (function () {
   'use strict';
@@ -12,9 +12,9 @@
       songs: function (n) { return n === 1 ? '1 canción' : n + ' canciones'; },
       pick: function (n) { return n === 1 ? 'Elegí quién canta.' : 'Elegí hasta ' + n + ' cantantes. El orden es el de los micrófonos.'; },
       position: function (n) { return 'Vas en el puesto ' + n; },
-      scan: 'ESCANEÁ EL QR', scanHint: 'Abrí esta página con el código QR que muestra la pantalla de Kantor.',
+      scan: 'ESCANEÁ EL QR', scanHint: 'Abrí esta página con el código QR que muestra la pantalla de Kantaria.',
       closed: 'ACCESO CERRADO', closedHint: 'El anfitrión cerró el acceso. Escaneá el QR otra vez.',
-      offline: 'SIN CONEXIÓN', offlineHint: 'No se llega a Kantor. Revisá que estés en la misma red Wi-Fi.',
+      offline: 'SIN CONEXIÓN', offlineHint: 'No se llega a Kantaria. Revisá que estés en la misma red Wi-Fi.',
       noPlayers: 'TODAVÍA NO HAY JUGADORES', noPlayersHint: 'Creá el tuyo con + NUEVO JUGADOR.',
       newPlayer: '+ NUEVO JUGADOR', newPlayerTitle: 'NUEVO JUGADOR', yourName: 'TU NOMBRE',
       pickCharacter: 'ELEGÍ TU PERSONAJE', create: 'CREAR Y SELECCIONAR', creating: 'CREANDO…', cancel: 'CANCELAR',
@@ -35,8 +35,8 @@
         NO_MICROPHONES: 'Falta un micrófono en la PC.',
         REQUEST_REUSED: 'Probá de nuevo.',
         INVALID_REQUEST: 'No se pudo enviar. Probá de nuevo.',
-        UNAVAILABLE: 'Kantor no puede hacerlo ahora. Probá en un momento.',
-        BUSY: 'Kantor está ocupado. Probá en un momento.'
+        UNAVAILABLE: 'Kantaria no puede hacerlo ahora. Probá en un momento.',
+        BUSY: 'Kantaria está ocupado. Probá en un momento.'
       },
       generic: 'Algo salió mal. Probá de nuevo.'
     },
@@ -48,9 +48,9 @@
       songs: function (n) { return n === 1 ? '1 song' : n + ' songs'; },
       pick: function (n) { return n === 1 ? 'Pick who sings.' : 'Pick up to ' + n + ' singers. Order follows the microphones.'; },
       position: function (n) { return "You're number " + n; },
-      scan: 'SCAN THE QR', scanHint: "Open this page with the QR code shown on Kantor's screen.",
+      scan: 'SCAN THE QR', scanHint: "Open this page with the QR code shown on Kantaria's screen.",
       closed: 'ACCESS CLOSED', closedHint: 'The host closed access. Scan the QR again.',
-      offline: 'NO CONNECTION', offlineHint: "Can't reach Kantor. Make sure you are on the same Wi-Fi.",
+      offline: 'NO CONNECTION', offlineHint: "Can't reach Kantaria. Make sure you are on the same Wi-Fi.",
       noPlayers: 'NO PLAYERS YET', noPlayersHint: 'Create yours with + NEW PLAYER.',
       newPlayer: '+ NEW PLAYER', newPlayerTitle: 'NEW PLAYER', yourName: 'YOUR NAME',
       pickCharacter: 'PICK YOUR CHARACTER', create: 'CREATE & SELECT', creating: 'CREATING…', cancel: 'CANCEL',
@@ -71,14 +71,14 @@
         NO_MICROPHONES: 'The PC needs a microphone.',
         REQUEST_REUSED: 'Try again.',
         INVALID_REQUEST: "Couldn't send it. Try again.",
-        UNAVAILABLE: "Kantor can't do that right now. Try again in a moment.",
-        BUSY: 'Kantor is busy. Try again in a moment.'
+        UNAVAILABLE: "Kantaria can't do that right now. Try again in a moment.",
+        BUSY: 'Kantaria is busy. Try again in a moment.'
       },
       generic: 'Something went wrong. Try again.'
     }
   };
 
-  var SLOT_COLORS = ['#19D3FF', '#FF3DB8', '#5BE56B', '#A06BFF'];   // PlayerColors de Kantor (J1–J4)
+  var SLOT_COLORS = ['#19D3FF', '#FF3DB8', '#5BE56B', '#A06BFF'];   // PlayerColors de Kantaria (J1–J4)
   var PAGE = 30;
 
   var $ = function (id) { return document.getElementById(id); };
@@ -461,7 +461,7 @@
     loadAvatars();
   }
 
-  // La galería es la de fábrica de Kantor (la misma de la PC); las imágenes se piden por identificador.
+  // La galería es la de fábrica de Kantaria (la misma de la PC); las imágenes se piden por identificador.
   function loadAvatars() {
     if (state.avatarList) { renderAvatars(); return; }
     api('/api/avatars').then(function (d) { state.avatarList = d.items || []; renderAvatars(); })
@@ -594,7 +594,7 @@
   applyTexts();
   if (!state.token) { showNoToken(); return; }
   api('/api/config').then(function (cfg) {
-    state.lang = cfg.language === 'en' ? 'en' : 'es';   // el idioma de Kantor como valor inicial
+    state.lang = cfg.language === 'en' ? 'en' : 'es';   // el idioma de Kantaria como valor inicial
     applyTexts();
     loadSongs(true);
   }).catch(function (e) {

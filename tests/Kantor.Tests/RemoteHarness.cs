@@ -9,7 +9,7 @@ using Kantor.Core.Remote;
 namespace Kantor.Tests;
 
 /// <summary>
-/// La ventana de Kantor simulada: mantiene un <see cref="HostState"/> y lo cambia como lo haría la real (cargar,
+/// La ventana de Kantaria simulada: mantiene un <see cref="HostState"/> y lo cambia como lo haría la real (cargar,
 /// preguntar quién canta, cantar, resultados). No hay audio ni WPF: lo que se prueba es el contrato y las reglas.
 /// </summary>
 internal sealed class FakeHost : IKantorHost
@@ -194,7 +194,7 @@ internal sealed record Reply(bool Ok, long Rev, JsonObject? Payload, string? Cod
     public JsonObject P => Payload ?? throw new InvalidOperationException($"Sin payload ({Code}).");
 }
 
-/// <summary>Kantor "real" sin ventana: store SQLite, catálogo, cola, controlador y un hilo de interfaz propio.</summary>
+/// <summary>Kantaria "real" sin ventana: store SQLite, catálogo, cola, controlador y un hilo de interfaz propio.</summary>
 internal sealed class RemoteHarness : IDisposable
 {
     public const string Origin = """{"clientId":"phone-1","name":"Pablo"}""";

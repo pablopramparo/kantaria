@@ -35,7 +35,7 @@ public static class Diag
             return;
         }
 
-        Mark("=== Kantor inicia ===");
+        Mark("=== Kantaria inicia ===");
         var watcher = new Thread(() => Watch(ui)) { IsBackground = true, Name = "Kantor.Diag" };
         watcher.Start();
     }

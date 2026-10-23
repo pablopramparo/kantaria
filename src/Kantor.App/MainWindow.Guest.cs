@@ -151,7 +151,7 @@ public partial class MainWindow
         }
     }
 
-    /// <summary>Al cerrar Kantor: revoca el token y libera el puerto (sin colgar el cierre más de unos segundos).</summary>
+    /// <summary>Al cerrar Kantaria: revoca el token y libera el puerto (sin colgar el cierre más de unos segundos).</summary>
     private void StopGuest()
     {
         var server = _guestServer;

@@ -42,7 +42,7 @@ public sealed partial class KantorController
     }
 
     /// <summary>
-    /// Crea un jugador normal de Kantor (el mismo registro que crea la PC) con un avatar de fábrica. Con una partida
+    /// Crea un jugador normal de Kantaria (el mismo registro que crea la PC) con un avatar de fábrica. Con una partida
     /// abierta (y sin cantar suelto) entra a ella, como los que se crean desde "¿Quién canta?" en la PC: si no, no
     /// se podría elegir. No toca la selección de micrófonos ni la canción en curso. Hilo de la interfaz.
     /// </summary>

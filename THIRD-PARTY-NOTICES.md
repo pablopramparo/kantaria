@@ -1,6 +1,6 @@
 # Avisos de terceros
 
-Kantor se distribuye bajo GPL-3.0-or-later (ver `LICENSE`). La distribución binaria incluye los siguientes
+Kantaria se distribuye bajo GPL-3.0-or-later (ver `LICENSE`). La distribución binaria incluye los siguientes
 componentes, cada uno con su propia licencia.
 
 | Componente | Uso | Licencia |
@@ -19,7 +19,7 @@ componentes, cada uno con su propia licencia.
 
 ## Recursos propios fuera de la GPL
 
-El nombre Kantor, su logo y los personajes son del autor y no están bajo la GPL: ver
+El nombre Kantaria, su logo y los personajes son del autor y no están bajo la GPL: ver
 `src/Kantor.App/Assets/LICENSE-ASSETS.md` (en la distribución, `LICENSE-ASSETS.md`).
 
 ## LibVLC (LGPL)
@@ -30,5 +30,5 @@ compatible de LibVLC 3.x copiándola en esa carpeta.
 
 ## Canciones
 
-Kantor no incluye canciones. Las canciones UltraStar las aporta el usuario y son responsabilidad de quien las
+Kantaria no incluye canciones. Las canciones UltraStar las aporta el usuario y son responsabilidad de quien las
 posee.

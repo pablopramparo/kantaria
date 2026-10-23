@@ -4,7 +4,7 @@ Descripción en palabras propias de lo que hace WorldParty (GPL-3.0+), leída en
 `src/base/UMusic.pas`, `src/base/USong.pas`, `src/base/UBeatTimer.pas`, `src/base/URecord.pas`,
 `src/base/UIni.pas` y `src/screens/controllers/UScreenSingController.pas` (rama `master`, leída el
 2026-10-14). **No se copió código**; esto es la especificación de comportamiento contra la que se
-mide Kantor. Lo que no figura acá no se verificó.
+mide Kantaria. Lo que no figura acá no se verificó.
 
 ## 1. Tipos de nota y peso
 
@@ -93,14 +93,14 @@ Todo se acumula en reales y se muestra en múltiplos de 10:
   índice de jugador. Quedó fuera del alcance del primer incremento.
 - El conteo de líneas del bono es por voz.
 
-## 9. Diferencias deliberadas de Kantor (implementado en `Kantor.Core.Scoring`)
+## 9. Diferencias deliberadas de Kantaria (implementado en `Kantor.Core.Scoring`)
 
 Lo que **se mantiene igual**: máximo 10.000 (9000 + 1000 de bono), factores 1/2/1/2/0, tolerancia 2/1/0
 semitonos, equivalencia por clase de altura, rap sin comparar tono, valor por beat, perfección con 2 puntos
 de holgura, reparto del bono entre frases no vacías, redondeo a decenas con el sentido opuesto en las doradas,
 dificultad Fácil y bono activado por omisión.
 
-| Tema | WorldParty | Kantor | Por qué |
+| Tema | WorldParty | Kantaria | Por qué |
 |---|---|---|---|
 | Detector | Autocorrelación por semitonos, sin confianza | YIN: voz/no voz | Decisión del proyecto (mantener YIN) |
 | ¿Hay sonido? | Pico ≥ umbral de amplitud (10 % por omisión) | `LevelDb` RMS ≥ `LevelGateDb` (−50, provisional, configurable); rap y notas con tono | Sin equivalencia afirmada; se calibra con el micrófono |
@@ -136,13 +136,13 @@ crudo del micrófono**, sino el resultado de la evaluación por beat:
 - Extremos redondeados (textura izquierda, media repetida y derecha) y color por jugador; las notas rap
   tienen textura propia.
 
-Diferencia con la estela actual de Kantor: se dibuja una marca por cada análisis de YIN (cada ~21 ms),
+Diferencia con la estela actual de Kantaria: se dibuja una marca por cada análisis de YIN (cada ~21 ms),
 con el tono fraccionario y plegado a la octava del carril, también entre notas; por eso se ve la oscilación
 del detector.
 
-### Adaptación en Kantor
+### Adaptación en Kantaria
 - Mismo criterio de barras, altura (100 % / 65 %), tono mostrado (el de la nota si acierta; si no, el real
   a ±6) y "solo sobre las notas". El rap se dibuja a media altura del carril, como sus notas.
-- **Difiere** en que el escenario de Kantor se desplaza (no pagina por frase), así que no se limpian las
+- **Difiere** en que el escenario de Kantaria se desplaza (no pagina por frase), así que no se limpian las
   barras al cambiar de frase: se muestran las de la ventana visible (2 s hacia atrás).
 - El modo "Cruda" (cada análisis de YIN) se conserva como ayuda para depurar el micrófono.

@@ -98,8 +98,8 @@ public static class PlayersTexts
         ["h.failed"] = ("No se pudo guardar: {0}", "Could not save: {0}"),
         ["h.deleted"] = ("Partida borrada.", "Session deleted."),
         ["h.restore"] = (
-            "Para restaurar un respaldo: con Kantor cerrado, reemplazá kantor.db (en la carpeta de datos) por la copia.",
-            "To restore a backup: with Kantor closed, replace kantor.db (in the data folder) with the copy."),
+            "Para restaurar un respaldo: con Kantaria cerrado, reemplazá kantor.db (en la carpeta de datos) por la copia.",
+            "To restore a backup: with Kantaria closed, replace kantor.db (in the data folder) with the copy."),
         ["h.global"] = ("Ranking global", "Global ranking"),
 
         ["h.view"] = ("Ver", "View"),

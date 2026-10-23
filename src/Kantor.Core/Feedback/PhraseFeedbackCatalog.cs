@@ -21,7 +21,7 @@ public sealed class PhraseFeedbackCatalog
 
     /// <summary>
     /// Catálogo del idioma de la interfaz ("es", "en", "en-US"…). Sin catálogo para ese idioma se usa el español,
-    /// que es el idioma base de Kantor. Los catálogos son independientes: no se corresponden frase por frase.
+    /// que es el idioma base de Kantaria. Los catálogos son independientes: no se corresponden frase por frase.
     /// </summary>
     public static PhraseFeedbackCatalog For(string? language)
     {
@@ -1680,7 +1680,7 @@ public sealed class PhraseFeedbackCatalog
                 "¡EL TECLADO BORRÓ LA CANCIÓN!",
                 "¡EL WIFI SE DESCONECTÓ DEL PLANETA!",
                 "¡EL BLUETOOTH NEGÓ TODA VINCULACIÓN!",
-                "¡KANTOR SOLICITA REINICIO DE EMERGENCIA!",
+                "¡KANTARIA SOLICITA REINICIO DE EMERGENCIA!",
                 "¡EL GATO CAMBIÓ DE FAMILIA!",
                 "¡EL PERRO SE HIZO GATO!",
                 "¡EL LORO APRENDIÓ A DECIR SOCORRO!",
@@ -2225,7 +2225,7 @@ public sealed class PhraseFeedbackCatalog
             "THE MUSIC INDUSTRY IS ON NOTICE!",
             "YOU JUST INVENTED A NEW STANDARD!",
             "THE SONG THANKED YOU PERSONALLY!",
-            "KANTOR HAS NOTHING LEFT TO TEACH YOU!",
+            "KANTARIA HAS NOTHING LEFT TO TEACH YOU!",
             ],
             [PhraseRating.Excellent] =
             [
@@ -2419,7 +2419,7 @@ public sealed class PhraseFeedbackCatalog
             "THE WORLD IS MISSING OUT!",
             "THAT WAVEFORM DESERVES A FRAME!",
             "THE UNIVERSE WANTS ANOTHER SONG!",
-            "KANTOR IS SERIOUSLY IMPRESSED!",
+            "KANTARIA IS SERIOUSLY IMPRESSED!",
             ],
             [PhraseRating.VeryGood] =
             [
@@ -2613,7 +2613,7 @@ public sealed class PhraseFeedbackCatalog
             "SOMEONE SHOULD RECORD THIS!",
             "THAT WAVEFORM LOOKS FRAMEABLE!",
             "THE UNIVERSE IS NODDING ALONG!",
-            "KANTOR GIVES YOU A RESPECTFUL NOD!",
+            "KANTARIA GIVES YOU A RESPECTFUL NOD!",
             ],
             [PhraseRating.Good] =
             [
@@ -2807,7 +2807,7 @@ public sealed class PhraseFeedbackCatalog
             "SOMEONE MIGHT RECORD THIS!",
             "THAT WAVEFORM IS PRESENTABLE!",
             "THE UNIVERSE GAVE A SMALL NOD!",
-            "KANTOR IS REASONABLY PLEASED!",
+            "KANTARIA IS REASONABLY PLEASED!",
             ],
             [PhraseRating.Acceptable] =
             [
@@ -3002,7 +3002,7 @@ public sealed class PhraseFeedbackCatalog
             "SOMEONE PROBABLY RECORDED THIS!",
             "THAT WAVEFORM NEEDS SOME EXPLAINING!",
             "THE UNIVERSE IS RESERVING JUDGMENT!",
-            "KANTOR HAS DECIDED TO BE NICE!",
+            "KANTARIA HAS DECIDED TO BE NICE!",
             ],
             [PhraseRating.Poor] =
             [
@@ -3196,7 +3196,7 @@ public sealed class PhraseFeedbackCatalog
             "SOMEONE SHOULD DELETE THAT RECORDING!",
             "THAT WAVEFORM NEEDS AN EXPLANATION!",
             "THE UNIVERSE REQUESTED SILENCE!",
-            "KANTOR IS TRYING TO STAY PROFESSIONAL!",
+            "KANTARIA IS TRYING TO STAY PROFESSIONAL!",
             "LET'S NEVER SPEAK OF THIS AGAIN!",
             ],
             [PhraseRating.Bad] =
@@ -3372,7 +3372,7 @@ public sealed class PhraseFeedbackCatalog
             "DELETE THE RECORDING BEFORE IT SPREADS!",
             "THAT WAVEFORM IS A CRIME SCENE!",
             "THE UNIVERSE HAS FILED AN INJUNCTION!",
-            "KANTOR IS CONSULTING ITS LAWYERS!",
+            "KANTARIA IS CONSULTING ITS LAWYERS!",
             "THE SCIENTISTS HAVE ABANDONED THE CASE!",
             "THE LAB HAS BEEN QUARANTINED!",
             "THE EXPERIMENT IS OFFICIALLY CANCELLED!",
@@ -3547,7 +3547,7 @@ public sealed class PhraseFeedbackCatalog
             "THE KEYBOARD DELETED THE SONG!",
             "THE WIFI DISCONNECTED FROM EARTH!",
             "BLUETOOTH DENIES ANY ASSOCIATION!",
-            "KANTOR REQUIRES AN EMERGENCY REBOOT!",
+            "KANTARIA REQUIRES AN EMERGENCY REBOOT!",
             "THE CAT HAS CHANGED FAMILIES.",
             "THE CAT HAS FILED FOR SOLE CUSTODY OF THE HOUSE.",
             "THE PARROT LEARNED TO SCREAM FOR HELP.",
@@ -3679,7 +3679,7 @@ public sealed class PhraseFeedbackCatalog
             "EVEN YOUR SHOWER IS IMPRESSED!",
             "THE NEIGHBORS ARE SELLING TICKETS!",
             "THE CAT HAS STARTED A FAN CLUB!",
-            "KANTOR IS RUNNING OUT OF COMPLIMENTS!",
+            "KANTARIA IS RUNNING OUT OF COMPLIMENTS!",
         ],
         Recovery =
         [
@@ -3750,7 +3750,7 @@ public sealed class PhraseFeedbackCatalog
             "THE CAT HAS RETURNED TO THE ROOM!",
             "THE NEIGHBORS PUT DOWN THE PHONE!",
             "YOUR SHOWER HAS BEEN VINDICATED!",
-            "KANTOR HAS CANCELLED THE EMERGENCY!",
+            "KANTARIA HAS CANCELLED THE EMERGENCY!",
         ],
         Duel =
         [
@@ -3821,7 +3821,7 @@ public sealed class PhraseFeedbackCatalog
             "THE NEIGHBORS ARE WATCHING THE SCORE!",
             "YOUR FRIENDSHIP MAY NOT SURVIVE!",
             "THIS IS WHY WE CAN'T HAVE NICE THINGS!",
-            "KANTOR DEMANDS A DECISIVE VICTORY!",
+            "KANTARIA DEMANDS A DECISIVE VICTORY!",
         ],
     };
 }

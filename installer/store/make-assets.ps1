@@ -2,7 +2,7 @@
 # Copyright (C) 2026 Pablo Pramparo
 <#
 .SYNOPSIS
-  Genera los logos del paquete MSIX (installer\store\Assets) a partir del logo de Kantor.
+  Genera los logos del paquete MSIX (installer\store\Assets) a partir del logo de Kantaria.
 .DESCRIPTION
   Cuadrados (44, 150, tienda): el logo completo sobre el azul noche de la interfaz. Ancho (310x150): el logo
   completo. Se generan a escala 100, 200 y 400 y, para el ícono de 44 px, los tamaños fijos que usa Windows
@@ -11,7 +11,7 @@
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Drawing
 $root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-$src = [Drawing.Image]::FromFile((Join-Path $root 'src\Kantor.App\Assets\Branding\kantor-logo.png'))
+$src = [Drawing.Image]::FromFile((Join-Path $root 'src\Kantor.App\Assets\Branding\kantaria-logo.png'))
 $out = Join-Path $PSScriptRoot 'Assets'
 New-Item -ItemType Directory -Force $out | Out-Null
 $night = [Drawing.Color]::FromArgb(7, 10, 36)
@@ -63,7 +63,7 @@ $src.Dispose()
 Write-Host "Logos generados en $out"
 
 # ---- Logotipos de la ficha de la Store (Partner Center): arte de caja 1:1 y póster 2:3 (solo Xbox, opcional) ----
-$src = [Drawing.Image]::FromFile((Join-Path $root 'src\Kantor.App\Assets\Branding\kantor-logo.png'))
+$src = [Drawing.Image]::FromFile((Join-Path $root 'src\Kantor.App\Assets\Branding\kantaria-logo.png'))
 $store = Join-Path $PSScriptRoot 'StoreArt'
 New-Item -ItemType Directory -Force $store | Out-Null
 function New-StoreArt([int]$w, [int]$h, [string]$file) {

@@ -1,4 +1,4 @@
-# Kantor — estado del proyecto
+# Kantaria — estado del proyecto (antes Kantor; ver la nota de marca en CLAUDE.md)
 
 Última actualización: 16 de octubre de 2026 (acceso de invitados por LAN; ver §8 duodecies).
 Resumen técnico del proyecto: estado, decisiones, mediciones, pendientes y trampas conocidas.
@@ -148,7 +148,7 @@ La única que falla es "Ace of Base – Beautiful Life" (sin `#BPM`).
   sobre la grabación de "The Line" (150–200 ms), así que el retardo de voz es casi todo del equipo. La
   correlación global voz/notas en esa grabación pone la voz **~200 ms después** de las notas (173–176 de
   sistema + ~25 de detección y arranque de voz); los inicios de frase llegan ~178 ms tarde (n = 29). La
-  latencia **no depende del búfer de salida de Kantor** (100/50/30 ms → 177/174/174 ms; 20 ms empeora a 185):
+  latencia **no depende del búfer de salida de Kantaria** (100/50/30 ms → 177/174/174 ms; 20 ms empeora a 185):
   está en el driver/USB de la interfaz en modo compartido; bajarla exigiría modo exclusivo o ASIO. Windows
   informa 0 ms de `StreamLatency` en ambos lados (el driver no la declara). **Por ASIO** ("Focusrite USB ASIO",
   6 entradas / 4 salidas, búfer 508 muestras ≈ 10,6 ms), mismos clics y mismo cable: **19,5 ms** de ida y vuelta
@@ -180,7 +180,7 @@ La única que falla es "Ace of Base – Beautiful Life" (sin `#BPM`).
 
 ## 6 ter. Puntuación (incremento 4)
 
-Referencia de comportamiento: `docs/PUNTUACION_WORLDPARTY.md` (qué hace WorldParty y en qué difiere Kantor).
+Referencia de comportamiento: `docs/PUNTUACION_WORLDPARTY.md` (qué hace WorldParty y en qué difiere Kantaria).
 
 - **Máximo 10.000**: 9.000 de notas + 1.000 de bono de línea (activado); sin bono, 10.000 de notas.
   Cada beat acertado vale `MaxNotas / valorTotal × factor` (normal y rap 1, dorada y rap dorada 2, freestyle 0).
@@ -345,7 +345,7 @@ durante la canción **no se toca** hasta el video de fondo. Video y dos jugadore
   Los recursos se resuelven en `Kantor.App/Characters/CharacterAssets.cs` desde `Assets/Characters/{id}/
   portrait.png` y `fullbody.png` (embebidos como `Resource`); si faltan queda `null` y se usa el placeholder.
   Sin selección de personajes ni cambios en la pantalla de reproducción todavía.
-- **Distribución**: `scripts/publish.ps1` arma `dist\Kantor-<versión>-win-x64\` (autocontenida, solo x64, sin .pdb,
+- **Distribución**: `scripts/publish.ps1` arma `dist\Kantaria-<versión>-win-x64\` (autocontenida, solo x64, sin .pdb,
   sin `libvlc\win-x86`) y su `.zip`; ver `docs/DISTRIBUCION.md` (incluye lo que falta para la Store). Versión en
   `Kantor.App.csproj` (hoy 0.2.0). Comprobado: publica y arranca desde `dist`; sin probar en una PC limpia ni firmada.
 - **Señal de onda del micrófono** (`StageControl.DrawWave`): a la derecha de la tarjeta de cada jugador con
@@ -389,7 +389,7 @@ durante la canción **no se toca** hasta el video de fondo. Video y dos jugadore
 ## 8 quater. Menú principal
 
 - Vista `Kantor.App/Menu/MainMenuView` (dentro de `MainWindow`, a pantalla completa sobre barra y estado): logo
-  (`Assets/Branding/kantor-logo.png`, con su halo original), `CANTAR` / `AUDIO` / `SALIR`, fondo de escenario y
+  (`Assets/Branding/kantaria-logo.png`, con su halo original), `CANTAR` / `AUDIO` / `SALIR`, fondo de escenario y
   navegación con flechas + Enter o mouse. Textos es/en en `Kantor.Core/Menu/MenuTexts.cs` (usa el idioma de
   "Comentarios").
 - Flujo: arranque → menú (si no se pasa una canción por argumento) → `CANTAR` abre el selector de canción (hoy;
@@ -603,10 +603,10 @@ básico. Sin rankings globales, gráficos ni estadísticas agregadas (nada agreg
   INICIAR SESIÓN o CANTAR SIN SESIÓN. Esc cancela sin decidir. La pestaña JUGADORES › Partida es solo de la
   partida (estado, nueva/cerrar, sus jugadores): **no tiene un selector "con partida / suelto"**, porque suelto es
   estar fuera de una partida. Para pasar a cantar suelto una vez decidido: cerrar la partida (sin partida abierta
-  se canta suelto) o reiniciar Kantor y elegir CANTAR SUELTO en la puerta.
+  se canta suelto) o reiniciar Kantaria y elegir CANTAR SUELTO en la puerta.
 - **Cantar sin sesión**: se puede elegir cualquier jugador del sistema, la sesión abierta no se toca y **el
   resultado no se guarda** (una interpretación cuelga de una sesión). Se avisa en el menú y al terminar.
-- **Las sesiones sobreviven al cierre de Kantor**: nunca se cierran solas; cerrar es una acción explícita (o
+- **Las sesiones sobreviven al cierre de Kantaria**: nunca se cierran solas; cerrar es una acción explícita (o
   "iniciar nueva"). Una sola sesión abierta a la vez. La aplicación **ya no crea sesiones automáticas** al
   terminar una canción (`KantorStore.SavePerformance` conserva esa capacidad y sus pruebas, pero no se usa).
 - **Una sesión admite cualquier cantidad de jugadores**; el límite de 4 es por interpretación (puestos P1–P4 =
@@ -655,7 +655,7 @@ básico. Sin rankings globales, gráficos ni estadísticas agregadas (nada agreg
   **`KANTOR_DATA_DIR`** la reemplaza (`Kantor.Core/Settings/AppPaths`): sirve para probar sin tocar los datos
   reales. **Trampa**: `Environment.GetFolderPath(ApplicationData)` ignora la variable `APPDATA`; cambiarla no aísla nada.
 - **Trampa de pruebas de interfaz**: con `SendKeys` las teclas van a la ventana en primer plano, que puede no ser
-  Kantor (llegaron a otras aplicaciones). Las pruebas de pantalla se hacen con UI Automation (`InvokePattern`,
+  Kantaria (llegaron a otras aplicaciones). Las pruebas de pantalla se hacen con UI Automation (`InvokePattern`,
   `ValuePattern`), que no necesita foco ni envía teclas.
 
 ### Código
@@ -827,7 +827,7 @@ Reemplaza a `SessionStats`. Tres métricas separadas (spec §4):
   - **Exportar**: CSV UTF-8 con BOM, una fila por resultado (partida, fechas ISO, canción, dificultad, jugador, mic,
     puntaje, posición, puntos de competición): de una partida o de todo (`HistoryExport`).
   - **Respaldar**: copia consistente de la base con `VACUUM INTO` a un archivo nuevo elegido por el usuario
-    (`KantorStore.BackupTo`; no sobrescribe). **Restaurar**: manual, con Kantor cerrado, reemplazando `kantor.db`.
+    (`KantorStore.BackupTo`; no sobrescribe). **Restaurar**: manual, con Kantaria cerrado, reemplazando `kantor.db`.
     No hay respaldo automático ni restauración desde la interfaz.
   - Todo en Jugadores › Historial (más el botón borrar en "Por partida").
 - **Filtros del ranking global**: dificultad (Todas/Fácil/Medio/Difícil) y mínimo de canciones (1, 2, 3, 5, 10);
@@ -841,12 +841,12 @@ Reemplaza a `SessionStats`. Tres métricas separadas (spec §4):
 - **Siguiente**: al terminar una canción, la pantalla de resultados muestra **SIGUIENTE: <título>** si la cola no
   está vacía; la saca de la cola y la carga (después, como siempre, gate de partida y "¿quién canta?").
 - **Persistencia**: con partida abierta, la cola es de la partida (tabla `queue_item`, esquema **v2**, migración
-  automática; sobrevive al cierre de Kantor y se borra junto con la partida). Cantando suelto o sin partida abierta,
+  automática; sobrevive al cierre de Kantaria y se borra junto con la partida). Cantando suelto o sin partida abierta,
   vive solo en memoria. No se asigna quién canta por adelantado.
 - **Código**: `Core/Data/SongQueue.cs` (operaciones puras), `KantorStore.GetQueue/SetQueue`, `Core/Menu/QueueTexts.cs`,
   `App/Queue/QueueView`, integración en `MainWindow` (sección "Cola de canciones") y `ResultsView.SetNext`.
 - Comprobado: agregar, contador, pantalla de la cola (captura). Sin comprobar a mano: SIGUIENTE al terminar una
-  canción real, reordenar con el teclado, persistencia tras cerrar Kantor con una partida abierta (cubierta por tests).
+  canción real, reordenar con el teclado, persistencia tras cerrar Kantaria con una partida abierta (cubierta por tests).
 
 ## 8 undecies. Control remoto (Avyn) — contrato v3 implementado
 
@@ -854,7 +854,7 @@ Contrato cerrado y acordado con el desarrollo de Avyn: **`docs/AVYN_CONTRATO.md`
 solo recoge cómo quedó en el código y lo que cuesta cambiarlo).
 
 ### Qué hay
-- **Pipe** `Kantor.ControlPlane.v1` (`Core/Remote/KantorIpcServer`): `maxInstances = 1`, `PipeOptions.CurrentUserOnly`,
+- **Pipe** `Kantaria.ControlPlane.v1` (`Core/Remote/KantorIpcServer`): `maxInstances = 1`, `PipeOptions.CurrentUserOnly`,
   marco de 4 bytes LE + JSON, máximo 1 MiB exacto (un prefijo mayor o 0 cierra la conexión). **Apagado por omisión**:
   Opciones › Juego › "Control remoto (Avyn)" (`UserSettings.RemoteControl`). El controlador y el avance automático
   existen siempre; solo el pipe es opcional.
@@ -863,7 +863,7 @@ solo recoge cómo quedó en el código y lo que cuesta cambiarlo).
   `queue.list`, `players.list`, `session.get/list/history` e `history.*` corren fuera de él (snapshot inmutable del
   índice; `KantorStore` ya tiene candado global). Un comando que espera más de 3 s para empezar responde `TIMEOUT`
   sin ejecutarse y su `commandId` queda libre.
-- **Presencia**: el Agent manda `kantor.ping` cada 5 s; Kantor corta a los 15 s sin tráfico + 5 s de gracia; si el
+- **Presencia**: el Agent manda `kantor.ping` cada 5 s; Kantaria corta a los 15 s sin tráfico + 5 s de gracia; si el
   propio vigilante se atrasó más de 5 s (suspensión) el contador vuelve a empezar (`PipeLiveness`). Una escritura
   que no avanza en 5 s también corta. Un cliente nuevo no expulsa a uno vivo (el pipe está ocupado).
 - **Estado y revisiones** (`StatePublisher`, `KantorController`): un solo `rev` que sube una vez por publicación;
@@ -885,7 +885,7 @@ solo recoge cómo quedó en el código y lo que cuesta cambiarlo).
   (pendiente/en ejecución/completado/cancelado/quitado), jugadores por elemento, instantánea de artista/título/
   edición y revisión (`queueRev`). La usan la pantalla local y el IPC. "Cantar ya" y "SIGUIENTE" marcan el elemento
   en ejecución; al terminar pasa a completado (con `performanceId`) o a cancelado. Los quitados se conservan
-  (estado interno) para distinguir "ya no está" de "nunca existió". Al abrir Kantor un "en ejecución" colgado pasa a
+  (estado interno) para distinguir "ya no está" de "nunca existió". Al abrir Kantaria un "en ejecución" colgado pasa a
   cancelado (`RecoverInterrupted`).
 - **Biblioteca**: `LibraryCatalog`/`LibrarySearch` sobre el mismo índice que la lista local (mismas reglas de
   `SongSearch`, incluida la edición). **Sin colapsar ediciones**: cada archivo es una entrada con su
@@ -909,7 +909,7 @@ solo recoge cómo quedó en el código y lo que cuesta cambiarlo).
   monitor, límites en píxeles físicos y escala de DPI. La pantalla completa se ajusta con `SetWindowPos` en
   píxeles físicos (`FitToMonitor`, `Topmost`, no `Maximized`); `LocationChanged`, `DpiChanged` y
   `SystemEvents.DisplaySettingsChanged` la vuelven a ajustar al monitor donde quedó. Maximizada y movida a otro
-  monitor, se la vuelve a maximizar. El título de la ventana nunca queda vacío (`Kantor` o `Kantor — artista —
+  monitor, se la vuelve a maximizar. El título de la ventana nunca queda vacío (`Kantaria` o `Kantaria — artista —
   título`).
 - **Escalado pixel art**: `Pixel/PixelViewbox` reemplaza a `Viewbox` en todas las pantallas: cuantiza el factor a
   múltiplos de 0,25 píxeles físicos por unidad de diseño (así 4 unidades son siempre píxeles enteros) con el DPI
@@ -924,7 +924,7 @@ solo recoge cómo quedó en el código y lo que cuesta cambiarlo).
   real con un cliente de prueba** (apretón de manos, orden evento→respuesta, ping con la interfaz bloqueada, lecturas
   sin esperar a la interfaz, marco de más, cliente muerto que se libera, reconexión con reintento deduplicado,
   segundo cliente rechazado).
-- **App real** (`KANTOR_DATA_DIR` aislado, cliente PowerShell contra el pipe de Kantor): handshake, biblioteca (6
+- **App real** (`KANTOR_DATA_DIR` aislado, cliente PowerShell contra el pipe de Kantaria): handshake, biblioteca (6
   entradas), búsqueda, facetas, portada, jugadores, partida, cola (conflicto de revisión, "ya no está"),
   `playback.start` de un elemento → "¿Quién canta?" en pantalla → `NO_MICROPHONES` → `stop` (elemento cancelado y
   vuelta al menú), pantalla completa y `display` real (`\\.\DISPLAY3`, 1920×1080, escala 1,0), segundo cliente
@@ -1018,14 +1018,14 @@ Guía de uso y seguridad: **`docs/INVITADOS.md`**. Aquí, lo que hay que saber p
   `CharacterEdition` lee la lista (recurso embebido), `CharacterCatalog.Factory` se arma sin ellos y la App ni siquiera
   embebe sus PNG (`Resource Remove` en `Kantor.App.csproj`). Todo lo que usa la galería (PC, web de invitados, validación
   de la creación de jugadores) sale de `Factory`, así que sigue coherente. `FactoryCount` es el total del repositorio.
-- `scripts/publish.ps1 -Edition Store` → `dist\Kantor-<v>-store-win-x64`; sin instalador. **Trampa**: MSBuild no regenera los
+- `scripts/publish.ps1 -Edition Store` → `dist\Kantaria-<v>-store-win-x64`; sin instalador. **Trampa**: MSBuild no regenera los
   recursos de WPF al cambiar solo la lista de recursos: el script borra `obj` antes y después.
 - Un jugador con un avatar que la Store no trae se muestra con el genérico (`GetOrDefault`); el id guardado no se toca.
 - Tests (`CharacterEditionTests`): análisis de la lista, subconjunto y orden, caída del genérico, y que el archivo real solo
   nombre avatares de fábrica. Se corrieron en las dos ediciones. **Excluidos de la Store (decididos el 16/10/2026, por parecido con personajes ajenos): `avatar_025`, `avatar_029`, `avatar_030` y `avatar_031`; la Store trae 41 de los 45.**
 
 ### Paquete MSIX y créditos
-- `publish.ps1 -Edition Store -Msix` → `dist\Kantor-<v>-store.msix` (ver `docs/DISTRIBUCION.md`); manifiesto e identidad en
+- `publish.ps1 -Edition Store -Msix` → `dist\Kantaria-<v>-store.msix` (ver `docs/DISTRIBUCION.md`); manifiesto e identidad en
   `installer/store/`. **Trampa**: `makeappx` exige los logos con el nombre exacto del manifiesto si no hay `resources.pri`
   (por eso hay archivos sin calificador además de los `.scale-N`); la variable `$msix` choca con el parámetro `-Msix`.
 - Opciones › **CRÉDITOS** (`OptionsView.Section.Credits`, textos `credits.*` en `OptionsTexts`): versión y edición, autoría,
@@ -1112,4 +1112,18 @@ Guía de uso y seguridad: **`docs/INVITADOS.md`**. Aquí, lo que hay que saber p
 
 Sube `<Version>` a 0.3.0 con todo lo de «Ajustes de las pruebas manuales» y «Mensajes por frase» de arriba (volver a la lista, menú de
 pausa con Esc, teclado en los botones del escenario, freestyle en lila, video de vista previa, catálogos de frases neutro/argentino/inglés).
-Novedades para la Store: solo esto, sin repetir lo de la 0.2.0.
+Novedades para la Store: solo esto, sin repetir lo de la 0.2.0. **La 0.3.0 ya está publicada** (18/10/2026): nada de lo anterior
+se repite en «Novedades» de las versiones siguientes.
+
+### Versión 0.4.0 (en curso; `<Version>` ya subida)
+
+Solo lo posterior a la 0.3.0 publicada:
+- **Duetos marcados** en la lista de canciones: etiqueta «DÚO»/«DUET» (según el idioma de la interfaz) en filas, celdas de la grilla y
+  ficha. `SongEntry.IsDuet` se detecta en `SongHeaderReader` buscando una línea `P2` o `P 2` en el cuerpo (el formato con espacio es el
+  que usan los TXT de la biblioteca real); el índice (`SongIndexStore.Version = 3`) se reconstruye una vez. La ficha puso «DÚO» y «CON
+  VIDEO» en una línea y achicó la carátula grande a 180 px para que entren con el QR abierto.
+- **Esc en la lista de canciones siempre va al menú** (antes, tras volver desde resultados, dejaba ver la canción anterior:
+  `OnSongListBack` solo ocultaba la lista; ahora llama a `ShowMenu()`).
+- **Frases en español**: `UserSettings.ArgentinePhrases` por omisión es argentina solo si la región de Windows es AR (neutra en el
+  resto); quien ya tenga la opción guardada la conserva.
+- Sin comprobar a mano: el aspecto de la ficha con el QR abierto y la detección de duetos en la biblioteca completa.

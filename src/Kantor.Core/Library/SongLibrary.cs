@@ -15,7 +15,8 @@ public sealed record SongEntry(
     string? Genre,
     string? Year,
     string? Language,
-    string? Edition)
+    string? Edition,
+    bool IsDuet = false)
 {
     /// <summary>Texto normalizado (minúsculas, sin acentos) sobre el que busca <see cref="SongSearch"/>.</summary>
     [System.Text.Json.Serialization.JsonIgnore]
@@ -141,7 +142,31 @@ public static class SongHeaderReader
         string? Optional(string name) => Tag(name).Length > 0 ? Tag(name) : null;
 
         return new SongEntry(path, title, artist, FindCover(directory, baseName, Tag("COVER")),
-            Tag("VIDEO").Length > 0, Optional("GENRE"), Optional("YEAR"), Optional("LANGUAGE"), Optional("EDITION"));
+            Tag("VIDEO").Length > 0, Optional("GENRE"), Optional("YEAR"), Optional("LANGUAGE"), Optional("EDITION"),
+            HasSecondVoice(path));
+    }
+
+    /// <summary>Un dueto trae una línea "P2" (cambio a la segunda voz) en el cuerpo; se busca sin cargar el archivo entero.</summary>
+    private static bool HasSecondVoice(string path)
+    {
+        try
+        {
+            foreach (var line in File.ReadLines(path))
+            {
+                // "P2" o "P 2": igual que el parser, que recorta el espacio
+                var span = line.AsSpan().Trim();
+                if (span.Length > 1 && span[0] == 'P' && span[1..].Trim().SequenceEqual("2"))
+                {
+                    return true;
+                }
+            }
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            // sin poder leerlo, se lista como canción normal
+        }
+
+        return false;
     }
 
     private static string? FindCover(string directory, string baseName, string coverTag)
@@ -174,7 +199,7 @@ public sealed record IndexItem(string Path, long ModifiedTicks, long Length, Son
 /// <summary>Índice persistente de la biblioteca: evita volver a leer cada archivo en cada arranque.</summary>
 public static class SongIndexStore
 {
-    private const int Version = 1;
+    private const int Version = 3; // 2: se agregó IsDuet; 3: IsDuet reconoce también "P 2"
 
     private sealed record Document(int Version, List<IndexItem> Items);
 

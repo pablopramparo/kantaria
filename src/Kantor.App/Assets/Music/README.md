@@ -2,7 +2,7 @@
 
 Dos temas en loop para acompañar la navegación y la pantalla de resultados. Ambos están publicados en OpenGameArt bajo
 **CC0 1.0** (dominio público; <https://creativecommons.org/publicdomain/zero/1.0/>): no exigen atribución, pero se conserva.
-La licencia de cada página se verificó el 16/10/2026. No están bajo la GPL de Kantor ni bajo `LICENSE-ASSETS.md`.
+La licencia de cada página se verificó el 16/10/2026. No están bajo la GPL de Kantaria ni bajo `LICENSE-ASSETS.md`.
 
 | Archivo distribuido | Tema | Autor | Origen | Licencia |
 |---|---|---|---|---|
@@ -20,7 +20,7 @@ La licencia de cada página se verificó el 16/10/2026. No están bajo la GPL de
   (`WaveFileWriter.CreateWaveFile16`), sin otro procesamiento, para reducir el tamaño a la mitad. Es el único cambio. La costura
   del loop ya era continua.
 
-## Cómo suenan en Kantor
+## Cómo suenan en Kantaria
 
 Los archivos se copian junto al ejecutable (`Assets\Music\`, contenido de la compilación y de la publicación) y se leen desde
 `AppContext.BaseDirectory`: no hay rutas absolutas ni descargas en tiempo de ejecución. Si falta alguno, esa pista simplemente no

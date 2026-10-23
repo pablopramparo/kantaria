@@ -32,7 +32,7 @@ public sealed class KantorControllerOptions
 }
 
 /// <summary>
-/// El estado autoritativo de Kantor visto desde el control remoto y las operaciones que acepta. No conoce WPF ni
+/// El estado autoritativo de Kantaria visto desde el control remoto y las operaciones que acepta. No conoce WPF ni
 /// la red: la ventana entra por <see cref="IKantorHost"/> y los mensajes salen por <see cref="Outbound"/>. Todo lo
 /// que toca la ventana o muta estado corre en el hilo de la interfaz; las lecturas pesadas (biblioteca, historial)
 /// corren fuera de él sobre datos inmutables o protegidos.
@@ -87,7 +87,7 @@ public sealed partial class KantorController
         _lastResultSeq = _host.Capture().LastResult?.Seq ?? 0;
     }
 
-    /// <summary>Identifica esta ejecución de Kantor: cambia en cada arranque.</summary>
+    /// <summary>Identifica esta ejecución de Kantaria: cambia en cada arranque.</summary>
     public string InstanceId => _o.InstanceId;
 
     public long Rev => _publisher.Rev;
